@@ -132,6 +132,18 @@ class UnitRepository {
 		return true;
 	}
 
+	/**
+	 * Latest housekeeping changes of a room.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function status_log( int $unit_id, int $limit = 30 ): array {
+		global $wpdb;
+		$table = Schema::table( 'unit_status_log' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		return (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE unit_id = %d ORDER BY id DESC LIMIT %d", $unit_id, max( 1, min( 200, $limit ) ) ), ARRAY_A );
+	}
+
 	private function bump( int $id ): void {
 		global $wpdb;
 		$table = Schema::table( 'units' );

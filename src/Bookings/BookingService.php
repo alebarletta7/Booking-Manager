@@ -31,6 +31,8 @@ use BookingManager\Core\Validation;
 use BookingManager\Database\Abort;
 use BookingManager\Guests\GuestRepository;
 use BookingManager\Guests\GuestService;
+use BookingManager\Housekeeping\OpStatus;
+use BookingManager\Inventory\UnitRepository;
 use BookingManager\Licensing\LicenseGate;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
@@ -52,7 +54,8 @@ class BookingService {
 		private AuditLogger $audit,
 		private Clock $clock,
 		private LicenseGate $license,
-		private ManageLink $manage
+		private ManageLink $manage,
+		private UnitRepository $units
 	) {}
 
 	/**
@@ -521,7 +524,11 @@ class BookingService {
 	 * Changes the commercial status. Going back to a status that occupies rooms (no-show
 	 * marked by mistake) checks the rooms again.
 	 *
-	 * @param array{reason?: string, user_id?: int, actor?: string} $opts
+	 * The rooms' stays follow, in the same transaction: in_house checks in the rooms arriving
+	 * by today (or only $opts['room_ids']), completed checks out the rooms in house, and
+	 * undoing a check-in sets them back to expected.
+	 *
+	 * @param array{reason?: string, user_id?: int, actor?: string, room_ids?: int[], ignore_dirty?: bool} $opts
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function set_status( int $id, int $version, string $to, array $opts = array() ): array|\WP_Error {
@@ -548,6 +555,10 @@ class BookingService {
 			return new \WP_Error( 'bkng_too_early', __( 'Il check-in si può registrare solo dal giorno di arrivo.', 'booking-manager' ), array( 'status' => 409 ) );
 		}
 		$user_id = (int) ( $opts['user_id'] ?? get_current_user_id() );
+		$moves   = $this->stay_moves( $booking, $property, $from, $to, $today, $opts );
+		if ( $moves instanceof \WP_Error ) {
+			return $moves;
+		}
 		$now     = gmdate( 'Y-m-d H:i:s' );
 		$changes = array(
 			'status'     => $to,
@@ -581,10 +592,15 @@ class BookingService {
 		$was_occupying = BookingStatus::occupies( $from );
 		$occupies      = BookingStatus::occupies( $to );
 		$result        = Abort::run(
-			function () use ( $id, $version, $booking, $property, $changes, $was_occupying, $occupies ) {
+			function () use ( $id, $version, $booking, $property, $changes, $was_occupying, $occupies, $moves, $user_id ) {
 				$locked = $this->repo->lock( $id );
 				if ( ! $locked || (int) $locked['version'] !== $version ) {
 					throw new Abort( self::conflict() );
+				}
+				foreach ( $moves as $move ) {
+					if ( ! $this->repo->set_room_stay( (int) $move['room']['id'], $move['from'], $move['to'], $user_id ) ) {
+						throw new Abort( self::conflict() );
+					}
 				}
 				$rooms = $this->repo->rooms( $id, true );
 				if ( $occupies && ! $was_occupying ) {
@@ -648,7 +664,202 @@ class BookingService {
 			BookingStatus::COMPLETED => Hooks::BOOKING_COMPLETED,
 		)[ $to ] ?? Hooks::BOOKING_UPDATED;
 		Hooks::dispatch( $hook, $id, $this->context( $after ) + array( 'previous_status' => $from ) );
+		$this->stay_hooks( $after, $moves, $user_id );
 		return $this->payload( $after );
+	}
+
+	/**
+	 * Check-in or check-out of single rooms of a booking already in house (a family
+	 * arriving in two rounds, a room leaving earlier). Checking out the last room in house
+	 * completes the booking.
+	 *
+	 * @param int[]                                                $room_ids
+	 * @param array{user_id?: int, ignore_dirty?: bool, version?: int} $opts version: needed only to complete the booking
+	 * @return array<string, mixed>|\WP_Error the booking payload
+	 */
+	public function stay_rooms( int $booking_id, array $room_ids, string $to, array $opts = array() ): array|\WP_Error {
+		$booking = $this->repo->find( $booking_id );
+		if ( ! $booking ) {
+			return self::not_found();
+		}
+		if ( BookingStatus::IN_HOUSE !== $booking['status'] ) {
+			return new \WP_Error( 'bkng_not_in_house', __( 'La prenotazione non è in soggiorno.', 'booking-manager' ), array( 'status' => 409 ) );
+		}
+		if ( ! in_array( $to, array( StayStatus::IN_HOUSE, StayStatus::DEPARTED ), true ) ) {
+			return new \WP_Error( 'bkng_invalid_transition', __( 'Questo cambio di stato non è possibile.', 'booking-manager' ), array( 'status' => 409 ) );
+		}
+		$user_id  = (int) ( $opts['user_id'] ?? get_current_user_id() );
+		$property = (array) $this->properties->find( (int) $booking['property_id'] );
+		$today    = $this->clock->today_in( (string) $property['timezone'] );
+		$rooms    = $this->repo->rooms( $booking_id, true );
+		$wanted   = array_map( 'intval', $room_ids );
+
+		if ( StayStatus::DEPARTED === $to ) {
+			$in_house = array_filter( $rooms, static fn( array $r ) => StayStatus::IN_HOUSE === $r['stay_status'] );
+			$expected = array_filter( $rooms, static fn( array $r ) => StayStatus::EXPECTED === $r['stay_status'] );
+			if ( array() === $wanted ) {
+				$wanted = array_map( 'intval', array_column( $in_house, 'id' ) );
+			}
+			$wrong = array_diff( $wanted, array_map( 'intval', array_column( $in_house, 'id' ) ) );
+			if ( array() !== $wrong || array() === $wanted ) {
+				return new \WP_Error( 'bkng_room_not_in_house', __( 'Una delle camere indicate non è in soggiorno.', 'booking-manager' ), array( 'status' => 409 ) );
+			}
+			// The last rooms leave: the whole booking is completed (version needed).
+			if ( count( $wanted ) === count( $in_house ) && array() === $expected ) {
+				return $this->set_status(
+					$booking_id,
+					(int) ( $opts['version'] ?? $booking['version'] ),
+					BookingStatus::COMPLETED,
+					array( 'user_id' => $user_id )
+				);
+			}
+			$moves = array();
+			foreach ( $in_house as $room ) {
+				if ( in_array( (int) $room['id'], $wanted, true ) ) {
+					$moves[] = array( 'room' => $room, 'from' => StayStatus::IN_HOUSE, 'to' => StayStatus::DEPARTED );
+				}
+			}
+		} else {
+			$moves = $this->arrivals( $rooms, $today, $wanted, $property, ! empty( $opts['ignore_dirty'] ) );
+			if ( $moves instanceof \WP_Error ) {
+				return $moves;
+			}
+		}
+
+		$done = array();
+		foreach ( $moves as $move ) {
+			if ( $this->repo->set_room_stay( (int) $move['room']['id'], $move['from'], $move['to'], $user_id ) ) {
+				$done[] = $move;
+			}
+		}
+		if ( array() === $done ) {
+			return self::conflict();
+		}
+		$this->audit->log(
+			array(
+				'action'      => StayStatus::IN_HOUSE === $to ? 'booking.rooms_checked_in' : 'booking.rooms_checked_out',
+				'entity_type' => 'booking',
+				'entity_id'   => $booking_id,
+				'property_id' => (int) $booking['property_id'],
+				'new'         => array( 'booking_room_ids' => array_map( static fn( array $m ) => (int) $m['room']['id'], $done ) ),
+			)
+		);
+		$after = (array) $this->repo->find( $booking_id );
+		$this->stay_hooks( $after, $done, $user_id );
+		return $this->payload( $after );
+	}
+
+	/**
+	 * Rooms whose stay changes with a status change.
+	 *
+	 * @param array<string, mixed> $booking
+	 * @param array<string, mixed> $property
+	 * @param array<string, mixed> $opts
+	 * @return array<int, array{room: array<string, mixed>, from: string, to: string}>|\WP_Error
+	 */
+	private function stay_moves( array $booking, array $property, string $from, string $to, string $today, array $opts ): array|\WP_Error {
+		$rooms = $this->repo->rooms( (int) $booking['id'], true );
+		$moves = array();
+		if ( BookingStatus::IN_HOUSE === $to ) {
+			$wanted = array_map( 'intval', (array) ( $opts['room_ids'] ?? array() ) );
+			return $this->arrivals( $rooms, $today, $wanted, $property, ! empty( $opts['ignore_dirty'] ) );
+		}
+		if ( BookingStatus::COMPLETED === $to ) {
+			foreach ( $rooms as $room ) {
+				if ( StayStatus::IN_HOUSE === $room['stay_status'] ) {
+					$moves[] = array( 'room' => $room, 'from' => StayStatus::IN_HOUSE, 'to' => StayStatus::DEPARTED );
+				}
+			}
+		} elseif ( BookingStatus::IN_HOUSE === $from && BookingStatus::CONFIRMED === $to ) {
+			foreach ( $rooms as $room ) {
+				if ( StayStatus::DEPARTED === $room['stay_status'] ) {
+					return new \WP_Error( 'bkng_room_departed', __( 'Una camera ha già fatto il check-out: il check-in non si può più annullare.', 'booking-manager' ), array( 'status' => 409 ) );
+				}
+				if ( StayStatus::IN_HOUSE === $room['stay_status'] ) {
+					$moves[] = array( 'room' => $room, 'from' => StayStatus::IN_HOUSE, 'to' => StayStatus::EXPECTED );
+				}
+			}
+		}
+		return $moves;
+	}
+
+	/**
+	 * Rooms to check in: expected and arriving by today (all of them, or the ones asked).
+	 * When the property asks so, a room not cleaned yet is refused.
+	 *
+	 * @param array<int, array<string, mixed>> $rooms
+	 * @param int[]                            $wanted
+	 * @param array<string, mixed>             $property
+	 * @return array<int, array{room: array<string, mixed>, from: string, to: string}>|\WP_Error
+	 */
+	private function arrivals( array $rooms, string $today, array $wanted, array $property, bool $ignore_dirty ): array|\WP_Error {
+		$ready = array_filter( $rooms, static fn( array $r ) => StayStatus::EXPECTED === $r['stay_status'] && $r['arrival'] <= $today );
+		$ids   = array_map( 'intval', array_column( $ready, 'id' ) );
+		if ( array() !== $wanted && array() !== array_diff( $wanted, $ids ) ) {
+			return new \WP_Error( 'bkng_room_not_arriving', __( 'Una delle camere indicate non è in arrivo oggi o ha già fatto il check-in.', 'booking-manager' ), array( 'status' => 409 ) );
+		}
+		$moves = array();
+		foreach ( $ready as $room ) {
+			if ( array() === $wanted || in_array( (int) $room['id'], $wanted, true ) ) {
+				$moves[] = array( 'room' => $room, 'from' => StayStatus::EXPECTED, 'to' => StayStatus::IN_HOUSE );
+			}
+		}
+		if ( array() === $moves ) {
+			return new \WP_Error( 'bkng_room_not_arriving', __( 'Nessuna camera della prenotazione è in arrivo oggi.', 'booking-manager' ), array( 'status' => 409 ) );
+		}
+		$settings = (array) $property['settings'];
+		if ( ! $ignore_dirty && ! empty( $settings['housekeeping_enabled'] ) && ! empty( $settings['block_dirty_checkin'] ) ) {
+			$not_ready = array();
+			foreach ( $moves as $move ) {
+				$unit = $move['room']['unit_id'] ? $this->units->find( (int) $move['room']['unit_id'] ) : null;
+				if ( $unit && ! OpStatus::guest_ready( (string) $unit['op_status'] ) ) {
+					$not_ready[] = array(
+						'unit_id' => (int) $unit['id'],
+						'code'    => (string) $unit['code'],
+						'status'  => (string) $unit['op_status'],
+					);
+				}
+			}
+			if ( array() !== $not_ready ) {
+				return new \WP_Error(
+					'bkng_room_not_ready',
+					/* translators: %s: room codes. */
+					sprintf( __( 'La camera non è ancora pronta: %s.', 'booking-manager' ), implode( ', ', array_column( $not_ready, 'code' ) ) ),
+					array(
+						'status' => 409,
+						'units'  => $not_ready,
+					)
+				);
+			}
+		}
+		return $moves;
+	}
+
+	/**
+	 * Hooks of the rooms checked in or out (after the commit).
+	 *
+	 * @param array<string, mixed>                                                      $booking
+	 * @param array<int, array{room: array<string, mixed>, from: string, to: string}> $moves
+	 */
+	private function stay_hooks( array $booking, array $moves, int $user_id ): void {
+		foreach ( $moves as $move ) {
+			$hook = array(
+				StayStatus::IN_HOUSE => Hooks::ROOM_CHECKED_IN,
+				StayStatus::DEPARTED => Hooks::ROOM_CHECKED_OUT,
+			)[ $move['to'] ] ?? null;
+			if ( null === $hook || StayStatus::EXPECTED !== $move['from'] && StayStatus::IN_HOUSE === $move['to'] ) {
+				continue;
+			}
+			Hooks::dispatch(
+				$hook,
+				(int) $move['room']['id'],
+				$this->context( $booking ) + array(
+					'booking_id' => (int) $booking['id'],
+					'unit_id'    => $move['room']['unit_id'] ? (int) $move['room']['unit_id'] : null,
+					'user_id'    => $user_id,
+				)
+			);
+		}
 	}
 
 	/**

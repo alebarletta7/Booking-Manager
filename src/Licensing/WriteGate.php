@@ -111,6 +111,9 @@ class WriteGate {
 		'#^/bookings/\d+/(payments|payment-link)$#',
 		'#^/payments/\d+/(refund|sync)$#',
 		'#^/webhooks/[a-z0-9_-]{2,20}/\d+$#',
+		'#^/properties/\d+/(checkin(/scan)?|checkout)$#',
+		'#^/bookings/\d+/qr/regenerate$#',
+		'#^/units/\d+/op-status$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}

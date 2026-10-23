@@ -87,4 +87,8 @@ final class BookingStatus {
 			self::NO_SHOW   => __( 'No-show', 'booking-manager' ),
 		);
 	}
+
+	public static function label( string $status ): string {
+		return self::labels()[ $status ] ?? $status;
+	}
 }

@@ -47,6 +47,16 @@ final class Dates {
 		return ( new \DateTimeImmutable( $date . ' 00:00:00', new \DateTimeZone( 'UTC' ) ) )->modify( ( $days >= 0 ? '+' : '' ) . $days . ' days' )->format( 'Y-m-d' );
 	}
 
+	/** Midnight of a local date, as a UTC datetime (for "since this morning" queries). */
+	public static function local_midnight_utc( string $date, string $timezone ): string {
+		try {
+			$local = new \DateTimeImmutable( $date . ' 00:00:00', new \DateTimeZone( $timezone ) );
+		} catch ( \Exception $e ) {
+			$local = new \DateTimeImmutable( $date . ' 00:00:00', new \DateTimeZone( 'UTC' ) );
+		}
+		return $local->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+	}
+
 	/** ISO weekday: 1 = Monday … 7 = Sunday. */
 	public static function weekday( string $date ): int {
 		return (int) ( new \DateTimeImmutable( $date . ' 00:00:00', new \DateTimeZone( 'UTC' ) ) )->format( 'N' );

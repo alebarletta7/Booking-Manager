@@ -77,6 +77,12 @@ use BookingManager\Payments\Providers\NexiProvider;
 use BookingManager\Payments\Providers\StripeClient;
 use BookingManager\Payments\Providers\StripeProvider;
 use BookingManager\Rest\PaymentsController;
+use BookingManager\Rest\CheckinController;
+use BookingManager\Rest\HousekeepingController;
+use BookingManager\Checkin\CheckinRepository;
+use BookingManager\Checkin\CheckinService;
+use BookingManager\Checkin\QrToken;
+use BookingManager\Housekeeping\HousekeepingService;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
@@ -220,7 +226,8 @@ final class Plugin {
 				$c->get( AuditLogger::class ),
 				$c->get( Clock::class ),
 				$c->get( LicenseGate::class ),
-				$c->get( ManageLink::class )
+				$c->get( ManageLink::class ),
+				$c->get( UnitRepository::class )
 			)
 		);
 		// Read models, public form, staff, integrations.
@@ -278,6 +285,12 @@ final class Plugin {
 			)
 		);
 
+		// Front desk and housekeeping.
+		$c->set( QrToken::class, fn() => new QrToken() );
+		$c->set( CheckinRepository::class, fn() => new CheckinRepository() );
+		$c->set( CheckinService::class, fn( Container $c ) => new CheckinService( $c->get( BookingRepository::class ), $c->get( BookingService::class ), $c->get( CheckinRepository::class ), $c->get( PropertyRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( UnitRepository::class ), $c->get( QrToken::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
+		$c->set( HousekeepingService::class, fn( Container $c ) => new HousekeepingService( $c->get( UnitRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ), $c->get( Clock::class ) ) );
+
 		// REST controllers.
 		$p = fn( Container $c ) => $c->get( Policy::class );
 		$c->set( MeController::class, fn( Container $c ) => new MeController( $p( $c ), $c->get( PropertyScope::class ), $c->get( PropertyRepository::class ), $c->get( Clock::class ) ) );
@@ -294,6 +307,8 @@ final class Plugin {
 		$c->set( StaffController::class, fn( Container $c ) => new StaffController( $p( $c ), $c->get( StaffService::class ) ) );
 		$c->set( CloudflareController::class, fn( Container $c ) => new CloudflareController( $p( $c ), $c->get( CloudflareSettings::class ), $c->get( CloudflareService::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( PaymentsController::class, fn( Container $c ) => new PaymentsController( $p( $c ), $c->get( PaymentService::class ), $c->get( PaymentRepository::class ), $c->get( PaymentAccountService::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
+		$c->set( CheckinController::class, fn( Container $c ) => new CheckinController( $p( $c ), $c->get( CheckinService::class ), $c->get( BookingRepository::class ) ) );
+		$c->set( HousekeepingController::class, fn( Container $c ) => new HousekeepingController( $p( $c ), $c->get( HousekeepingService::class ), $c->get( UnitRepository::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
 		$c->set( StaffEntry::class, fn() => new StaffEntry() );
@@ -351,6 +366,8 @@ final class Plugin {
 			StaffController::class,
 			CloudflareController::class,
 			PaymentsController::class,
+			CheckinController::class,
+			HousekeepingController::class,
 			PublicController::class,
 		);
 	}
@@ -384,9 +401,12 @@ final class Plugin {
 		);
 		// A cancelled booking closes its open payment pages (a payment already made is refunded).
 		add_action( Hooks::BOOKING_CANCELLED, fn( int $booking_id ) => $c->get( PaymentService::class )->cancel_open_payments( $booking_id ) );
+		// A room checked out becomes "da pulire" (when the property asks so).
+		add_action( Hooks::ROOM_CHECKED_OUT, fn( int $room_id, array $context = array() ) => $c->get( HousekeepingService::class )->on_checkout( $room_id, $context ), 10, 2 );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( BookingService::class )->auto_complete() );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( HoldService::class )->expire() );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( AuditLogger::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );
+		add_action( Installer::DAILY_HOOK, fn() => $c->get( CheckinRepository::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );
 
 		add_action(
 			'rest_api_init',

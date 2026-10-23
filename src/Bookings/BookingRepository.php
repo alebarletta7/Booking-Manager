@@ -290,6 +290,48 @@ class BookingRepository {
 		$wpdb->update( Schema::table( 'booking_rooms' ), $changes, array( 'id' => $id ) );
 	}
 
+	/**
+	 * Moves one room's stay (expected → in_house → departed, or back to expected when a
+	 * check-in is undone), only when it is still in the status the caller saw: two phones
+	 * checking in the same room produce one check-in.
+	 *
+	 * @return bool false when the room was not in $from any more.
+	 */
+	public function set_room_stay( int $id, string $from, string $to, int $user_id ): bool {
+		global $wpdb;
+		$table = Schema::table( 'booking_rooms' );
+		$now   = gmdate( 'Y-m-d H:i:s' );
+		$user  = $user_id ? $user_id : null;
+		$set   = array( 'stay_status' => $to, 'updated_at' => $now );
+		if ( 'in_house' === $to && 'expected' === $from ) {
+			$set['checked_in_at'] = $now;
+			$set['checked_in_by'] = $user;
+		} elseif ( 'departed' === $to ) {
+			$set['checked_out_at'] = $now;
+			$set['checked_out_by'] = $user;
+		} elseif ( 'expected' === $to ) {
+			$set['checked_in_at'] = null;
+			$set['checked_in_by'] = null;
+		} elseif ( 'in_house' === $to && 'departed' === $from ) {
+			$set['checked_out_at'] = null;
+			$set['checked_out_by'] = null;
+		}
+		$parts = array();
+		$args  = array();
+		foreach ( $set as $col => $value ) {
+			if ( null === $value ) {
+				$parts[] = "{$col} = NULL";
+				continue;
+			}
+			$parts[] = is_int( $value ) ? "{$col} = %d" : "{$col} = %s";
+			$args[]  = $value;
+		}
+		$args[] = $id;
+		$args[] = $from;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table and column names are internal.
+		return 1 === (int) $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET " . implode( ', ', $parts ) . ' WHERE id = %d AND stay_status = %s', $args ) );
+	}
+
 	/** Sets occupies for every room of a booking (status change). */
 	public function set_occupies( int $booking_id, bool $occupies ): void {
 		global $wpdb;
