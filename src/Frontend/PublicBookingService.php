@@ -322,6 +322,8 @@ class PublicBookingService {
 						'user_id' => 0,
 						'actor'   => 'system',
 						'reason'  => __( 'Pagamento online non avviato.', 'booking-manager' ),
+						// The guest sees the error on the page: no e-mail for a booking never made.
+						'notify'  => false,
 					)
 				);
 				return $checkout;

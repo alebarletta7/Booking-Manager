@@ -61,7 +61,7 @@ class BookingService {
 	/**
 	 * Creates a booking.
 	 *
-	 * @param array<string, mixed> $input property_id, rooms[], guest{}, guests[], status, extras[], customer_notes, internal_notes, arrival_time, idempotency_key, hold_token, override_restrictions, external_source, external_ref, privacy_accepted, marketing_consent
+	 * @param array<string, mixed> $input property_id, rooms[], guest{}, guests[], status, extras[], customer_notes, internal_notes, arrival_time, idempotency_key, hold_token, override_restrictions, external_source, external_ref, privacy_accepted, marketing_consent, notify_guest (false: no e-mail to the guest)
 	 * @param array{channel?: string, user_id?: int, can_override?: bool, can_price?: bool, awaiting_payment_minutes?: int} $ctx channel: staff | online | import; awaiting_payment_minutes: online booking kept as an option until paid
 	 * @return array<string, mixed>|\WP_Error the booking payload
 	 */
@@ -265,9 +265,12 @@ class BookingService {
 				),
 			)
 		);
-		Hooks::dispatch( Hooks::BOOKING_CREATED, (int) $booking['id'], $this->context( $booking ) );
+		// Imported bookings (channels, other systems) are never announced to the guest:
+		// the channel already did it.
+		$notify = 'import' !== $booking['source'] && false !== ( $input['notify_guest'] ?? true );
+		Hooks::dispatch( Hooks::BOOKING_CREATED, (int) $booking['id'], $this->context( $booking ) + array( 'notify' => $notify ) );
 		if ( BookingStatus::CONFIRMED === $booking['status'] ) {
-			Hooks::dispatch( Hooks::BOOKING_CONFIRMED, (int) $booking['id'], $this->context( $booking ) );
+			Hooks::dispatch( Hooks::BOOKING_CONFIRMED, (int) $booking['id'], $this->context( $booking ) + array( 'notify' => $notify ) );
 		}
 		return $this->payload( $booking );
 	}
@@ -448,7 +451,14 @@ class BookingService {
 				'new'         => array_intersect_key( $after, array_flip( array( 'arrival', 'departure', 'adults', 'children', 'total' ) ) ) + array( 'override' => $override ),
 			)
 		);
-		Hooks::dispatch( Hooks::BOOKING_UPDATED, $id, $this->context( $after ) + array( 'change' => 'stay' ) );
+		Hooks::dispatch(
+			Hooks::BOOKING_UPDATED,
+			$id,
+			$this->context( $after ) + array(
+				'change' => 'stay',
+				'notify' => 'import' !== $after['source'] && false !== ( $input['notify_guest'] ?? true ),
+			)
+		);
 		return $this->payload( $after );
 	}
 
@@ -528,7 +538,7 @@ class BookingService {
 	 * by today (or only $opts['room_ids']), completed checks out the rooms in house, and
 	 * undoing a check-in sets them back to expected.
 	 *
-	 * @param array{reason?: string, user_id?: int, actor?: string, room_ids?: int[], ignore_dirty?: bool} $opts
+	 * @param array{reason?: string, user_id?: int, actor?: string, room_ids?: int[], ignore_dirty?: bool, notify?: bool} $opts notify false: no e-mail to the guest
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function set_status( int $id, int $version, string $to, array $opts = array() ): array|\WP_Error {
@@ -663,7 +673,15 @@ class BookingService {
 			BookingStatus::IN_HOUSE  => Hooks::BOOKING_CHECKED_IN,
 			BookingStatus::COMPLETED => Hooks::BOOKING_COMPLETED,
 		)[ $to ] ?? Hooks::BOOKING_UPDATED;
-		Hooks::dispatch( $hook, $id, $this->context( $after ) + array( 'previous_status' => $from ) );
+		Hooks::dispatch(
+			$hook,
+			$id,
+			$this->context( $after ) + array(
+				'previous_status' => $from,
+				'actor'           => $opts['actor'] ?? null,
+				'notify'          => 'import' !== $after['source'] && false !== ( $opts['notify'] ?? true ),
+			)
+		);
 		$this->stay_hooks( $after, $moves, $user_id );
 		return $this->payload( $after );
 	}

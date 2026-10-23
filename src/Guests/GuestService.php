@@ -213,6 +213,8 @@ class GuestService {
 		$this->repo->anonymize( $id );
 		$wpdb->query( $wpdb->prepare( 'UPDATE ' . Schema::table( 'bookings' ) . " SET first_name = '', last_name = %s, email = NULL, phone = NULL, customer_notes = NULL WHERE guest_id = %d", __( 'Anonimo', 'booking-manager' ), $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- internal table name.
 		$wpdb->query( $wpdb->prepare( 'UPDATE ' . Schema::table( 'booking_guests' ) . " SET first_name = '', last_name = %s WHERE guest_id = %d", __( 'Anonimo', 'booking-manager' ), $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- internal table name.
+		// The message log keeps who received what: the address goes too.
+		$wpdb->query( $wpdb->prepare( 'UPDATE ' . Schema::table( 'notifications' ) . " SET recipient = '' WHERE booking_id IN (SELECT id FROM " . Schema::table( 'bookings' ) . ' WHERE guest_id = %d)', $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- internal table names.
 		$this->audit->log(
 			array(
 				'action'      => 'guest.anonymized',
@@ -221,6 +223,28 @@ class GuestService {
 			)
 		);
 		return true;
+	}
+
+	/**
+	 * Daily: guest cards with no stay in the last $months months (and none coming) are
+	 * anonymized. 0 keeps everything (the default: the property decides).
+	 *
+	 * @return int guests anonymized
+	 */
+	public function anonymize_inactive( int $months, int $now ): int {
+		global $wpdb;
+		if ( $months <= 0 ) {
+			return 0;
+		}
+		$cutoff   = gmdate( 'Y-m-d', strtotime( '-' . $months . ' months', $now ) );
+		$guests   = Schema::table( 'guests' );
+		$bookings = Schema::table( 'bookings' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table names.
+		$ids = array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT g.id FROM {$guests} g WHERE g.anonymized_at IS NULL AND g.created_at < %s AND NOT EXISTS (SELECT 1 FROM {$bookings} b WHERE b.guest_id = g.id AND (b.departure >= %s OR b.status IN ('pending','option','confirmed','in_house'))) LIMIT 200", $cutoff . ' 00:00:00', $cutoff ) ) );
+		foreach ( $ids as $id ) {
+			$this->anonymize( $id );
+		}
+		return count( $ids );
 	}
 
 	public static function not_found(): \WP_Error {

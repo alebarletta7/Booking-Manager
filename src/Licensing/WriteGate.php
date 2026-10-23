@@ -114,6 +114,11 @@ class WriteGate {
 		'#^/properties/\d+/(checkin(/scan)?|checkout)$#',
 		'#^/bookings/\d+/qr/regenerate$#',
 		'#^/units/\d+/op-status$#',
+		'#^/notifications/\d+/resend$#',
+		'#^/bookings/\d+/notify$#',
+		'#^/properties/\d+/notifications/test$#',
+		'#^/properties/\d+/templates/[a-z_]+(/preview)?$#',
+		'#^/properties/\d+/channels/[a-z0-9_-]{2,40}/mappings$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}

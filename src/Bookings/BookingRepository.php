@@ -128,6 +128,20 @@ class BookingRepository {
 		);
 	}
 
+	/**
+	 * Bookings of a property in a status arriving between two dates (inclusive): the
+	 * pre-arrival messages.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function arriving( int $property_id, string $from, string $to, string $status ): array {
+		global $wpdb;
+		$table = Schema::table( 'bookings' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE property_id = %d AND status = %s AND arrival BETWEEN %s AND %s ORDER BY arrival, id LIMIT 500", $property_id, $status, $from, $to ), ARRAY_A );
+		return array_map( array( self::class, 'hydrate' ), $rows );
+	}
+
 	/** @param array<string, mixed> $row */
 	public function insert( array $row ): int {
 		global $wpdb;

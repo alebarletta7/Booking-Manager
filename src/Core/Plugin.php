@@ -83,6 +83,17 @@ use BookingManager\Checkin\CheckinRepository;
 use BookingManager\Checkin\CheckinService;
 use BookingManager\Checkin\QrToken;
 use BookingManager\Housekeeping\HousekeepingService;
+use BookingManager\Notifications\Channels\EmailChannel;
+use BookingManager\Notifications\Channels\WhatsAppChannel;
+use BookingManager\Notifications\NotificationRepository;
+use BookingManager\Notifications\NotificationService;
+use BookingManager\Notifications\NotificationTemplates;
+use BookingManager\Notifications\TemplateRepository;
+use BookingManager\Rest\NotificationsController;
+use BookingManager\Rest\ChannelsController;
+use BookingManager\Channels\ChannelRefRepository;
+use BookingManager\Channels\ChannelService;
+use BookingManager\Channels\SyncLogRepository;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
@@ -291,6 +302,33 @@ final class Plugin {
 		$c->set( CheckinService::class, fn( Container $c ) => new CheckinService( $c->get( BookingRepository::class ), $c->get( BookingService::class ), $c->get( CheckinRepository::class ), $c->get( PropertyRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( UnitRepository::class ), $c->get( QrToken::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
 		$c->set( HousekeepingService::class, fn( Container $c ) => new HousekeepingService( $c->get( UnitRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ), $c->get( Clock::class ) ) );
 
+		// Messages: e-mail, WhatsApp prepared for an add-on provider.
+		$c->set( NotificationRepository::class, fn() => new NotificationRepository() );
+		$c->set( TemplateRepository::class, fn() => new TemplateRepository() );
+		$c->set( NotificationTemplates::class, fn( Container $c ) => new NotificationTemplates( $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ), $c->get( RoomTypeRepository::class ) ) );
+		$c->set( EmailChannel::class, fn() => new EmailChannel() );
+		$c->set( WhatsAppChannel::class, fn() => new WhatsAppChannel() );
+		$c->set(
+			NotificationService::class,
+			fn( Container $c ) => new NotificationService(
+				$c->get( NotificationRepository::class ),
+				$c->get( NotificationTemplates::class ),
+				$c->get( BookingRepository::class ),
+				$c->get( PropertyRepository::class ),
+				$c->get( EmailChannel::class ),
+				$c->get( WhatsAppChannel::class ),
+				$c->get( QrToken::class ),
+				$c->get( ManageLink::class ),
+				$c->get( LicenseGate::class ),
+				$c->get( Clock::class )
+			)
+		);
+
+		// Sales channels: prepared for connectors supplied by add-ons.
+		$c->set( ChannelRefRepository::class, fn() => new ChannelRefRepository() );
+		$c->set( SyncLogRepository::class, fn() => new SyncLogRepository() );
+		$c->set( ChannelService::class, fn( Container $c ) => new ChannelService( $c->get( ChannelRefRepository::class ), $c->get( SyncLogRepository::class ), $c->get( BookingService::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ) ) );
+
 		// REST controllers.
 		$p = fn( Container $c ) => $c->get( Policy::class );
 		$c->set( MeController::class, fn( Container $c ) => new MeController( $p( $c ), $c->get( PropertyScope::class ), $c->get( PropertyRepository::class ), $c->get( Clock::class ) ) );
@@ -309,6 +347,8 @@ final class Plugin {
 		$c->set( PaymentsController::class, fn( Container $c ) => new PaymentsController( $p( $c ), $c->get( PaymentService::class ), $c->get( PaymentRepository::class ), $c->get( PaymentAccountService::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
 		$c->set( CheckinController::class, fn( Container $c ) => new CheckinController( $p( $c ), $c->get( CheckinService::class ), $c->get( BookingRepository::class ) ) );
 		$c->set( HousekeepingController::class, fn( Container $c ) => new HousekeepingController( $p( $c ), $c->get( HousekeepingService::class ), $c->get( UnitRepository::class ) ) );
+		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ) ) );
+		$c->set( ChannelsController::class, fn( Container $c ) => new ChannelsController( $p( $c ), $c->get( ChannelService::class ), $c->get( RoomTypeRepository::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
 		$c->set( StaffEntry::class, fn() => new StaffEntry() );
@@ -368,6 +408,8 @@ final class Plugin {
 			PaymentsController::class,
 			CheckinController::class,
 			HousekeepingController::class,
+			NotificationsController::class,
+			ChannelsController::class,
 			PublicController::class,
 		);
 	}
@@ -385,6 +427,10 @@ final class Plugin {
 		$c->get( WriteGate::class )->hooks();
 		$c->get( LicenseScheduler::class )->hooks();
 		$c->get( UpdateChecker::class )->hooks();
+		$c->get( NotificationService::class )->hooks();
+		$c->get( ChannelService::class )->hooks();
+		add_action( Installer::NOTIFICATIONS_HOOK, fn() => $c->get( NotificationService::class )->run() );
+		add_action( Installer::REMINDERS_HOOK, fn() => $c->get( NotificationService::class )->queue_reminders() );
 
 		add_filter( 'cron_schedules', array( Installer::class, 'cron_schedules' ) );
 		add_action( 'init', array( Installer::class, 'ensure_schedules' ), 20 );
@@ -406,7 +452,10 @@ final class Plugin {
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( BookingService::class )->auto_complete() );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( HoldService::class )->expire() );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( AuditLogger::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );
-		add_action( Installer::DAILY_HOOK, fn() => $c->get( CheckinRepository::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );
+		add_action( Installer::DAILY_HOOK, fn() => $c->get( GuestService::class )->anonymize_inactive( (int) $c->get( Settings::class )->get( 'guest_retention_months' ), time() ) );
+		add_action( Installer::DAILY_HOOK, fn() => $c->get( NotificationService::class )->purge( (int) $c->get( Settings::class )->get( 'notification_retention_months' ) ) );
+		add_action( Installer::DAILY_HOOK, fn() => $c->get( SyncLogRepository::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );
+		add_action( Installer::DAILY_HOOK, fn() => $c->get( CheckinRepository::class )->purge( (int) $c->get( Settings::class )->get( 'checkin_retention_months' ), time() ) );
 
 		add_action(
 			'rest_api_init',

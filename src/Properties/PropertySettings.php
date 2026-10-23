@@ -51,6 +51,10 @@ final class PropertySettings {
 			'tourist_tax_max_nights' => 0,
 			'tourist_tax_min_age'   => 0,
 			// Notifications.
+			'email_enabled'         => true,
+			'notify_staff'          => true,
+			'qr_in_email'           => true,
+			'whatsapp_enabled'      => false,
 			'notify_email'          => '',
 			'sender_name'           => '',
 			'reminder_days'         => 2,
