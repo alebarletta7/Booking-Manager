@@ -259,7 +259,8 @@ final class Plugin {
 				$c->get( Captcha::class ),
 				$c->get( Clock::class ),
 				$c->get( PaymentService::class ),
-				$c->get( PaymentAccountService::class )
+				$c->get( PaymentAccountService::class ),
+				$c->get( RateRepository::class )
 			)
 		);
 		$c->set( PublicFrontend::class, fn( Container $c ) => new PublicFrontend( $c->get( PropertyRepository::class ), $c->get( Captcha::class ) ) );

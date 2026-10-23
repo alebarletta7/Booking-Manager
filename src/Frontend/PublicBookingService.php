@@ -33,6 +33,7 @@ use BookingManager\Payments\PaymentAccountService;
 use BookingManager\Payments\PaymentService;
 use BookingManager\Payments\PaymentStatus;
 use BookingManager\Rates\Policies;
+use BookingManager\Rates\RateRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -58,7 +59,8 @@ class PublicBookingService {
 		private Captcha $captcha,
 		private Clock $clock,
 		private PaymentService $payments,
-		private PaymentAccountService $accounts
+		private PaymentAccountService $accounts,
+		private RateRepository $rates
 	) {}
 
 	/**
@@ -129,8 +131,36 @@ class PublicBookingService {
 			'privacy_url'       => $privacy,
 			'marketing_consent' => (bool) $s['marketing_consent'],
 			'room_types'        => $types,
+			'extras'            => $this->extras( (int) $property['id'], (bool) $s['show_prices'] ),
 			'available'         => (bool) $types,
 		);
+	}
+
+	/**
+	 * Optional extras the guest can add (breakfast, parking, late check-out…): the public
+	 * optional supplements of the property. The price shown is the one written in the
+	 * rate; the total of the stay comes from the search, which applies them.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function extras( int $property_id, bool $show_prices ): array {
+		$out = array();
+		foreach ( $this->rates->adjustments( $property_id ) as $adj ) {
+			if ( ! $adj['is_optional'] || ! $adj['is_public'] || 'supplement' !== $adj['kind'] ) {
+				continue;
+			}
+			$out[] = array(
+				'id'            => (int) $adj['id'],
+				'name'          => (string) $adj['name'],
+				'description'   => (string) ( $adj['description'] ?? '' ),
+				'amount'        => $show_prices ? $adj['amount'] : null,
+				'percent_bp'    => $show_prices ? $adj['percent_bp'] : null,
+				'per'           => (string) $adj['per'],
+				'rate_plan_id'  => $adj['rate_plan_id'],
+				'room_type_ids' => $adj['room_type_ids'],
+			);
+		}
+		return $out;
 	}
 
 	/**
@@ -500,7 +530,7 @@ class PublicBookingService {
 			'code'           => (string) $b['code'],
 			'property'       => array(
 				'name'           => (string) ( $property['name'] ?? '' ),
-				'address'        => trim( (string) ( $property['address'] ?? '' ) . ' ' . (string) ( $property['city'] ?? '' ) ),
+				'address'        => trim( (string) ( $property['address'] ?? '' ) . ', ' . (string) ( $property['city'] ?? '' ), ', ' ),
 				'phone'          => $property['phone'] ?? null,
 				'email'          => $property['email'] ?? null,
 				'checkin_from'   => (string) ( $property['checkin_from'] ?? '' ),
