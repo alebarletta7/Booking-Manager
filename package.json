@@ -1,0 +1,20 @@
+{
+	"name": "booking-manager",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Interfaccia di Booking Manager (app di amministrazione e modulo pubblico).",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"build": "wp-scripts build admin=./assets/src/admin/index.js public=./assets/src/public/index.js --output-path=assets/build",
+		"start": "wp-scripts start admin=./assets/src/admin/index.js public=./assets/src/public/index.js --output-path=assets/build",
+		"lint:js": "wp-scripts lint-js assets/src",
+		"test:js": "wp-scripts test-unit-js --rootDir=assets/src"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.0.0",
+		"typescript": "^5.5.4"
+	},
+	"dependencies": {
+		"jsqr": "^1.4.0"
+	}
+}

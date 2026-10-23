@@ -70,7 +70,7 @@ class AdminApp {
 	 */
 	public static function menu_icon(): string {
 		$svg = is_readable( BKNG_DIR . 'assets/images/menu-icon.svg' ) ? (string) file_get_contents( BKNG_DIR . 'assets/images/menu-icon.svg' ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file of the plugin.
-		return '' === $svg ? 'dashicons-food' : 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- the format WordPress asks for.
+		return '' === $svg ? 'dashicons-building' : 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- the format WordPress asks for.
 	}
 
 	public function is_app_screen(): bool {
@@ -125,11 +125,11 @@ class AdminApp {
 			'logoUrl'         => BKNG_URL . 'assets/images/logo.svg',
 			'locale'          => str_replace( '_', '-', determine_locale() ),
 			'license'         => $this->license_boot( $admin ),
-			'shortcode'       => '[restaurant_manager_prenota struttura="…"]',
+			'shortcode'       => '[booking_manager_prenota struttura="…"]',
 			// First installation: the guided setup opens by itself for an administrator.
 			'setupPending'    => $admin && SetupController::PENDING === $this->setup->state(),
 		);
-		wp_add_inline_script( self::HANDLE, 'window.rmgrBoot = ' . wp_json_encode( $boot ) . ';', 'before' );
+		wp_add_inline_script( self::HANDLE, 'window.bkngBoot = ' . wp_json_encode( $boot ) . ';', 'before' );
 	}
 
 	/**
