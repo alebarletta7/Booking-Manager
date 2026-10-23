@@ -24,7 +24,7 @@ final class Rules {
 	public const PHASE_WAF   = 'http_request_firewall_custom';
 	public const PHASE_CACHE = 'http_request_cache_settings';
 
-	public const WAF_DESCRIPTION   = 'Booking Manager: messaggi di WhatsApp senza controlli anti-bot';
+	public const WAF_DESCRIPTION   = 'Booking Manager: notifiche di pagamento senza controlli anti-bot';
 	public const CACHE_DESCRIPTION = 'Booking Manager: nessuna cache per prenotazioni e API';
 
 	/** Phases skipped for the webhook (custom-rule skip options). */
@@ -39,29 +39,32 @@ final class Rules {
 	}
 
 	/**
-	 * POST to the exact address of a WhatsApp webhook (one per property), with a JSON body
-	 * and nothing else in the query.
+	 * POST to the exact address of a payment webhook (one per connected Stripe or Nexi
+	 * account), with a JSON body.
 	 *
 	 * WordPress lets a "rest_route" query (or form) argument pick the REST route on any
 	 * URL. A rule where the query merely contains the webhook route would let anyone reach
 	 * every other route (the booking form included) with Cloudflare's protections skipped,
-	 * by adding the webhook route as a second argument. So the path and the whole query
-	 * must be exactly the webhook's, and the body must be JSON, which PHP never reads as
-	 * form fields (Meta sends application/json). Meta signs every message and the plugin
-	 * checks the signature anyway.
+	 * by adding the webhook route as a second argument. So path and whole query must be
+	 * exactly a webhook's, and the body must be JSON, which PHP never reads as form fields
+	 * (Stripe and Nexi send application/json). The plugin checks every notification with
+	 * the provider anyway (signature or order lookup).
 	 *
-	 * @param string[] $webhook_urls PublicController::url( 'whatsapp/webhook/{id}' ) of each property.
+	 * @param string[] $webhook_urls PaymentAccountService::webhook_url() of each account.
 	 */
 	public static function webhook_expression( array $webhook_urls ): string {
-		$path    = '/';
-		$queries = array();
+		$targets = array();
 		foreach ( $webhook_urls as $url ) {
-			$path      = (string) ( parse_url( $url, PHP_URL_PATH ) ?: '/' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- pure, no WordPress.
-			$queries[] = self::quote( (string) parse_url( $url, PHP_URL_QUERY ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+			$path  = (string) ( parse_url( $url, PHP_URL_PATH ) ?: '/' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- pure, no WordPress.
+			$query = (string) parse_url( $url, PHP_URL_QUERY ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+			$targets[ $path . '?' . $query ] = '(http.request.uri.path eq ' . self::quote( $path ) . ' and http.request.uri.query eq ' . self::quote( $query ) . ')';
 		}
-		$queries = array_values( array_unique( $queries ) ) ?: array( self::quote( '' ) );
-		$json    = 'starts_with(http.request.headers["content-type"][0], "application/json")';
-		return '(http.request.method eq "POST" and http.request.uri.path eq ' . self::quote( $path ) . ' and http.request.uri.query in {' . implode( ' ', $queries ) . '} and ' . $json . ')';
+		if ( ! $targets ) {
+			// No payment account yet: a rule that matches nothing, ready to be updated.
+			$targets[] = '(http.request.uri.path eq ' . self::quote( '/booking-manager-no-webhook' ) . ')';
+		}
+		$json = 'starts_with(http.request.headers["content-type"][0], "application/json")';
+		return '(http.request.method eq "POST" and ' . $json . ' and (' . implode( ' or ', array_values( $targets ) ) . '))';
 	}
 
 	/**
@@ -78,7 +81,7 @@ final class Rules {
 	}
 
 	/**
-	 * The custom WAF rule letting Meta's WhatsApp messages through.
+	 * The custom WAF rule letting the payment providers' notifications through.
 	 *
 	 * @param string[] $webhook_urls
 	 * @return array<string, mixed>

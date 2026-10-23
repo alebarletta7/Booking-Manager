@@ -14,8 +14,9 @@ namespace BookingManager\Cloudflare;
 use BookingManager\Audit\AuditLogger;
 use BookingManager\Core\ClientIp;
 use BookingManager\Core\Clock;
+use BookingManager\Payments\PaymentAccountRepository;
+use BookingManager\Payments\PaymentAccountService;
 use BookingManager\Properties\PropertyRepository;
-use BookingManager\Rest\PublicController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -32,6 +33,7 @@ class CloudflareService {
 		private CloudflareSettings $settings,
 		private CloudflareClient $client,
 		private PropertyRepository $properties,
+		private PaymentAccountRepository $accounts,
 		private AuditLogger $audit,
 		private Clock $clock
 	) {}
@@ -112,15 +114,20 @@ class CloudflareService {
 	}
 
 	/**
-	 * Meta's webhook address of every property (archived ones too: their address does
-	 * not change, and Meta may still call it).
+	 * The webhook address of every payment account (archived properties too: the
+	 * provider may still call it).
 	 *
 	 * @return string[]
 	 */
 	public function webhook_urls(): array {
 		$urls = array();
 		foreach ( $this->properties->all() as $property ) {
-			$urls[] = PublicController::url( 'whatsapp/webhook/' . (int) $property['id'] );
+			foreach ( $this->accounts->rows_for( (int) $property['id'] ) as $row ) {
+				$account = $this->accounts->find( (int) $row['id'] );
+				if ( $account ) {
+					$urls[] = PaymentAccountService::webhook_url( $account );
+				}
+			}
 		}
 		return $urls;
 	}

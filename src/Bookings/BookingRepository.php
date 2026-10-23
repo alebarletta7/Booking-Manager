@@ -80,9 +80,13 @@ class BookingRepository {
 				$args    = array_merge( $args, $statuses );
 			}
 		}
-		if ( ! empty( $f['from'] ) && ! empty( $f['to'] ) ) {
-			$where[] = 'arrival < %s AND departure > %s';
+		// Stays overlapping [from, to); one end alone leaves the period open.
+		if ( ! empty( $f['to'] ) ) {
+			$where[] = 'arrival < %s';
 			$args[]  = (string) $f['to'];
+		}
+		if ( ! empty( $f['from'] ) ) {
+			$where[] = 'departure > %s';
 			$args[]  = (string) $f['from'];
 		}
 		if ( ! empty( $f['arrival'] ) ) {

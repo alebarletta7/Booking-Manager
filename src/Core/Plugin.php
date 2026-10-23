@@ -266,7 +266,7 @@ final class Plugin {
 		$c->set( StaffService::class, fn( Container $c ) => new StaffService( $c->get( RoleManager::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( CloudflareSettings::class, fn( Container $c ) => new CloudflareSettings( $c->get( SecretBox::class ) ) );
 		$c->set( CloudflareClient::class, fn( Container $c ) => new CloudflareClient( $c->get( CloudflareSettings::class ) ) );
-		$c->set( CloudflareService::class, fn( Container $c ) => new CloudflareService( $c->get( CloudflareSettings::class ), $c->get( CloudflareClient::class ), $c->get( PropertyRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
+		$c->set( CloudflareService::class, fn( Container $c ) => new CloudflareService( $c->get( CloudflareSettings::class ), $c->get( CloudflareClient::class ), $c->get( PropertyRepository::class ), $c->get( PaymentAccountRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
 
 		// Payments: desk payments, Stripe and Nexi hosted pages, refunds, notifications.
 		$c->set( PaymentAccountRepository::class, fn( Container $c ) => new PaymentAccountRepository( $c->get( SecretBox::class ) ) );
