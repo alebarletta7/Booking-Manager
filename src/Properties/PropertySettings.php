@@ -34,6 +34,9 @@ final class PropertySettings {
 			// Public form.
 			'online_enabled'        => true,
 			'show_prices'           => true,
+			// The guest may cancel from the link in the e-mail (the rate's cancellation
+			// terms decide what is refunded; a non-refundable rate can never be cancelled online).
+			'guest_cancel_online'   => true,
 			'terms_text'            => '',
 			'privacy_url'           => '',
 			'marketing_consent'     => false,

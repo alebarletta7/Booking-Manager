@@ -51,7 +51,8 @@ class BookingService {
 		private GuestRepository $guest_repo,
 		private AuditLogger $audit,
 		private Clock $clock,
-		private LicenseGate $license
+		private LicenseGate $license,
+		private ManageLink $manage
 	) {}
 
 	/**
@@ -150,8 +151,9 @@ class BookingService {
 				$first    = $lines[0];
 				$arrival  = min( array_column( $lines, 'arrival' ) );
 				$depart   = max( array_column( $lines, 'departure' ) );
+				$uuid     = wp_generate_uuid4();
 				$row      = array(
-					'uuid'                => wp_generate_uuid4(),
+					'uuid'                => $uuid,
 					'code'                => $this->unique_code(),
 					'property_id'         => (int) $property['id'],
 					'status'              => $status,
@@ -188,6 +190,7 @@ class BookingService {
 					'idempotency_key'     => '' !== $key ? $key : null,
 					'qr_id'               => BookingCodes::qr_id(),
 					'qr_version'          => 1,
+					'manage_token_hash'   => $this->manage->hash( $uuid ),
 					'privacy_accepted_at' => ! empty( $input['privacy_accepted'] ) ? gmdate( 'Y-m-d H:i:s' ) : null,
 					'confirmed_at'        => BookingStatus::CONFIRMED === $status ? gmdate( 'Y-m-d H:i:s' ) : null,
 					'confirmed_by'        => BookingStatus::CONFIRMED === $status && $user_id ? $user_id : null,

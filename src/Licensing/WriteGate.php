@@ -5,22 +5,21 @@
  *
  * - FULL (LicenseManager::is_locked: this site has no activation of its own, because it
  *   was never activated or an administrator deactivated it here): Booking Manager is
- *   locked until the licence is entered. On booking-manager/v1 only the licence routes
- *   and /me (+ /me/preferences, the app shell) answer; everything else, reading
- *   included, is 403 bkng_license_required. On the public namespace the booking form
- *   shows that online bookings are closed (available: false) and a new booking is
- *   refused, while what completes bookings already taken still works: the customer's
- *   page and cancellation, the calendar, the WhatsApp buttons and Meta's webhook.
+ *   locked until the licence is entered (the wizard shows only the Licenza step). On
+ *   booking-manager/v1 only the licence routes and /me (+ /me/preferences, the app shell)
+ *   answer; everything else, reading included, is 403 bkng_license_required. On the
+ *   public namespace the booking form shows that online bookings are closed
+ *   (available: false) and a new booking is refused, while the guest's page and
+ *   cancellation of bookings already taken still work.
  *
  * - BOOKINGS (activated once, but no licence that allows it: expired, suspended, revoked,
- *   site_changed, recovery_required, invalid, unverified after the offline grace…): the
- *   same choice as Night Manager («solo le vendite»), where the sales are the new
- *   bookings. A service in progress must never stop at the door:
- *   - BLOCKED: new bookings, from the staff app and from the public form;
- *   - ALLOWED: everything else that exists today: check-in, changes, confirmations and
- *     cancellations of existing bookings, customers (privacy is never blocked),
- *     properties, shifts, closures, notifications and WhatsApp, staff, settings, the
- *     Licenza panel, the customer's page and cancellation, Meta's webhook.
+ *   site_changed, recovery_required, invalid, unverified after the offline grace…):
+ *   - BLOCKED: new bookings (staff app and public form, holds included) and the
+ *     management of rooms (room types and rooms: create, change, archive, restore);
+ *   - ALLOWED: everything that serves guests already booked: changes, confirmations,
+ *     cancellations, check-in, room assignment, out-of-service periods, guests (privacy
+ *     is never blocked), rates, properties, staff, settings, Cloudflare, the Licenza
+ *     panel, the guest's page and cancellation.
  *   - A write route in neither list is blocked: in doubt, the gate closes. Reading is
  *     never blocked in this mode.
  *
@@ -71,36 +70,41 @@ class WriteGate {
 		'#^/me(/preferences)?$#',
 		'#^/license(/(activate|refresh|deactivate|updates/check))?$#',
 		'#^/public/properties(/[a-z0-9-]+)?$#',
-		'#^/public/manage/[A-Za-z0-9]{6,16}(/(cancel|calendar\.ics|add-to-calendar))?$#',
-		'#^/public/go/[mc]/[A-Za-z0-9]{6,16}\.[A-Za-z0-9]{32}$#',
-		'#^/public/whatsapp/webhook/\d+$#',
+		'#^/public/manage/[A-Za-z0-9]{6,16}(/cancel)?$#',
 	);
 
-	/** Paths inside booking-manager/v1; the public namespace is written as /public/…. */
+	/**
+	 * Paths inside booking-manager/v1; the public namespace is written as /public/….
+	 * Blocked without a licence: new bookings (staff and online, holds included) and the
+	 * management of rooms (types and rooms: create, change, archive).
+	 */
 	public const BLOCKED = array(
-		'#^/bookings$#',
-		'#^/public/properties/[a-z0-9-]+/bookings$#',
+		'#^/properties/\d+/bookings$#',
+		'#^/public/properties/[a-z0-9-]+/(bookings|holds)$#',
+		'#^/properties/\d+/(room-types|units)$#',
+		'#^/room-types/\d+(/archive)?$#',
+		'#^/units/\d+(/(archive|restore))?$#',
 	);
 
 	public const ALLOWED = array(
 		'#^/me/preferences$#',
 		'#^/properties(/\d+)?$#',
-		'#^/properties/\d+/(settings|test-email|email-preview|archive|restore)$#',
-		'#^/properties/\d+/(services|exceptions)$#',
-		'#^/(services|exceptions)/\d+$#',
-		'#^/bookings/\d+(/(status|regenerate-qr))?$#',
-		'#^/checkin/(scan|confirm)$#',
-		'#^/customers/\d+(/anonymize)?$#',
-		'#^/notifications/\d+/resend$#',
+		'#^/properties/\d+/(settings|archive|restore)$#',
+		'#^/properties/\d+/(rate-plans|adjustments|restrictions|prices)$#',
+		'#^/(rate-plans|adjustments|restrictions|prices)/\d+(/archive)?$#',
+		'#^/units/\d+/blocks$#',
+		'#^/blocks/\d+$#',
+		'#^/bookings/\d+(/(stay|status))?$#',
+		'#^/booking-rooms/\d+/(assign|move)$#',
+		'#^/guests/\d+(/anonymize)?$#',
 		'#^/staff(/\d+)?$#',
 		'#^/roles/[a-z_]+$#',
 		'#^/settings$#',
 		'#^/cloudflare(/(verify|rules))?$#',
 		'#^/license/(activate|refresh|deactivate|updates/check)$#',
 		'#^/setup/(page|finish)$#',
-		'#^/properties/\d+/whatsapp(/(connection|refresh|templates/[a-z_]+(/(preview|test))?))?$#',
+		'#^/public/holds/release$#',
 		'#^/public/manage/[A-Za-z0-9]{6,16}/cancel$#',
-		'#^/public/whatsapp/webhook/\d+$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}

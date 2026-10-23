@@ -33,6 +33,19 @@ class GuestRepository {
 		return $row ? self::hydrate( $row ) : null;
 	}
 
+	/**
+	 * Properties where the guest has at least one booking: a guest card is visible to the
+	 * staff of those properties only.
+	 *
+	 * @return int[]
+	 */
+	public function property_ids( int $id ): array {
+		global $wpdb;
+		$table = Schema::table( 'bookings' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT property_id FROM {$table} WHERE guest_id = %d", $id ) ) );
+	}
+
 	/** @return array<int, array<string, mixed>> guests with this e-mail hash (newest first). */
 	public function by_email_hash( string $hash ): array {
 		return $this->by( 'email_hash', $hash );

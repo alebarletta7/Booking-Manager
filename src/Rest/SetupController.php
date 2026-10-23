@@ -165,7 +165,7 @@ class SetupController extends RestController {
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
 				'post_title'   => '' !== $title ? $title : __( 'Prenota il tuo soggiorno', 'booking-manager' ),
-				'post_content' => PublicFrontend::shortcode( (string) $property['slug'] ),
+				'post_content' => PublicFrontend::shortcode_for( (string) $property['slug'] ),
 			),
 			true
 		);

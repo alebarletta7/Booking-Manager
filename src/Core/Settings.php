@@ -27,8 +27,8 @@ class Settings {
 			'delete_data_on_uninstall'  => false,
 			// Audit log: store a truncated IP address (privacy-friendly) or nothing.
 			'audit_store_ip'            => false,
-			// Customers without bookings for this many months are anonymized (0 = never).
-			'customer_retention_months' => 0,
+			// Guests without stays for this many months are anonymized (0 = never).
+			'guest_retention_months' => 0,
 			// Audit log rows older than this many months are deleted every day (0 = keep).
 			'audit_retention_months'    => 24,
 			// Notification log rows older than this many months are deleted (0 = keep).
