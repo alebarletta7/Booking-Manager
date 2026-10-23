@@ -295,8 +295,8 @@ final class RestApiTest extends TestCase {
 			return $out;
 		}
 		$path = preg_replace(
-			array( '/\(\?P<\w+>\\\\d\+\)/', '/\(\?P<\w+>\[a-z0-9\\\\-\]\+\)/', '/\(\?P<\w+>\[A-Za-z0-9\]\{6,16\}\)/', '/\(\?P<\w+>\[a-z_\]\+\)/' ),
-			array( '12', 'villa-test', 'ABCDEFGH', 'bkng_admin' ),
+			array( '/\(\?P<\w+>\\\\d\+\)/', '/\(\?P<\w+>\[a-z0-9\\\\-\]\+\)/', '/\(\?P<\w+>\[A-Za-z0-9\]\{6,16\}\)/', '/\(\?P<\w+>\[a-z_\]\+\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,20\}\)/' ),
+			array( '12', 'villa-test', 'ABCDEFGH', 'bkng_admin', 'stripe' ),
 			$route
 		);
 		return array( (string) $path );

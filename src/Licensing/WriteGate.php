@@ -70,7 +70,9 @@ class WriteGate {
 		'#^/me(/preferences)?$#',
 		'#^/license(/(activate|refresh|deactivate|updates/check))?$#',
 		'#^/public/properties(/[a-z0-9-]+)?$#',
-		'#^/public/manage/[A-Za-z0-9]{6,16}(/cancel)?$#',
+		'#^/public/manage/[A-Za-z0-9]{6,16}(/(cancel|pay))?$#',
+		// Money already taken must still be settled (confirmed or refunded).
+		'#^/webhooks/[a-z0-9_-]{2,20}/\d+$#',
 	);
 
 	/**
@@ -104,7 +106,11 @@ class WriteGate {
 		'#^/license/(activate|refresh|deactivate|updates/check)$#',
 		'#^/setup/(page|finish)$#',
 		'#^/public/holds/release$#',
-		'#^/public/manage/[A-Za-z0-9]{6,16}/cancel$#',
+		'#^/public/manage/[A-Za-z0-9]{6,16}/(cancel|pay)$#',
+		'#^/properties/\d+/payment-accounts(/select|/[a-z0-9_-]{2,20}/(test|live)(/verify)?)?$#',
+		'#^/bookings/\d+/(payments|payment-link)$#',
+		'#^/payments/\d+/(refund|sync)$#',
+		'#^/webhooks/[a-z0-9_-]{2,20}/\d+$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}

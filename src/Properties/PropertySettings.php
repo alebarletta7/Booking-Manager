@@ -65,7 +65,6 @@ final class PropertySettings {
 
 	/** Allowed values for the keys that are an enumeration. */
 	private const ENUMS = array(
-		'payment_provider' => array( 'none', 'stripe', 'nexi' ),
 		'payment_mode'     => array( 'test', 'live' ),
 		'online_payment'   => array( 'none', 'deposit', 'full' ),
 	);
@@ -129,6 +128,11 @@ final class PropertySettings {
 		$value = is_scalar( $value ) ? (string) $value : '';
 		if ( isset( self::ENUMS[ $key ] ) ) {
 			return in_array( $value, self::ENUMS[ $key ], true ) ? $value : $default;
+		}
+		if ( 'payment_provider' === $key ) {
+			// Any registered provider (add-ons may add their own): set only by
+			// PaymentAccountService::select(), after the account is verified.
+			return preg_match( '/^[a-z0-9_-]{2,20}$/', $value ) ? $value : $default;
 		}
 		if ( 'same_day_until' === $key ) {
 			return preg_match( '/^([01]\d|2[0-3]):[0-5]\d$/', $value ) ? $value : $default;

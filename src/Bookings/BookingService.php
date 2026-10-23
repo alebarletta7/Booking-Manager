@@ -59,7 +59,7 @@ class BookingService {
 	 * Creates a booking.
 	 *
 	 * @param array<string, mixed> $input property_id, rooms[], guest{}, guests[], status, extras[], customer_notes, internal_notes, arrival_time, idempotency_key, hold_token, override_restrictions, external_source, external_ref, privacy_accepted, marketing_consent
-	 * @param array{channel?: string, user_id?: int, can_override?: bool, can_price?: bool} $ctx channel: staff | online | import
+	 * @param array{channel?: string, user_id?: int, can_override?: bool, can_price?: bool, awaiting_payment_minutes?: int} $ctx channel: staff | online | import; awaiting_payment_minutes: online booking kept as an option until paid
 	 * @return array<string, mixed>|\WP_Error the booking payload
 	 */
 	public function create( array $input, array $ctx ): array|\WP_Error {
@@ -86,8 +86,13 @@ class BookingService {
 		}
 
 		$status = (string) ( $input['status'] ?? '' );
+		$pay_minutes = (int) ( $ctx['awaiting_payment_minutes'] ?? 0 );
 		if ( $online ) {
 			$status = 'direct' === $property['booking_mode'] ? BookingStatus::CONFIRMED : BookingStatus::PENDING;
+			if ( BookingStatus::CONFIRMED === $status && $pay_minutes > 0 ) {
+				// Confirmed only when the online payment arrives (PaymentService).
+				$status = BookingStatus::OPTION;
+			}
 		} elseif ( '' === $status ) {
 			$status = BookingStatus::CONFIRMED;
 		}
@@ -140,7 +145,7 @@ class BookingService {
 
 		$option_hours = (int) $property['settings']['option_hours'];
 		$result       = Abort::run(
-			function () use ( $property, $lines, $guest, $input, $status, $source, $extras, $key, $hold_id, $user_id, $online, $option_hours, $channel ) {
+			function () use ( $property, $lines, $guest, $input, $status, $source, $extras, $key, $hold_id, $user_id, $online, $option_hours, $channel, $pay_minutes ) {
 				$this->ledger->lock_types( array_column( $lines, 'room_type_id' ) );
 				$free = $this->stays->check_free( $lines, array(), $hold_id );
 				if ( $free instanceof \WP_Error ) {
@@ -184,7 +189,7 @@ class BookingService {
 					'customer_notes'      => self::text( $input['customer_notes'] ?? null, 2000 ),
 					'internal_notes'      => $online ? null : self::text( $input['internal_notes'] ?? null, 4000 ),
 					'arrival_time'        => self::arrival_time( $input['arrival_time'] ?? null ),
-					'option_expires_at'   => BookingStatus::OPTION === $status ? gmdate( 'Y-m-d H:i:s', time() + $option_hours * HOUR_IN_SECONDS ) : null,
+					'option_expires_at'   => BookingStatus::OPTION === $status ? gmdate( 'Y-m-d H:i:s', time() + ( $pay_minutes > 0 ? $pay_minutes * MINUTE_IN_SECONDS : $option_hours * HOUR_IN_SECONDS ) ) : null,
 					'external_source'     => 'import' === $channel ? self::text( $input['external_source'] ?? null, 60 ) : null,
 					'external_ref'        => 'import' === $channel ? self::text( $input['external_ref'] ?? null, 190 ) : null,
 					'idempotency_key'     => '' !== $key ? $key : null,
@@ -416,6 +421,7 @@ class BookingService {
 						'deposit_due'      => $priced['deposit'],
 						'deposit_due_date' => $priced['deposit_due_date'],
 						'balance'          => $priced['total'] - (int) $locked['paid'] + (int) $locked['refunded'],
+						'payment_status'   => PaymentSummary::status( $priced['total'], $priced['deposit'], (int) $locked['paid'], (int) $locked['refunded'] ),
 						'price_snapshot'   => $priced['price_snapshot'],
 					);
 				}

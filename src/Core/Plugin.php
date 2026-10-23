@@ -66,6 +66,17 @@ use BookingManager\Licensing\LicenseStore;
 use BookingManager\Licensing\ServerConfig;
 use BookingManager\Licensing\ServerGate;
 use BookingManager\Licensing\WriteGate;
+use BookingManager\Payments\PaymentAccountRepository;
+use BookingManager\Payments\PaymentAccountService;
+use BookingManager\Payments\PaymentRepository;
+use BookingManager\Payments\PaymentService;
+use BookingManager\Payments\ProviderRegistry;
+use BookingManager\Payments\Providers\ManualProvider;
+use BookingManager\Payments\Providers\NexiClient;
+use BookingManager\Payments\Providers\NexiProvider;
+use BookingManager\Payments\Providers\StripeClient;
+use BookingManager\Payments\Providers\StripeProvider;
+use BookingManager\Rest\PaymentsController;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
@@ -228,7 +239,9 @@ final class Plugin {
 				$c->get( BookingRepository::class ),
 				$c->get( ManageLink::class ),
 				$c->get( Captcha::class ),
-				$c->get( Clock::class )
+				$c->get( Clock::class ),
+				$c->get( PaymentService::class ),
+				$c->get( PaymentAccountService::class )
 			)
 		);
 		$c->set( PublicFrontend::class, fn( Container $c ) => new PublicFrontend( $c->get( PropertyRepository::class ), $c->get( Captcha::class ) ) );
@@ -236,6 +249,34 @@ final class Plugin {
 		$c->set( CloudflareSettings::class, fn( Container $c ) => new CloudflareSettings( $c->get( SecretBox::class ) ) );
 		$c->set( CloudflareClient::class, fn( Container $c ) => new CloudflareClient( $c->get( CloudflareSettings::class ) ) );
 		$c->set( CloudflareService::class, fn( Container $c ) => new CloudflareService( $c->get( CloudflareSettings::class ), $c->get( CloudflareClient::class ), $c->get( PropertyRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
+
+		// Payments: desk payments, Stripe and Nexi hosted pages, refunds, notifications.
+		$c->set( PaymentAccountRepository::class, fn( Container $c ) => new PaymentAccountRepository( $c->get( SecretBox::class ) ) );
+		$c->set(
+			ProviderRegistry::class,
+			fn( Container $c ) => new ProviderRegistry(
+				array(
+					new ManualProvider(),
+					new StripeProvider( new StripeClient(), $c->get( Clock::class ) ),
+					new NexiProvider( new NexiClient(), $c->get( Clock::class ) ),
+				)
+			)
+		);
+		$c->set( PaymentAccountService::class, fn( Container $c ) => new PaymentAccountService( $c->get( PaymentAccountRepository::class ), $c->get( ProviderRegistry::class ), $c->get( PropertyRepository::class ), $c->get( AuditLogger::class ) ) );
+		$c->set( PaymentRepository::class, fn() => new PaymentRepository() );
+		$c->set(
+			PaymentService::class,
+			fn( Container $c ) => new PaymentService(
+				$c->get( PaymentRepository::class ),
+				$c->get( PaymentAccountService::class ),
+				$c->get( ProviderRegistry::class ),
+				$c->get( BookingRepository::class ),
+				$c->get( BookingService::class ),
+				$c->get( PropertyRepository::class ),
+				$c->get( AuditLogger::class ),
+				$c->get( Clock::class )
+			)
+		);
 
 		// REST controllers.
 		$p = fn( Container $c ) => $c->get( Policy::class );
@@ -252,6 +293,7 @@ final class Plugin {
 		$c->set( AuditController::class, fn( Container $c ) => new AuditController( $p( $c ), $c->get( AuditLogReader::class ), $c->get( PropertyRepository::class ) ) );
 		$c->set( StaffController::class, fn( Container $c ) => new StaffController( $p( $c ), $c->get( StaffService::class ) ) );
 		$c->set( CloudflareController::class, fn( Container $c ) => new CloudflareController( $p( $c ), $c->get( CloudflareSettings::class ), $c->get( CloudflareService::class ), $c->get( AuditLogger::class ) ) );
+		$c->set( PaymentsController::class, fn( Container $c ) => new PaymentsController( $p( $c ), $c->get( PaymentService::class ), $c->get( PaymentRepository::class ), $c->get( PaymentAccountService::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
 		$c->set( StaffEntry::class, fn() => new StaffEntry() );
@@ -308,6 +350,7 @@ final class Plugin {
 			AuditController::class,
 			StaffController::class,
 			CloudflareController::class,
+			PaymentsController::class,
 			PublicController::class,
 		);
 	}
@@ -330,6 +373,17 @@ final class Plugin {
 		add_action( 'init', array( Installer::class, 'ensure_schedules' ), 20 );
 
 		add_action( Installer::HOURLY_HOOK, fn() => $c->get( BookingService::class )->expire_options() );
+		// Every 15 minutes: first ask the providers about open payments (a paid option is
+		// confirmed), then let the expired options go.
+		add_action(
+			Installer::PAYMENTS_HOOK,
+			function () use ( $c ) {
+				$c->get( PaymentService::class )->reconcile_open();
+				$c->get( BookingService::class )->expire_options();
+			}
+		);
+		// A cancelled booking closes its open payment pages (a payment already made is refunded).
+		add_action( Hooks::BOOKING_CANCELLED, fn( int $booking_id ) => $c->get( PaymentService::class )->cancel_open_payments( $booking_id ) );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( BookingService::class )->auto_complete() );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( HoldService::class )->expire() );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( AuditLogger::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );

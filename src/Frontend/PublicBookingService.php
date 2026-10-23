@@ -29,6 +29,9 @@ use BookingManager\Core\Validation;
 use BookingManager\Inventory\InventoryService;
 use BookingManager\Inventory\RoomTypeRepository;
 use BookingManager\Properties\PropertyRepository;
+use BookingManager\Payments\PaymentAccountService;
+use BookingManager\Payments\PaymentService;
+use BookingManager\Payments\PaymentStatus;
 use BookingManager\Rates\Policies;
 
 defined( 'ABSPATH' ) || exit;
@@ -53,7 +56,9 @@ class PublicBookingService {
 		private BookingRepository $repo,
 		private ManageLink $manage,
 		private Captcha $captcha,
-		private Clock $clock
+		private Clock $clock,
+		private PaymentService $payments,
+		private PaymentAccountService $accounts
 	) {}
 
 	/**
@@ -291,15 +296,43 @@ class PublicBookingService {
 		if ( ! empty( $property['settings']['marketing_consent'] ) ) {
 			$data['marketing_consent'] = rest_sanitize_boolean( $input['marketing_consent'] ?? false );
 		}
-		$result = $this->bookings->create( $data, array( 'channel' => 'online' ) );
+		$pay    = $this->online_payment( $property );
+		$result = $this->bookings->create(
+			$data,
+			array(
+				'channel'                  => 'online',
+				// Kept as an option for as long as a payment page lives (Stripe: 30 minutes at least).
+				'awaiting_payment_minutes' => $pay ? 40 : 0,
+			)
+		);
 		if ( $result instanceof \WP_Error ) {
 			return $result;
 		}
-		$booking = (array) $this->repo->find( (int) $result['id'] );
+		$booking  = (array) $this->repo->find( (int) $result['id'] );
+		$checkout = null;
+		if ( BookingStatus::OPTION === $booking['status'] && $pay ) {
+			$checkout = $this->checkout( $booking );
+			if ( $checkout instanceof \WP_Error ) {
+				// The guest could not reach the payment page: the rooms go back on sale.
+				$this->bookings->set_status(
+					(int) $booking['id'],
+					(int) $booking['version'],
+					BookingStatus::CANCELLED,
+					array(
+						'user_id' => 0,
+						'actor'   => 'system',
+						'reason'  => __( 'Pagamento online non avviato.', 'booking-manager' ),
+					)
+				);
+				return $checkout;
+			}
+			$booking = (array) $this->repo->find( (int) $booking['id'] );
+		}
 		return array(
 			'booking'    => $this->public_payload( $booking ),
 			'manage_url' => $this->manage->url( $booking ),
 			'token'      => $this->manage->token( (string) $booking['uuid'] ),
+			'payment'    => $checkout,
 		);
 	}
 
@@ -309,7 +342,27 @@ class PublicBookingService {
 			return self::too_many();
 		}
 		$booking = $this->find_for_guest( $code, $token );
-		return $booking instanceof \WP_Error ? $booking : $this->public_payload( $booking );
+		return $booking instanceof \WP_Error ? $booking : $this->public_payload( $this->refresh_payments( $booking ) );
+	}
+
+	/**
+	 * The guest pays from the booking's page: what the booking still waits for (the
+	 * option's payment, the deposit, or the balance).
+	 *
+	 * @return array<string, mixed>|\WP_Error checkout_url and amount
+	 */
+	public function pay( string $code, string $token, string $ip ): array|\WP_Error {
+		if ( ! RateLimiter::hit( 'public_manage', RateLimiter::ip_key( $ip ), self::MANAGE_LIMIT, HOUR_IN_SECONDS ) ) {
+			return self::too_many();
+		}
+		$booking = $this->find_for_guest( $code, $token );
+		if ( $booking instanceof \WP_Error ) {
+			return $booking;
+		}
+		if ( ! $this->can_pay( $booking ) ) {
+			return new \WP_Error( 'bkng_nothing_to_pay', __( 'Per questa prenotazione non c\'è nulla da pagare online.', 'booking-manager' ), array( 'status' => 409 ) );
+		}
+		return $this->checkout( $booking );
 	}
 
 	/** @return array<string, mixed>|\WP_Error */
@@ -336,6 +389,85 @@ class PublicBookingService {
 			)
 		);
 		return $result instanceof \WP_Error ? $result : $this->public_payload( (array) $this->repo->find( (int) $booking['id'] ) );
+	}
+
+	/**
+	 * Online payment of a property: 'deposit' or 'full' when a verified account is chosen
+	 * and the property asks for it, null otherwise.
+	 *
+	 * @param array<string, mixed> $property
+	 */
+	private function online_payment( array $property ): ?string {
+		$mode = (string) ( $property['settings']['online_payment'] ?? 'none' );
+		if ( 'none' === $mode || 'direct' !== $property['booking_mode'] ) {
+			return null;
+		}
+		return $this->accounts->active_online_account( (int) $property['id'] ) ? $mode : null;
+	}
+
+	/**
+	 * What the guest pays now: the whole amount due, or the deposit still missing.
+	 *
+	 * @param array<string, mixed> $booking
+	 */
+	public static function amount_to_pay( array $booking, string $mode ): int {
+		$t = PaymentService::totals( $booking );
+		return 'deposit' === $mode && $t['deposit_missing'] > 0 ? $t['deposit_missing'] : $t['due'];
+	}
+
+	/** @param array<string, mixed> $booking */
+	private function can_pay( array $booking ): bool {
+		$property = $this->properties->find( (int) $booking['property_id'] );
+		if ( ! $property || ! in_array( $booking['status'], array( BookingStatus::OPTION, BookingStatus::CONFIRMED, BookingStatus::IN_HOUSE ), true ) ) {
+			return false;
+		}
+		$mode = (string) ( $property['settings']['online_payment'] ?? 'none' );
+		return 'none' !== $mode
+			&& null !== $this->accounts->active_online_account( (int) $property['id'] )
+			&& self::amount_to_pay( $booking, $mode ) >= PaymentService::MIN_ONLINE_CENTS;
+	}
+
+	/**
+	 * Opens (or reuses) the payment page for what the booking waits for.
+	 *
+	 * @param array<string, mixed> $booking
+	 * @return array{checkout_url: string, amount: int}|\WP_Error
+	 */
+	private function checkout( array $booking ): array|\WP_Error {
+		$property = (array) $this->properties->find( (int) $booking['property_id'] );
+		$amount   = self::amount_to_pay( $booking, (string) ( $property['settings']['online_payment'] ?? 'full' ) );
+		$back     = $this->manage->url( $booking );
+		$result   = $this->payments->start_online_payment( $booking, $amount, add_query_arg( 'bkng_paid', '1', $back ), add_query_arg( 'bkng_paid', '0', $back ), $booking['email'] ?? null );
+		if ( $result instanceof \WP_Error ) {
+			return $result;
+		}
+		return array(
+			'checkout_url' => (string) $result['checkout_url'],
+			'amount'       => $amount,
+		);
+	}
+
+	/**
+	 * Back from the payment page, the guest's browser proves nothing: while the booking
+	 * waits for a payment, the provider is asked directly (at most every 10 seconds).
+	 *
+	 * @param array<string, mixed> $booking
+	 */
+	private function refresh_payments( array $booking ): array {
+		if ( BookingStatus::OPTION !== $booking['status'] ) {
+			return $booking;
+		}
+		$key = 'bkng_pay_check_' . (int) $booking['id'];
+		if ( get_transient( $key ) ) {
+			return $booking;
+		}
+		set_transient( $key, 1, 10 );
+		foreach ( $this->payments->repository()->for_booking( (int) $booking['id'] ) as $payment ) {
+			if ( in_array( $payment['status'], PaymentStatus::OPEN, true ) ) {
+				$this->payments->reconcile( $payment );
+			}
+		}
+		return (array) $this->repo->find( (int) $booking['id'] );
 	}
 
 	public function captcha_config(): ?array {
@@ -388,6 +520,10 @@ class PublicBookingService {
 			'deposit_due'    => (int) $b['deposit_due'],
 			'terms'          => $b['terms_snapshot'],
 			'can_cancel'     => $terms['online'],
+			// Waiting for the online payment: the booking holds the rooms until option_expires_at.
+			'awaiting_payment' => BookingStatus::OPTION === $b['status'],
+			'option_expires_at' => \BookingManager\Core\Clock::iso( $b['option_expires_at'] ),
+			'can_pay'        => $this->can_pay( $b ),
 			'cancel_penalty' => $terms['penalty'],
 		);
 	}

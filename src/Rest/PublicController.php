@@ -11,6 +11,7 @@
  *   POST /holds/release                      rooms let go (guest went back)
  *   POST /properties/{slug}/bookings         the booking
  *   GET  /manage/{code}?token                the guest's booking
+ *   POST /manage/{code}/pay?token            payment page for what is due
  *   POST /manage/{code}/cancel?token         cancellation by the guest
  *
  * @package BookingManager
@@ -113,6 +114,16 @@ class PublicController {
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => fn( \WP_REST_Request $r ) => self::out( $this->service->manage( (string) $r['code'], (string) $r->get_param( 'token' ), ClientIp::current( $r ) ) ),
+				'permission_callback' => $public,
+				'args'                => $token,
+			)
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/manage/' . $code . '/pay',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => fn( \WP_REST_Request $r ) => self::out( $this->service->pay( (string) $r['code'], (string) $r->get_param( 'token' ), ClientIp::current( $r ) ), 201 ),
 				'permission_callback' => $public,
 				'args'                => $token,
 			)

@@ -182,6 +182,37 @@ class BookingRepository {
 		return 1 === (int) $n;
 	}
 
+	/**
+	 * Money collected on the booking, from its payments. Not a change of the booking
+	 * (the version stays): a payment arriving never makes a staff member's form stale.
+	 */
+	public function set_payment_totals( int $id, int $paid, int $refunded ): void {
+		global $wpdb;
+		$booking = $this->find( $id );
+		if ( ! $booking ) {
+			return;
+		}
+		$wpdb->update(
+			Schema::table( 'bookings' ),
+			array(
+				'paid'           => $paid,
+				'refunded'       => $refunded,
+				'balance'        => (int) $booking['total'] - $paid + $refunded,
+				'payment_status' => PaymentSummary::status( (int) $booking['total'], (int) $booking['deposit_due'], $paid, $refunded ),
+				'updated_at'     => gmdate( 'Y-m-d H:i:s' ),
+			),
+			array( 'id' => $id )
+		);
+	}
+
+	/** An option waiting for its online payment lives at least until $until (UTC). */
+	public function extend_option( int $id, string $until ): void {
+		global $wpdb;
+		$table = Schema::table( 'bookings' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET option_expires_at = %s WHERE id = %d AND status = %s AND option_expires_at IS NOT NULL AND option_expires_at < %s", $until, $id, BookingStatus::OPTION, $until ) );
+	}
+
 	/** Locks the booking row (inside a transaction). */
 	public function lock( int $id ): ?array {
 		global $wpdb;

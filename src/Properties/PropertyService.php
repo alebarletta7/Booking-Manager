@@ -123,6 +123,9 @@ class PropertyService {
 		if ( ! $current ) {
 			return self::not_found();
 		}
+		// The payment provider is chosen only once its account is connected and verified
+		// (PaymentAccountService::select()), never through the plain settings.
+		unset( $changes['payment_provider'], $changes['payment_mode'] );
 		$merged = PropertySettings::merge( $current['settings'], $changes );
 		$diff   = array();
 		foreach ( $merged as $key => $value ) {

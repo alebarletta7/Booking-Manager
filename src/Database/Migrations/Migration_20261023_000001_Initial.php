@@ -504,7 +504,7 @@ final class Migration_20261023_000001_Initial extends Migration {
   property_id bigint(20) unsigned NOT NULL,
   booking_id bigint(20) unsigned NOT NULL,
   kind varchar(20) NOT NULL DEFAULT 'deposit',
-  method varchar(20) NOT NULL,
+  method varchar(30) NULL,
   gateway varchar(20) NOT NULL DEFAULT 'manual',
   payment_account_id bigint(20) unsigned NULL,
   amount bigint(20) NOT NULL,

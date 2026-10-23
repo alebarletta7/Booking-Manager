@@ -47,6 +47,7 @@ final class Hooks {
 	// Payments.
 	public const PAYMENT_RECORDED = 'bkng_payment_recorded';
 	public const PAYMENT_REFUNDED = 'bkng_payment_refunded';
+	public const PAYMENT_FAILED   = 'bkng_payment_failed';
 
 	// Rooms (housekeeping).
 	public const UNIT_STATUS_CHANGED = 'bkng_unit_status_changed';
