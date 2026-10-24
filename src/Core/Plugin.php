@@ -79,6 +79,7 @@ use BookingManager\Payments\Providers\StripeProvider;
 use BookingManager\Rest\PaymentsController;
 use BookingManager\Rest\CheckinController;
 use BookingManager\Rest\HousekeepingController;
+use BookingManager\Cli\LicenseCommand;
 use BookingManager\Checkin\CheckinRepository;
 use BookingManager\Checkin\CheckinService;
 use BookingManager\Checkin\QrToken;
@@ -427,6 +428,9 @@ final class Plugin {
 		// Licence: the gate on the REST API, scheduled checks, updates from the server.
 		$c->get( WriteGate::class )->hooks();
 		$c->get( LicenseScheduler::class )->hooks();
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			\WP_CLI::add_command( 'booking-manager license', new LicenseCommand( $c->get( LicenseManager::class ) ) );
+		}
 		$c->get( UpdateChecker::class )->hooks();
 		$c->get( NotificationService::class )->hooks();
 		$c->get( ChannelService::class )->hooks();
