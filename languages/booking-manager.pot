@@ -1,0 +1,5749 @@
+# Copyright (C) 2026 Alessandro Barletta
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Booking Manager 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/booking-manager\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-23T22:14:45+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: booking-manager\n"
+
+#. Plugin Name of the plugin
+#: booking-manager.php
+#: src/Admin/AdminApp.php:57
+#: src/Admin/AdminApp.php:58
+msgid "Booking Manager"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: booking-manager.php
+msgid "https://www.alessandrobarletta.it/"
+msgstr ""
+
+#. Description of the plugin
+#: booking-manager.php
+msgid "Gestionale per B&B, affittacamere, case vacanza, appartamenti e hotel: camere, tariffe, disponibilità, prenotazioni, pagamenti, check-in e housekeeping."
+msgstr ""
+
+#. Author of the plugin
+#: booking-manager.php
+msgid "Alessandro Barletta"
+msgstr ""
+
+#. translators: 1: required PHP version, 2: current PHP version.
+#: booking-manager.php:49
+msgid "Booking Manager richiede PHP %1$s o superiore (versione attuale: %2$s)."
+msgstr ""
+
+#. translators: 1: required WordPress version, 2: current WordPress version.
+#: booking-manager.php:53
+msgid "Booking Manager richiede WordPress %1$s o superiore (versione attuale: %2$s)."
+msgstr ""
+
+#: src/Access/Capabilities.php:131
+msgid "Accesso e dashboard"
+msgstr ""
+
+#: src/Access/Capabilities.php:132
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:10
+msgid "Prenotazioni"
+msgstr ""
+
+#: src/Access/Capabilities.php:133
+msgid "Reception e pagamenti"
+msgstr ""
+
+#: src/Access/Capabilities.php:134
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "Housekeeping"
+msgstr ""
+
+#: src/Access/Capabilities.php:135
+#: src/Notifications/NotificationTemplates.php:282
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+msgid "Ospiti"
+msgstr ""
+
+#: src/Access/Capabilities.php:136
+msgid "Report e controllo"
+msgstr ""
+
+#: src/Access/Capabilities.php:137
+msgid "Configurazione della struttura"
+msgstr ""
+
+#: src/Access/Capabilities.php:138
+msgid "Amministrazione"
+msgstr ""
+
+#: src/Access/Capabilities.php:145
+msgid "Accedere al gestionale"
+msgstr ""
+
+#: src/Access/Capabilities.php:146
+msgid "Vedere la dashboard"
+msgstr ""
+
+#: src/Access/Capabilities.php:147
+msgid "Vedere prenotazioni, calendario e planning"
+msgstr ""
+
+#: src/Access/Capabilities.php:148
+msgid "Creare prenotazioni"
+msgstr ""
+
+#: src/Access/Capabilities.php:149
+msgid "Modificare e spostare prenotazioni"
+msgstr ""
+
+#: src/Access/Capabilities.php:150
+msgid "Confermare prenotazioni in attesa"
+msgstr ""
+
+#: src/Access/Capabilities.php:151
+msgid "Annullare prenotazioni"
+msgstr ""
+
+#: src/Access/Capabilities.php:152
+msgid "Segnare un no-show"
+msgstr ""
+
+#: src/Access/Capabilities.php:153
+msgid "Prenotare ignorando soggiorno minimo, anticipo e chiusure"
+msgstr ""
+
+#: src/Access/Capabilities.php:154
+msgid "Registrare check-in e check-out"
+msgstr ""
+
+#: src/Access/Capabilities.php:155
+msgid "Vedere pagamenti e saldi"
+msgstr ""
+
+#: src/Access/Capabilities.php:156
+msgid "Registrare pagamenti e richiedere caparre"
+msgstr ""
+
+#: src/Access/Capabilities.php:157
+msgid "Registrare ed eseguire rimborsi"
+msgstr ""
+
+#: src/Access/Capabilities.php:158
+msgid "Vedere lo stato delle camere"
+msgstr ""
+
+#: src/Access/Capabilities.php:159
+msgid "Aggiornare lo stato delle camere"
+msgstr ""
+
+#: src/Access/Capabilities.php:160
+msgid "Cercare ospiti e vedere la scheda"
+msgstr ""
+
+#: src/Access/Capabilities.php:161
+msgid "Modificare i dati degli ospiti"
+msgstr ""
+
+#: src/Access/Capabilities.php:162
+msgid "Esportare i dati di un ospite"
+msgstr ""
+
+#: src/Access/Capabilities.php:163
+msgid "Anonimizzare un ospite"
+msgstr ""
+
+#: src/Access/Capabilities.php:164
+msgid "Vedere report e statistiche"
+msgstr ""
+
+#: src/Access/Capabilities.php:165
+msgid "Esportare i report"
+msgstr ""
+
+#: src/Access/Capabilities.php:166
+msgid "Consultare il log delle operazioni"
+msgstr ""
+
+#: src/Access/Capabilities.php:167
+msgid "Gestire tipologie e camere"
+msgstr ""
+
+#: src/Access/Capabilities.php:168
+msgid "Gestire tariffe, restrizioni e chiusure"
+msgstr ""
+
+#: src/Access/Capabilities.php:169
+msgid "Gestire le impostazioni della struttura"
+msgstr ""
+
+#: src/Access/Capabilities.php:170
+msgid "Collegare i conti di pagamento (Stripe, Nexi)"
+msgstr ""
+
+#: src/Access/Capabilities.php:171
+msgid "Creare e archiviare strutture"
+msgstr ""
+
+#: src/Access/Capabilities.php:172
+msgid "Accedere a tutte le strutture"
+msgstr ""
+
+#: src/Access/Capabilities.php:173
+msgid "Gestire gli operatori"
+msgstr ""
+
+#: src/Access/Capabilities.php:174
+msgid "Gestire ruoli e permessi"
+msgstr ""
+
+#: src/Access/Capabilities.php:175
+msgid "Gestire le impostazioni generali"
+msgstr ""
+
+#: src/Access/Capabilities.php:176
+msgid "Gestire integrazioni e canali"
+msgstr ""
+
+#: src/Access/Capabilities.php:183
+msgid "Housekeeping (Booking Manager)"
+msgstr ""
+
+#: src/Access/Capabilities.php:184
+msgid "Reception (Booking Manager)"
+msgstr ""
+
+#: src/Access/Capabilities.php:185
+msgid "Addetto prenotazioni (Booking Manager)"
+msgstr ""
+
+#: src/Access/Capabilities.php:186
+msgid "Responsabile di struttura (Booking Manager)"
+msgstr ""
+
+#: src/Access/Capabilities.php:187
+msgid "Amministratore Booking Manager"
+msgstr ""
+
+#: src/Access/Policy.php:32
+msgid "Devi effettuare l'accesso."
+msgstr ""
+
+#: src/Access/Policy.php:35
+msgid "Non hai il permesso per questa operazione."
+msgstr ""
+
+#: src/Access/Policy.php:39
+#: src/Checkin/CheckinService.php:592
+#: src/Housekeeping/HousekeepingService.php:48
+#: src/Properties/PropertyService.php:318
+#: src/Rest/MeController.php:157
+msgid "Struttura non trovata."
+msgstr ""
+
+#: src/Access/RoleManager.php:147
+#: src/Access/RoleManager.php:173
+msgid "Non hai il permesso di gestire i ruoli."
+msgstr ""
+
+#. translators: %s: capability name.
+#: src/Access/RoleManager.php:154
+msgid "Il permesso \"%s\" non appartiene a Booking Manager e non può essere assegnato da qui."
+msgstr ""
+
+#. translators: %s: capability name.
+#: src/Access/RoleManager.php:162
+msgid "Non puoi assegnare il permesso \"%s\" perché non lo possiedi."
+msgstr ""
+
+#: src/Access/RoleManager.php:177
+#: src/Access/RoleManager.php:200
+#: src/Staff/StaffService.php:279
+msgid "Ruolo inesistente."
+msgstr ""
+
+#: src/Access/RoleManager.php:181
+msgid "Il ruolo Amministratore di WordPress non si modifica da qui."
+msgstr ""
+
+#: src/Access/RoleManager.php:185
+msgid "Non puoi modificare questo ruolo."
+msgstr ""
+
+#: src/Access/RoleManager.php:188
+msgid "Puoi modificare solo ruoli dedicati a Booking Manager."
+msgstr ""
+
+#: src/Access/RoleManager.php:196
+msgid "Non hai il permesso di gestire gli operatori."
+msgstr ""
+
+#: src/Access/RoleManager.php:204
+msgid "Puoi assegnare solo ruoli dedicati a Booking Manager."
+msgstr ""
+
+#: src/Access/RoleManager.php:208
+msgid "Non puoi assegnare questo ruolo."
+msgstr ""
+
+#: src/Access/RoleManager.php:212
+msgid "Questo ruolo ha permessi che tu non possiedi."
+msgstr ""
+
+#: src/Admin/AdminApp.php:83
+msgid "Non hai il permesso di accedere a questa pagina."
+msgstr ""
+
+#: src/Admin/AdminApp.php:86
+msgid "I file dell'interfaccia non sono presenti. Esegui \"npm run build\" oppure reinstalla il plugin dallo zip ufficiale."
+msgstr ""
+
+#: src/Admin/AdminApp.php:89
+#: src/Frontend/PublicFrontend.php:163
+#: assets/build/admin.js:4
+#: assets/build/public.js:16
+msgid "Caricamento…"
+msgstr ""
+
+#: src/Admin/AdminApp.php:90
+msgid "Booking Manager richiede JavaScript attivo."
+msgstr ""
+
+#: src/Availability/AvailabilityService.php:113
+msgid "Tariffa base"
+msgstr ""
+
+#: src/Availability/HoldService.php:42
+msgid "Le camere scelte non sono più disponibili per queste date."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:35
+#: src/Bookings/StayBuilder.php:86
+msgid "La partenza deve essere successiva all'arrivo."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:38
+msgid "Il soggiorno è troppo lungo."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:41
+msgid "La data di arrivo è già passata."
+msgstr ""
+
+#. translators: %d: minimum number of nights.
+#: src/Availability/RestrictionChecker.php:71
+msgid "Il soggiorno minimo è di %d notte."
+msgid_plural "Il soggiorno minimo è di %d notti."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: maximum number of nights.
+#: src/Availability/RestrictionChecker.php:75
+msgid "Il soggiorno massimo è di %d notte."
+msgid_plural "Il soggiorno massimo è di %d notti."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of days.
+#: src/Availability/RestrictionChecker.php:81
+msgid "Bisogna prenotare con almeno %d giorno di anticipo."
+msgid_plural "Bisogna prenotare con almeno %d giorni di anticipo."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of days.
+#: src/Availability/RestrictionChecker.php:85
+msgid "Si può prenotare al massimo %d giorno prima."
+msgid_plural "Si può prenotare al massimo %d giorni prima."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Availability/RestrictionChecker.php:88
+msgid "Per oggi non si accettano più prenotazioni online."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:93
+msgid "In questa data non sono previsti arrivi."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:96
+msgid "In questo periodo l'arrivo è possibile solo in alcuni giorni della settimana."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:101
+msgid "In questa data non sono previste partenze."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:104
+msgid "In questo periodo la partenza è possibile solo in alcuni giorni della settimana."
+msgstr ""
+
+#: src/Availability/RestrictionChecker.php:110
+msgid "La struttura è chiusa in una o più notti del soggiorno."
+msgstr ""
+
+#: src/Bookings/BookingService.php:74
+#: src/Licensing/WriteGate.php:221
+msgid "Le prenotazioni online non sono disponibili in questo momento. Contatta la struttura."
+msgstr ""
+
+#: src/Bookings/BookingService.php:74
+msgid "La licenza non permette di registrare nuove prenotazioni."
+msgstr ""
+
+#: src/Bookings/BookingService.php:87
+msgid "Richiesta duplicata non valida."
+msgstr ""
+
+#: src/Bookings/BookingService.php:103
+msgid "Stato iniziale non valido."
+msgstr ""
+
+#: src/Bookings/BookingService.php:116
+msgid "Per prenotare devi accettare l'informativa sulla privacy."
+msgstr ""
+
+#: src/Bookings/BookingService.php:209
+msgid "Non è stato possibile salvare la prenotazione."
+msgstr ""
+
+#: src/Bookings/BookingService.php:293
+msgid "Questa prenotazione non si può più modificare."
+msgstr ""
+
+#: src/Bookings/BookingService.php:311
+msgid "Una delle camere non appartiene a questa prenotazione."
+msgstr ""
+
+#: src/Bookings/BookingService.php:557
+#: src/Bookings/BookingService.php:707
+msgid "Questo cambio di stato non è possibile."
+msgstr ""
+
+#: src/Bookings/BookingService.php:562
+msgid "Il no-show si può segnare solo dal giorno di arrivo."
+msgstr ""
+
+#: src/Bookings/BookingService.php:565
+msgid "Il check-in si può registrare solo dal giorno di arrivo."
+msgstr ""
+
+#: src/Bookings/BookingService.php:704
+msgid "La prenotazione non è in soggiorno."
+msgstr ""
+
+#: src/Bookings/BookingService.php:723
+msgid "Una delle camere indicate non è in soggiorno."
+msgstr ""
+
+#: src/Bookings/BookingService.php:794
+msgid "Una camera ha già fatto il check-out: il check-in non si può più annullare."
+msgstr ""
+
+#: src/Bookings/BookingService.php:817
+msgid "Una delle camere indicate non è in arrivo oggi o ha già fatto il check-in."
+msgstr ""
+
+#: src/Bookings/BookingService.php:826
+msgid "Nessuna camera della prenotazione è in arrivo oggi."
+msgstr ""
+
+#. translators: %s: room codes.
+#: src/Bookings/BookingService.php:845
+msgid "La camera non è ancora pronta: %s."
+msgstr ""
+
+#: src/Bookings/BookingService.php:900
+msgid "Questa camera non appartiene alla tipologia della prenotazione."
+msgstr ""
+
+#: src/Bookings/BookingService.php:924
+#: src/Frontend/PublicBookingService.php:245
+msgid "Camera non valida."
+msgstr ""
+
+#: src/Bookings/BookingService.php:930
+#: src/Rest/AvailabilityController.php:174
+#: src/Rest/BookingsController.php:147
+msgid "Data non valida."
+msgstr ""
+
+#: src/Bookings/BookingService.php:987
+msgid "La camera scelta è già occupata in queste date."
+msgstr ""
+
+#: src/Bookings/BookingService.php:1029
+msgid "Opzione scaduta"
+msgstr ""
+
+#: src/Bookings/BookingService.php:1278
+msgid "Prenotazione non trovata."
+msgstr ""
+
+#: src/Bookings/BookingService.php:1282
+msgid "La prenotazione è stata modificata da qualcun altro. Ricarica e riprova."
+msgstr ""
+
+#: src/Bookings/BookingStatus.php:81
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "In attesa"
+msgstr ""
+
+#: src/Bookings/BookingStatus.php:82
+#: assets/build/admin.js:4
+msgid "Opzione"
+msgstr ""
+
+#: src/Bookings/BookingStatus.php:83
+#: assets/build/admin.js:4
+#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+#: assets/build/public.js:16
+msgid "Confermata"
+msgstr ""
+
+#: src/Bookings/BookingStatus.php:84
+#: src/Bookings/StayStatus.php:29
+#: assets/build/admin.js:4
+#: assets/build/admin.js:9
+msgid "In soggiorno"
+msgstr ""
+
+#: src/Bookings/BookingStatus.php:85
+#: assets/build/admin.js:4
+#: assets/build/admin.js:9
+#: assets/build/public.js:16
+msgid "Conclusa"
+msgstr ""
+
+#: src/Bookings/BookingStatus.php:86
+#: assets/build/admin.js:4
+#: assets/build/public.js:16
+msgid "Annullata"
+msgstr ""
+
+#: src/Bookings/BookingStatus.php:87
+#: assets/build/admin.js:4
+msgid "No-show"
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:55
+msgid "Scegli almeno una camera."
+msgstr ""
+
+#. translators: %d: maximum number of rooms.
+#: src/Bookings/StayBuilder.php:59
+msgid "Si possono prenotare al massimo %d camere insieme."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:71
+msgid "Tipologia di camera non valida."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:75
+msgid "Questa camera non è prenotabile online."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:81
+msgid "Date non valide."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:92
+#: src/Frontend/PublicBookingService.php:187
+msgid "Numero di ospiti non valido."
+msgstr ""
+
+#. translators: 1: room type, 2: maximum guests.
+#: src/Bookings/StayBuilder.php:97
+msgid "«%1$s» ospita al massimo %2$d persone."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:106
+msgid "Tariffa non valida per questa camera."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:121
+msgid "Questa camera non appartiene alla tipologia scelta."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:129
+msgid "Non puoi impostare un prezzo manuale."
+msgstr ""
+
+#: src/Bookings/StayBuilder.php:134
+#: src/Inventory/InventoryService.php:180
+#: src/Rates/RateService.php:186
+#: src/Rates/RateService.php:196
+msgid "Prezzo non valido."
+msgstr ""
+
+#. translators: %s: room code.
+#: src/Bookings/StayBuilder.php:233
+msgid "La camera %s è già occupata in queste date."
+msgstr ""
+
+#. translators: 1: room type, 2: date.
+#: src/Bookings/StayBuilder.php:326
+msgid "Non ci sono più camere «%1$s» libere per la notte del %2$s."
+msgstr ""
+
+#: src/Bookings/StayStatus.php:28
+#: assets/build/admin.js:4
+msgid "In arrivo"
+msgstr ""
+
+#: src/Bookings/StayStatus.php:30
+#: assets/build/admin.js:4
+msgid "Partito"
+msgstr ""
+
+#: src/Bookings/StayStatus.php:31
+#: assets/build/admin.js:4
+msgid "Rimossa"
+msgstr ""
+
+#: src/Channels/ChannelService.php:78
+msgid "Prenotazione del canale senza identificativo."
+msgstr ""
+
+#: src/Channels/ChannelService.php:114
+msgid "Annullata dal canale"
+msgstr ""
+
+#: src/Channels/ChannelService.php:121
+msgid "Modifica dal canale: controlla date e camere della prenotazione."
+msgstr ""
+
+#: src/Channels/ChannelService.php:128
+msgid "Annullamento di una prenotazione mai importata."
+msgstr ""
+
+#: src/Channels/ChannelService.php:139
+msgid "Tipologia del canale non collegata a una tipologia della struttura."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:100
+msgid "Troppi codici inseriti in poco tempo. Attendi un minuto."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:338
+#: src/Checkin/CheckinService.php:359
+msgid "Il QR esiste solo per le prenotazioni confermate."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:427
+#: assets/build/admin.js:6
+msgid "Fatto"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:428
+msgid "Prenotazione valida"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:429
+msgid "Già in soggiorno"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:430
+#: assets/build/admin.js:5
+#: assets/build/admin.js:9
+msgid "Da confermare"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:431
+#: src/Notifications/NotificationTemplates.php:51
+#: assets/build/admin.js:4
+msgid "Prenotazione annullata"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:432
+msgid "Segnata come no-show"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:433
+msgid "Soggiorno concluso"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:434
+msgid "Arrivo in un altro giorno"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:435
+msgid "Soggiorno già passato"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:436
+msgid "Camera non pronta"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:437
+msgid "Prenotazione di un'altra struttura"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:438
+msgid "Codice non valido"
+msgstr ""
+
+#: src/Checkin/CheckinService.php:533
+msgid "Check-out registrato: il soggiorno è concluso."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:534
+msgid "Check-out registrato per le camere indicate."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:536
+msgid "Check-in registrato: buon soggiorno!"
+msgstr ""
+
+#. translators: 1: time, 2: operator name.
+#: src/Checkin/CheckinService.php:544
+msgid "Check-in già registrato alle %1$s da %2$s."
+msgstr ""
+
+#. translators: %s: time.
+#: src/Checkin/CheckinService.php:546
+msgid "Check-in già registrato alle %s."
+msgstr ""
+
+#. translators: %s: arrival date.
+#: src/Checkin/CheckinService.php:552
+msgid "L'arrivo è previsto il %s: il check-in si registra dal giorno di arrivo."
+msgstr ""
+
+#. translators: %s: departure date.
+#: src/Checkin/CheckinService.php:556
+msgid "Il soggiorno è terminato il %s senza check-in: valuta il no-show."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:559
+msgid "Controlla nome, ospiti e camere, poi conferma il check-in."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:560
+msgid "La prenotazione non è ancora confermata: confermala prima del check-in."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:561
+msgid "La prenotazione è stata annullata."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:562
+msgid "La prenotazione è segnata come no-show. Un responsabile può ripristinarla."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:563
+msgid "Il soggiorno è già concluso."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:564
+msgid "Gli ospiti sono già in soggiorno."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:565
+msgid "Questo codice appartiene a un'altra struttura."
+msgstr ""
+
+#: src/Checkin/CheckinService.php:566
+msgid "QR o codice non riconosciuto. Il QR potrebbe essere stato rigenerato: cerca l'ospite per nome."
+msgstr ""
+
+#: src/Cloudflare/CloudflareClient.php:95
+msgid "Inserisci e salva Zone ID e token API di Cloudflare."
+msgstr ""
+
+#: src/Cloudflare/CloudflareClient.php:111
+msgid "Cloudflare non risponde. Riprova tra poco."
+msgstr ""
+
+#: src/Cloudflare/CloudflareClient.php:167
+msgid "Cloudflare ha rifiutato il token: è sbagliato, scaduto o non ha i permessi necessari per questa zona."
+msgstr ""
+
+#: src/Cloudflare/CloudflareClient.php:169
+msgid "Cloudflare non trova la zona o la risorsa richiesta: controlla lo Zone ID."
+msgstr ""
+
+#: src/Cloudflare/CloudflareClient.php:171
+msgid "Troppe richieste a Cloudflare: riprova tra qualche minuto."
+msgstr ""
+
+#: src/Cloudflare/CloudflareClient.php:173
+msgid "Cloudflare ha avuto un problema temporaneo. Riprova tra poco."
+msgstr ""
+
+#: src/Cloudflare/CloudflareClient.php:175
+msgid "Cloudflare ha rifiutato la richiesta."
+msgstr ""
+
+#: src/Cloudflare/CloudflareService.php:96
+msgid "Sicurezza → WAF → Regole personalizzate: azione «Salta», in prima posizione. Spunta tutti i componenti da ignorare tranne «All remaining custom rules in this phase» (Cloudflare non lo accetta insieme a «Tutte le restanti regole personalizzate»)."
+msgstr ""
+
+#: src/Cloudflare/CloudflareService.php:100
+msgid "Caching → Regole cache: «Ignora la cache», in ultima posizione."
+msgstr ""
+
+#: src/Cloudflare/CloudflareSettings.php:127
+msgid "Lo Zone ID è definito in wp-config.php: cambialo lì."
+msgstr ""
+
+#: src/Cloudflare/CloudflareSettings.php:130
+msgid "Zone ID non valido: sono 32 caratteri (cifre e lettere da a a f), li trovi nella pagina Panoramica del dominio su Cloudflare."
+msgstr ""
+
+#: src/Cloudflare/CloudflareSettings.php:141
+msgid "Il token è definito in wp-config.php: cambialo lì."
+msgstr ""
+
+#: src/Cloudflare/CloudflareSettings.php:143
+msgid "Token non valido: copialo per intero dalla pagina «Token API» di Cloudflare."
+msgstr ""
+
+#: src/Core/Installer.php:53
+msgid "Ogni minuto (Booking Manager)"
+msgstr ""
+
+#: src/Core/Installer.php:57
+msgid "Ogni 15 minuti (Booking Manager)"
+msgstr ""
+
+#: src/Database/Abort.php:40
+msgid "Il sistema è occupato da un'altra operazione sulle stesse camere. Riprova."
+msgstr ""
+
+#: src/Frontend/Captcha.php:99
+msgid "Verifica anti-robot non disponibile. Riprova tra poco."
+msgstr ""
+
+#: src/Frontend/Captcha.php:121
+msgid "Conferma di non essere un robot e riprova."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:182
+#: src/Frontend/PublicBookingService.php:248
+msgid "Scegli date di arrivo e partenza valide."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:282
+msgid "Non è stato possibile inviare la richiesta. Ricarica la pagina e riprova."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:286
+msgid "Hai inviato il modulo troppo in fretta. Controlla i dati e riprova."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:289
+msgid "Il modulo è scaduto. Ricarica la pagina e riprova."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:354
+msgid "Pagamento online non avviato."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:395
+msgid "Per questa prenotazione non c'è nulla da pagare online."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:411
+msgid "Questa prenotazione non si può annullare online. Contatta la struttura."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:420
+msgid "Annullata dall'ospite con il link della prenotazione."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:623
+msgid "Prenotazione non trovata. Controlla il link ricevuto."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:639
+msgid "Le prenotazioni online non sono disponibili per questa struttura."
+msgstr ""
+
+#: src/Frontend/PublicBookingService.php:655
+msgid "Troppe richieste in poco tempo. Riprova più tardi."
+msgstr ""
+
+#: src/Frontend/PublicFrontend.php:69
+msgid "Booking Manager: indica la struttura nello shortcode, ad esempio [booking_manager_prenota struttura=\"nome-struttura\"]."
+msgstr ""
+
+#: src/Frontend/PublicFrontend.php:95
+msgid "La tua prenotazione"
+msgstr ""
+
+#: src/Frontend/PublicFrontend.php:162
+msgid "Per prenotare online serve JavaScript attivo. In alternativa contatta la struttura."
+msgstr ""
+
+#: src/Guests/GuestRepository.php:141
+#: src/Guests/GuestService.php:214
+#: src/Guests/GuestService.php:215
+msgid "Anonimo"
+msgstr ""
+
+#: src/Guests/GuestService.php:45
+msgid "Indica il cognome dell'ospite."
+msgstr ""
+
+#: src/Guests/GuestService.php:50
+#: src/Notifications/Channels/EmailChannel.php:47
+#: src/Properties/PropertyService.php:256
+msgid "Indirizzo e-mail non valido."
+msgstr ""
+
+#: src/Guests/GuestService.php:59
+msgid "Numero di telefono non valido."
+msgstr ""
+
+#: src/Guests/GuestService.php:65
+msgid "Indica un indirizzo e-mail per ricevere la conferma."
+msgstr ""
+
+#: src/Guests/GuestService.php:72
+msgid "Paese non valido."
+msgstr ""
+
+#: src/Guests/GuestService.php:152
+#: src/Properties/PropertyService.php:322
+msgid "I dati sono stati modificati da qualcun altro. Ricarica e riprova."
+msgstr ""
+
+#: src/Guests/GuestService.php:251
+msgid "Ospite non trovato."
+msgstr ""
+
+#: src/Housekeeping/HousekeepingService.php:132
+#: src/Inventory/InventoryService.php:606
+msgid "Camera non trovata."
+msgstr ""
+
+#: src/Housekeeping/HousekeepingService.php:135
+msgid "Stato della camera non valido."
+msgstr ""
+
+#. translators: %s: current status of the room.
+#: src/Housekeeping/HousekeepingService.php:147
+msgid "Lo stato della camera è cambiato nel frattempo: ora è «%s»."
+msgstr ""
+
+#: src/Housekeeping/HousekeepingService.php:185
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "Check-out"
+msgstr ""
+
+#: src/Housekeeping/OpStatus.php:30
+#: assets/build/admin.js:4
+msgid "Da pulire"
+msgstr ""
+
+#: src/Housekeeping/OpStatus.php:31
+#: assets/build/admin.js:4
+msgid "In pulizia"
+msgstr ""
+
+#: src/Housekeeping/OpStatus.php:32
+#: assets/build/admin.js:4
+msgid "Pulita, da controllare"
+msgstr ""
+
+#: src/Housekeeping/OpStatus.php:33
+#: assets/build/admin.js:4
+msgid "Pronta"
+msgstr ""
+
+#: src/Housekeeping/OpStatus.php:34
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+msgid "Manutenzione"
+msgstr ""
+
+#: src/Inventory/InventoryService.php:123
+msgid "Ci sono prenotazioni future per questa tipologia: spostale prima di archiviarla."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:151
+msgid "Indica il nome della tipologia."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:170
+#: src/Rates/RateService.php:371
+msgid "Valore non valido."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:200
+msgid "Una delle immagini non è valida o non è pubblica."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:216
+msgid "Il numero massimo di ospiti deve essere almeno pari agli adulti."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:219
+msgid "Gli ospiti inclusi nel prezzo non possono superare il massimo."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:380
+msgid "Indica il numero o il codice della camera."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:382
+msgid "Esiste già una camera con questo codice."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:403
+#: src/Rates/RateService.php:170
+#: src/Rates/RateService.php:343
+msgid "Tipologia non valida."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:444
+msgid "La camera ha soggiorni futuri: spostali prima su un'altra camera."
+msgstr ""
+
+#. translators: %s: date.
+#: src/Inventory/InventoryService.php:466
+msgid "Senza questa camera non ci sarebbero abbastanza camere per le prenotazioni del %s."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:515
+msgid "Il periodo non è valido: la data di fine deve essere successiva all'inizio."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:524
+msgid "In questo periodo tutte le camere di questa tipologia sono già vendute: non si può togliere dalla vendita."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:539
+msgid "La camera ha già un soggiorno o un blocco in queste date."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:565
+#: src/Rates/RateService.php:164
+#: src/Rates/RateService.php:231
+msgid "Periodo non trovato."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:602
+msgid "Tipologia non trovata."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:615
+msgid "La licenza non permette di modificare camere e tipologie."
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:96
+msgid "Non configurato"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:97
+#: assets/build/admin.js:5
+msgid "Attiva"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:98
+msgid "Attiva (a vita)"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:99
+msgid "In prova"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:100
+msgid "Scaduta"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:101
+msgid "Sospesa"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:102
+msgid "Revocata"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:103
+msgid "Da ricollegare (indirizzo del sito cambiato)"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:104
+msgid "Da ricollegare (attivazione sostituita)"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:105
+msgid "Risposta non valida"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:106
+msgid "Nessuna licenza attiva"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:107
+msgid "Server licenze non raggiungibile (tolleranza)"
+msgstr ""
+
+#: src/Licensing/AccessMatrix.php:108
+msgid "Non verificabile"
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:152
+msgid "Booking Manager non è ancora attivato: chiedi all'amministratore di inserire la licenza."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:156
+msgid "Inserisci la licenza per usare Booking Manager: finché non è attivata su questo sito è disponibile solo questa schermata."
+msgstr ""
+
+#. translators: %s: licence state, e.g. Sospesa.
+#: src/Licensing/LicenseManager.php:159
+msgid "La licenza inserita non attiva questo sito (stato: %s). Booking Manager resta bloccato finché non inserisci una licenza valida."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:225
+msgid "non si possono inserire nuove prenotazioni (dal gestionale e dal sito). Check-in, modifiche, annullamenti, notifiche e tutto il resto funzionano normalmente."
+msgstr ""
+
+#. translators: 1: date, 2: what can and cannot be done.
+#: src/Licensing/LicenseManager.php:231
+msgid "Licenza scaduta il %1$s: %2$s"
+msgstr ""
+
+#. translators: %s: what can and cannot be done.
+#: src/Licensing/LicenseManager.php:233
+msgid "Licenza scaduta: %s"
+msgstr ""
+
+#. translators: %s: what can and cannot be done.
+#: src/Licensing/LicenseManager.php:236
+msgid "Licenza sospesa: %s"
+msgstr ""
+
+#. translators: %s: what can and cannot be done.
+#: src/Licensing/LicenseManager.php:239
+msgid "Licenza revocata: %s"
+msgstr ""
+
+#. translators: %s: what can and cannot be done.
+#: src/Licensing/LicenseManager.php:242
+msgid "Non è possibile verificare la licenza perché il server licenze non risponde da troppi giorni: %s"
+msgstr ""
+
+#. translators: %s: what can and cannot be done.
+#: src/Licensing/LicenseManager.php:246
+msgid "La licenza va ricollegata a questo sito: %s"
+msgstr ""
+
+#. translators: %s: what can and cannot be done.
+#: src/Licensing/LicenseManager.php:249
+msgid "Nessuna licenza attiva: %s"
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:270
+msgid "Inserisci o rinnova la licenza nella sezione Licenza."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:270
+msgid "Avvisa l'amministratore."
+msgstr ""
+
+#. translators: %d: number of days.
+#: src/Licensing/LicenseManager.php:289
+msgid "Il server licenze non risponde da %d giorno. La licenza a vita resta attiva."
+msgid_plural "Il server licenze non risponde da %d giorni. La licenza a vita resta attiva."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: number of days, 2: date.
+#: src/Licensing/LicenseManager.php:291
+msgid "Il server licenze non risponde da %1$d giorno. Tutto funziona normalmente fino al %2$s."
+msgid_plural "Il server licenze non risponde da %1$d giorni. Tutto funziona normalmente fino al %2$s."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: date.
+#: src/Licensing/LicenseManager.php:300
+msgid "La licenza scade il %s. Rinnovala per non bloccare le nuove prenotazioni."
+msgstr ""
+
+#. translators: %s: technical error code.
+#: src/Licensing/LicenseManager.php:319
+msgid "Il server licenze non risponde (%s). Il gestionale continua a funzionare durante il periodo di tolleranza."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:322
+msgid "La risposta del server licenze non aveva una firma valida ed è stata ignorata."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:324
+msgid "Troppe richieste al server licenze: riprova tra qualche minuto."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:326
+msgid "Il server licenze è in manutenzione: riprova più tardi."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:329
+msgid "L'orologio del server del sito è sbagliato di oltre 10 minuti: correggilo (o chiedi all'hosting), poi premi «Verifica ora»."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:331
+msgid "La chiave dell'installazione non si può più leggere (sono cambiate le chiavi di sicurezza di WordPress?): reinserisci la chiave di licenza e premi «Attiva»."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:333
+#: src/Licensing/LicenseManager.php:373
+msgid "Chiave di licenza non valida."
+msgstr ""
+
+#. translators: %s: list of web sites.
+#: src/Licensing/LicenseManager.php:338
+msgid "La licenza è già attiva sul numero massimo di siti: %s. Disattivala su uno di questi, poi premi «Attiva»."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:339
+msgid "La licenza è già attiva sul numero massimo di siti. Disattivala su un altro sito, poi premi «Attiva»."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:341
+msgid "Il server delle licenze non è configurato in questa installazione."
+msgstr ""
+
+#. translators: %s: error code from the licence server.
+#: src/Licensing/LicenseManager.php:344
+msgid "Verifica non riuscita (%s)."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:357
+msgid "Il server delle licenze non è configurato in questa installazione di Booking Manager: vedi docs/LICENZA.md."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:366
+msgid "La chiave salvata non si può più leggere: reinserisci la chiave di licenza."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:367
+msgid "Inserisci la chiave di licenza."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:768
+msgid "Chiave di licenza non valida (o di un altro prodotto)."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:779
+msgid "Troppi tentativi: riprova tra qualche minuto."
+msgstr ""
+
+#: src/Licensing/LicenseManager.php:784
+msgid "Il server delle licenze non risponde. Riprova più tardi."
+msgstr ""
+
+#. translators: %s: error code from the licence server.
+#: src/Licensing/LicenseManager.php:787
+msgid "Il server delle licenze ha rifiutato la richiesta (%s)."
+msgstr ""
+
+#: src/Notifications/Channels/EmailChannel.php:31
+msgid "E-mail"
+msgstr ""
+
+#: src/Notifications/Channels/EmailChannel.php:36
+msgid "E-mail disattivate per questa struttura."
+msgstr ""
+
+#: src/Notifications/Channels/EmailChannel.php:64
+msgid "Invio non riuscito."
+msgstr ""
+
+#: src/Notifications/Channels/EmailChannel.php:92
+msgid "wp_mail() non è riuscito a inviare il messaggio."
+msgstr ""
+
+#: src/Notifications/Channels/WhatsAppChannel.php:27
+msgid "WhatsApp"
+msgstr ""
+
+#: src/Notifications/Channels/WhatsAppChannel.php:42
+msgid "WhatsApp non attivo per questa struttura."
+msgstr ""
+
+#: src/Notifications/Channels/WhatsAppChannel.php:46
+msgid "Nessun servizio WhatsApp collegato: il canale è predisposto ma serve un fornitore (account WhatsApp Business e modelli approvati)."
+msgstr ""
+
+#: src/Notifications/Channels/WhatsAppChannel.php:58
+msgid "Nessun servizio WhatsApp collegato."
+msgstr ""
+
+#: src/Notifications/EmailDesign.php:53
+msgid "QR per il check-in"
+msgstr ""
+
+#: src/Notifications/EmailDesign.php:54
+msgid "Mostra questo QR alla reception per un check-in più veloce."
+msgstr ""
+
+#: src/Notifications/EmailDesign.php:55
+msgid "Codice prenotazione:"
+msgstr ""
+
+#: src/Notifications/NotificationService.php:294
+msgid "Invio interrotto: il messaggio potrebbe essere partito. Controlla prima di reinviarlo."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:323
+msgid "Prenotazione o struttura non più presente."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:325
+msgid "Destinatario rimosso (dati dell'ospite anonimizzati)."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:327
+msgid "Non più attuale: la prenotazione è cambiata prima dell'invio."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:329
+msgid "Canale non disponibile."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:331
+msgid "Notifiche sospese dalla licenza."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:357
+msgid "Notifica non trovata."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:360
+msgid "Questa notifica è già in coda."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:366
+msgid "Non c'è più un destinatario per questa notifica."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:380
+#: src/Notifications/NotificationService.php:415
+msgid "Non è stato possibile mettere in coda la notifica."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:394
+msgid "Prenotazione o messaggio non validi."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:397
+msgid "Questo messaggio non corrisponde allo stato attuale della prenotazione."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:401
+msgid "L'ospite non ha un indirizzo e-mail valido."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:431
+msgid "Indirizzo o struttura non validi."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:434
+msgid "Questa è una e-mail di prova di Booking Manager. Se la leggi, le e-mail della struttura partono correttamente."
+msgstr ""
+
+#. translators: %s: property name.
+#: src/Notifications/NotificationService.php:442
+msgid "Prova e-mail – %s"
+msgstr ""
+
+#: src/Notifications/NotificationService.php:446
+msgid "E-mail di prova"
+msgstr ""
+
+#: src/Notifications/NotificationService.php:469
+msgid "Struttura o messaggio non validi."
+msgstr ""
+
+#: src/Notifications/NotificationService.php:624
+msgid "Mario"
+msgstr ""
+
+#: src/Notifications/NotificationService.php:625
+msgid "Rossi"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:48
+#: assets/build/admin.js:4
+msgid "Richiesta ricevuta"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:49
+#: assets/build/admin.js:4
+#: assets/build/public.js:14
+msgid "Prenotazione confermata"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:50
+#: assets/build/admin.js:4
+msgid "Prenotazione modificata"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:52
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+msgid "Promemoria prima dell'arrivo"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:53
+#: assets/build/admin.js:4
+msgid "Pagamento ricevuto"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:54
+msgid "Benvenuto (dopo il check-in)"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:55
+msgid "Struttura: nuova prenotazione online"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:56
+msgid "Struttura: annullata dall'ospite"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:73
+msgid "Richiesta di prenotazione ricevuta – {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:74
+msgid "Abbiamo ricevuto la tua richiesta"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:75
+msgid ""
+"Ciao {nome},\n"
+"la tua richiesta per il soggiorno dal {arrivo} al {partenza} è arrivata. La controlliamo e ti scriviamo appena è confermata."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:78
+msgid "Prenotazione modificata – {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:79
+msgid "La tua prenotazione è stata modificata"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:80
+msgid ""
+"Ciao {nome},\n"
+"questi sono i dettagli aggiornati del tuo soggiorno."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:83
+msgid "Prenotazione annullata – {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:84
+msgid "La tua prenotazione è stata annullata"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:85
+msgid ""
+"Ciao {nome},\n"
+"la prenotazione {codice} dal {arrivo} al {partenza} è stata annullata. Speriamo di ospitarti presto."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:88
+msgid "Ti aspettiamo il {arrivo} – {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:89
+msgid "Il tuo arrivo si avvicina"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:90
+msgid ""
+"Ciao {nome},\n"
+"ti aspettiamo il {arrivo}. Il check-in è dalle {checkin_dalle} alle {checkin_alle}; il giorno della partenza la camera va lasciata entro le {checkout_entro}."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:93
+msgid "Pagamento ricevuto – {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:94
+msgid "Grazie, abbiamo ricevuto il pagamento"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:95
+msgid ""
+"Ciao {nome},\n"
+"abbiamo registrato il tuo pagamento per la prenotazione {codice}. Saldo ancora da pagare: {saldo}."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:98
+msgid "Benvenuto a {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:99
+msgid "Benvenuto!"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:100
+msgid ""
+"Ciao {nome},\n"
+"il check-in è registrato. Per qualsiasi necessità durante il soggiorno siamo a disposizione. La partenza è il {partenza} entro le {checkout_entro}."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:103
+msgid "Nuova prenotazione online {codice}: {arrivo} – {partenza}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:104
+msgid "Nuova prenotazione online"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:105
+msgid "{nome} ha prenotato dal sito: {arrivo} – {partenza}, {notti} notti, {ospiti}."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:108
+msgid "Annullata dall'ospite: {codice} ({arrivo})"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:109
+msgid "Prenotazione annullata dall'ospite"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:110
+msgid "{nome} ha annullato la prenotazione {codice} dal link ricevuto: le camere sono di nuovo disponibili."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:113
+msgid "Prenotazione confermata – {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:114
+msgid "La tua prenotazione è confermata"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:115
+msgid ""
+"Ciao {nome},\n"
+"grazie per aver scelto {struttura}: il tuo soggiorno dal {arrivo} al {partenza} è confermato. Ti aspettiamo!"
+msgstr ""
+
+#. translators: %d: number of guests.
+#: src/Notifications/NotificationTemplates.php:155
+msgid "%d ospite"
+msgid_plural "%d ospiti"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Notifications/NotificationTemplates.php:216
+msgid "Apri la prenotazione"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:221
+#: assets/build/public.js:16
+msgid "Vedi o gestisci la prenotazione"
+msgstr ""
+
+#. translators: %s: reason of the cancellation.
+#: src/Notifications/NotificationTemplates.php:227
+msgid "Motivo: %s"
+msgstr ""
+
+#. translators: %s: the guest's notes.
+#: src/Notifications/NotificationTemplates.php:230
+msgid "Note dell'ospite: %s"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:271
+#: src/Notifications/NotificationTemplates.php:285
+#: assets/build/admin.js:6
+#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+msgid "Camera"
+msgid_plural "Camere"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Notifications/NotificationTemplates.php:276
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+#: assets/build/public.js:16
+msgid "Codice"
+msgstr ""
+
+#. translators: %s: check-in time.
+#: src/Notifications/NotificationTemplates.php:278
+#: assets/build/admin.js:4
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+#: assets/build/public.js:8
+#: assets/build/public.js:18
+msgid "Arrivo"
+msgstr ""
+
+#. translators: %s: check-in time.
+#: src/Notifications/NotificationTemplates.php:278
+msgid "check-in dalle %s"
+msgstr ""
+
+#. translators: %s: check-out time.
+#: src/Notifications/NotificationTemplates.php:280
+#: assets/build/admin.js:4
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+#: assets/build/public.js:8
+#: assets/build/public.js:19
+msgid "Partenza"
+msgstr ""
+
+#. translators: %s: check-out time.
+#: src/Notifications/NotificationTemplates.php:280
+msgid "check-out entro le %s"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:281
+#: assets/build/admin.js:11
+msgid "Notti"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:288
+#: assets/build/admin.js:5
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "Ospite"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:291
+#: assets/build/admin.js:5
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+#: assets/build/public.js:13
+#: assets/build/public.js:16
+#: assets/build/public.js:20
+msgid "Totale"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:293
+msgid "Già pagato"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:294
+#: assets/build/admin.js:10
+msgid "Saldo"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:299
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+msgid "Indirizzo"
+msgstr ""
+
+#: src/Payments/PaymentAccountService.php:158
+msgid "Sito locale: il sistema di pagamento non può inviare le notifiche (webhook). In modalità prova i pagamenti vengono confermati chiedendo lo stato al sistema di pagamento, con qualche secondo di ritardo. Per la modalità reale il sito deve essere online."
+msgstr ""
+
+#. translators: %s: provider error
+#: src/Payments/PaymentAccountService.php:166
+msgid "Collegamento riuscito ma il webhook non è stato registrato (%s). Senza webhook i pagamenti non vengono confermati: controlla i permessi della chiave o inserisci il segreto del webhook a mano."
+msgstr ""
+
+#: src/Payments/PaymentAccountService.php:188
+msgid "Questo sistema di pagamento non è ancora collegato."
+msgstr ""
+
+#: src/Payments/PaymentAccountService.php:228
+#: src/Payments/PaymentAccountService.php:357
+msgid "Modalità non valida."
+msgstr ""
+
+#: src/Payments/PaymentAccountService.php:237
+msgid "Collega e verifica prima questo sistema di pagamento."
+msgstr ""
+
+#: src/Payments/PaymentAccountService.php:354
+msgid "Sistema di pagamento non disponibile."
+msgstr ""
+
+#: src/Payments/PaymentService.php:102
+msgid "I pagamenti online non sono attivi per questa struttura."
+msgstr ""
+
+#. translators: %s: amount still due
+#: src/Payments/PaymentService.php:109
+msgid "Importo non valido: da 0,50 al dovuto (%s)."
+msgstr ""
+
+#. translators: 1: location name, 2: booking code
+#: src/Payments/PaymentService.php:171
+msgid "%1$s — prenotazione %2$s"
+msgstr ""
+
+#: src/Payments/PaymentService.php:196
+msgid "Non è stato possibile avviare il pagamento. Riprova tra poco."
+msgstr ""
+
+#: src/Payments/PaymentService.php:231
+#: src/Payments/PaymentService.php:321
+#: src/Payments/PaymentService.php:327
+msgid "Richiesta non valida."
+msgstr ""
+
+#. translators: %s: amount due
+#: src/Payments/PaymentService.php:244
+msgid "Importo non valido: al massimo il dovuto (%s)."
+msgstr ""
+
+#: src/Payments/PaymentService.php:249
+msgid "Metodo di pagamento non valido."
+msgstr ""
+
+#: src/Payments/PaymentService.php:318
+msgid "Pagamento non trovato in questa struttura."
+msgstr ""
+
+#: src/Payments/PaymentService.php:331
+msgid "Il sistema di pagamento di questo incasso non è più collegato."
+msgstr ""
+
+#: src/Payments/PaymentService.php:334
+msgid "Questo sistema di pagamento non permette rimborsi dal gestionale."
+msgstr ""
+
+#: src/Payments/PaymentService.php:353
+msgid "Si può rimborsare solo un pagamento incassato."
+msgstr ""
+
+#. translators: %s: amount still refundable
+#: src/Payments/PaymentService.php:361
+msgid "Puoi rimborsare al massimo %s."
+msgstr ""
+
+#: src/Payments/PaymentService.php:367
+msgid "Questo sistema di pagamento permette solo il rimborso totale."
+msgstr ""
+
+#: src/Payments/PaymentService.php:408
+msgid "Il sistema di pagamento non ha risposto: il rimborso è in verifica e verrà completato automaticamente. Non ripeterlo."
+msgstr ""
+
+#: src/Payments/PaymentService.php:867
+msgid "Rimborso fatto dal pannello del sistema di pagamento"
+msgstr ""
+
+#: src/Payments/PaymentService.php:919
+msgid "già registrato dalla notifica"
+msgstr ""
+
+#: src/Payments/PaymentService.php:968
+msgid "Pagamento online ricevuto."
+msgstr ""
+
+#: src/Payments/PaymentService.php:979
+msgid "Pagamento arrivato dopo l'annullamento della prenotazione (o dopo la scadenza dell'opzione)."
+msgstr ""
+
+#: src/Payments/PaymentService.php:1001
+msgid "Pagato più del totale della prenotazione."
+msgstr ""
+
+#. translators: %s: error
+#: src/Payments/PaymentService.php:1022
+msgid "Rimborso automatico non riuscito: %s. Rimborsa a mano."
+msgstr ""
+
+#: src/Payments/PaymentService.php:1160
+msgid "Prenotazione non trovata in questa struttura."
+msgstr ""
+
+#: src/Payments/PaymentService.php:1281
+msgid "Non è stato possibile salvare il pagamento: riprova."
+msgstr ""
+
+#: src/Payments/Providers/AbstractProvider.php:73
+msgid "Operazione non disponibile con questo sistema di pagamento."
+msgstr ""
+
+#: src/Payments/Providers/ManualProvider.php:31
+#: assets/build/admin.js:11
+msgid "In struttura"
+msgstr ""
+
+#: src/Payments/Providers/NexiClient.php:53
+msgid "Nexi non risponde: riprova tra poco."
+msgstr ""
+
+#: src/Payments/Providers/NexiClient.php:61
+msgid "chiave API non valida per questo ambiente"
+msgstr ""
+
+#: src/Payments/Providers/NexiClient.php:62
+msgid "non trovato"
+msgstr ""
+
+#. translators: %s: message from Stripe
+#: src/Payments/Providers/NexiClient.php:64
+#: src/Payments/Providers/StripeClient.php:66
+msgid "errore sconosciuto"
+msgstr ""
+
+#. translators: %s: message from Nexi
+#: src/Payments/Providers/NexiClient.php:69
+msgid "Nexi: %s"
+msgstr ""
+
+#: src/Payments/Providers/NexiClient.php:78
+#: src/Payments/Providers/NexiProvider.php:183
+#: src/Payments/Providers/NexiProvider.php:284
+#: src/Payments/Providers/NexiProvider.php:361
+msgid "Risposta non valida da Nexi."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:94
+msgid "Chiave API XPay"
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:99
+msgid "La generi nel Back Office XPay, in Amministrazione → APIKey. Per la modalità di prova usa una chiave dell'ambiente di test Nexi."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:110
+msgid "Incolla la chiave API di XPay."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:112
+msgid "La chiave API di XPay ha la forma xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:115
+msgid "Controlla i dati di Nexi."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:146
+msgid "Nexi può inviare le notifiche solo a un sito raggiungibile da Internet."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:255
+msgid "Prenotazione non più valida: autorizzazione annullata"
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:266
+msgid "Il pagamento non risulta ancora incassato da Nexi."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:276
+msgid "Rimborso prenotazione"
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:493
+msgid "Pagamento rifiutato dalla banca."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:494
+msgid "Pagamento bloccato dai controlli antifrode."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:495
+msgid "Autenticazione 3D Secure non riuscita o annullata."
+msgstr ""
+
+#: src/Payments/Providers/NexiProvider.php:496
+msgid "Pagamento non riuscito per un problema tecnico."
+msgstr ""
+
+#: src/Payments/Providers/StripeClient.php:54
+msgid "Stripe non risponde: riprova tra poco."
+msgstr ""
+
+#: src/Payments/Providers/StripeClient.php:59
+#: src/Payments/Providers/StripeProvider.php:227
+msgid "Risposta non valida da Stripe."
+msgstr ""
+
+#. translators: %s: message from Stripe
+#: src/Payments/Providers/StripeClient.php:66
+msgid "Stripe: %s"
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:79
+msgid "Chiave limitata Stripe"
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:84
+msgid "Inizia con rk_test_ (prova) o rk_live_ (reale). Non usare la chiave segreta sk_."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:88
+msgid "Segreto del webhook (solo se lo crei a mano)"
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:93
+msgid "Lascia vuoto: il gestionale registra il webhook da solo."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:105
+msgid "Incolla la chiave limitata di Stripe."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:108
+msgid "Questa è la chiave segreta completa: per sicurezza Stripe chiede ai plugin di usare una chiave limitata (rk_…). Creala dall'app Booking Manager su Stripe o da Sviluppatori → Chiavi API."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:110
+msgid "La chiave deve iniziare con rk_test_ o rk_live_."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:114
+msgid "Per la modalità reale serve una chiave rk_live_."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:115
+msgid "Per la modalità di prova serve una chiave rk_test_."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:118
+msgid "Il segreto del webhook inizia con whsec_."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:121
+msgid "Controlla i dati di Stripe."
+msgstr ""
+
+#: src/Payments/Providers/StripeProvider.php:253
+msgid "Il pagamento non risulta ancora incassato da Stripe."
+msgstr ""
+
+#: src/Properties/PropertyService.php:33
+#: assets/build/admin.js:6
+msgid "B&B"
+msgstr ""
+
+#: src/Properties/PropertyService.php:34
+#: assets/build/admin.js:6
+msgid "Affittacamere"
+msgstr ""
+
+#: src/Properties/PropertyService.php:35
+#: assets/build/admin.js:6
+msgid "Casa vacanze"
+msgstr ""
+
+#: src/Properties/PropertyService.php:36
+#: assets/build/admin.js:6
+msgid "Appartamenti"
+msgstr ""
+
+#: src/Properties/PropertyService.php:37
+#: assets/build/admin.js:6
+msgid "Residence"
+msgstr ""
+
+#: src/Properties/PropertyService.php:38
+#: assets/build/admin.js:6
+msgid "Guest house"
+msgstr ""
+
+#: src/Properties/PropertyService.php:39
+#: assets/build/admin.js:6
+msgid "Hotel"
+msgstr ""
+
+#: src/Properties/PropertyService.php:57
+msgid "Non è stato possibile salvare la struttura."
+msgstr ""
+
+#: src/Properties/PropertyService.php:199
+msgid "Indica il nome della struttura."
+msgstr ""
+
+#: src/Properties/PropertyService.php:207
+msgid "Indirizzo non valido."
+msgstr ""
+
+#: src/Properties/PropertyService.php:209
+msgid "Questo indirizzo è già usato da un'altra struttura."
+msgstr ""
+
+#: src/Properties/PropertyService.php:218
+msgid "Tipo di struttura non valido."
+msgstr ""
+
+#: src/Properties/PropertyService.php:225
+msgid "Fuso orario non valido."
+msgstr ""
+
+#: src/Properties/PropertyService.php:231
+msgid "Valuta non valida (codice di tre lettere, es. EUR)."
+msgstr ""
+
+#: src/Properties/PropertyService.php:240
+msgid "Modalità di prenotazione non valida."
+msgstr ""
+
+#: src/Properties/PropertyService.php:249
+msgid "Orario non valido (HH:MM)."
+msgstr ""
+
+#: src/Properties/PropertyService.php:267
+msgid "Paese non valido (codice di due lettere, es. IT)."
+msgstr ""
+
+#: src/Rates/RateService.php:107
+msgid "Indica il nome della tariffa."
+msgstr ""
+
+#: src/Rates/RateService.php:118
+#: src/Rates/RateService.php:276
+msgid "Una delle tipologie non è valida."
+msgstr ""
+
+#: src/Rates/RateService.php:126
+msgid "Variazione non valida (da −90% a +100%)."
+msgstr ""
+
+#: src/Rates/RateService.php:135
+msgid "Trattamento non valido."
+msgstr ""
+
+#: src/Rates/RateService.php:176
+#: src/Rates/RateService.php:271
+#: src/Rates/RateService.php:349
+msgid "Tariffa non valida."
+msgstr ""
+
+#: src/Rates/RateService.php:182
+#: src/Rates/RateService.php:281
+#: src/Rates/RateService.php:339
+#: src/Rest/InventoryController.php:146
+msgid "Periodo non valido."
+msgstr ""
+
+#: src/Rates/RateService.php:201
+msgid "Scegli almeno un giorno della settimana."
+msgstr ""
+
+#: src/Rates/RateService.php:247
+#: src/Rates/RateService.php:316
+msgid "Supplemento o sconto non trovato."
+msgstr ""
+
+#: src/Rates/RateService.php:253
+msgid "Indica un nome."
+msgstr ""
+
+#: src/Rates/RateService.php:256
+msgid "Tipo non valido."
+msgstr ""
+
+#: src/Rates/RateService.php:260
+msgid "Modalità di calcolo non valida."
+msgstr ""
+
+#: src/Rates/RateService.php:265
+msgid "Indica un importo o una percentuale."
+msgstr ""
+
+#: src/Rates/RateService.php:332
+#: src/Rates/RateService.php:393
+msgid "Regola non trovata."
+msgstr ""
+
+#: src/Rates/RateService.php:375
+msgid "Il soggiorno massimo deve essere almeno pari al minimo."
+msgstr ""
+
+#: src/Rates/RateService.php:416
+msgid "Tariffa non trovata."
+msgstr ""
+
+#: src/Rest/AuditController.php:81
+msgid "Data non valida (AAAA-MM-GG)."
+msgstr ""
+
+#. translators: %d: maximum number of nights
+#: src/Rest/AvailabilityController.php:161
+msgid "Periodo non valido (massimo %d notti)."
+msgstr ""
+
+#: src/Rest/BookingsController.php:197
+msgid "Stato non valido."
+msgstr ""
+
+#: src/Rest/BookingsController.php:206
+msgid "Indica il motivo dell'annullamento."
+msgstr ""
+
+#: src/Rest/ChannelsController.php:57
+msgid "Tipologia o codice del canale non validi."
+msgstr ""
+
+#: src/Rest/GuestsController.php:136
+msgid "Serve l'accesso a tutte le strutture."
+msgstr ""
+
+#: src/Rest/LicenseController.php:96
+msgid "Solo un amministratore di WordPress può gestire la licenza."
+msgstr ""
+
+#: src/Rest/MeController.php:150
+msgid "La modalità operativa è sempre attiva per il tuo profilo."
+msgstr ""
+
+#: src/Rest/NotificationsController.php:204
+msgid "Messaggio sconosciuto."
+msgstr ""
+
+#: src/Rest/PaymentsController.php:197
+msgid "La prenotazione è conclusa o annullata."
+msgstr ""
+
+#: src/Rest/PaymentsController.php:217
+msgid "Errore interno durante l'operazione: i dettagli sono nel log degli errori del sito."
+msgstr ""
+
+#: src/Rest/RestController.php:49
+msgid "Struttura non specificata."
+msgstr ""
+
+#: src/Rest/RestController.php:70
+msgid "Elemento non trovato."
+msgstr ""
+
+#: src/Rest/SettingsController.php:57
+msgid "Indica un numero di mesi tra 0 e 240 (0 = conserva sempre)."
+msgstr ""
+
+#: src/Rest/SetupController.php:113
+msgid "Solo un amministratore di WordPress può usare la configurazione guidata."
+msgstr ""
+
+#: src/Rest/SetupController.php:160
+msgid "Il tuo account non può pubblicare pagine."
+msgstr ""
+
+#: src/Rest/SetupController.php:167
+#: assets/build/admin.js:6
+msgid "Prenota il tuo soggiorno"
+msgstr ""
+
+#: src/Rest/SetupController.php:173
+msgid "Non è stato possibile creare la pagina."
+msgstr ""
+
+#: src/Staff/StaffService.php:112
+#: src/Staff/StaffService.php:195
+msgid "Scegli un ruolo."
+msgstr ""
+
+#: src/Staff/StaffService.php:126
+msgid "Utente non trovato."
+msgstr ""
+
+#: src/Staff/StaffService.php:129
+msgid "Questo utente fa già parte dello staff."
+msgstr ""
+
+#: src/Staff/StaffService.php:136
+msgid "Indirizzo email non valido."
+msgstr ""
+
+#: src/Staff/StaffService.php:139
+msgid "Esiste già un utente con questa email: cercalo per nome o email."
+msgstr ""
+
+#: src/Staff/StaffService.php:142
+msgid "Nome obbligatorio."
+msgstr ""
+
+#: src/Staff/StaffService.php:334
+#: src/Staff/StaffService.php:347
+msgid "Operatore non trovato."
+msgstr ""
+
+#: src/Staff/StaffService.php:337
+msgid "Non puoi modificare il tuo ruolo: chiedilo a un altro amministratore."
+msgstr ""
+
+#: src/Staff/StaffService.php:340
+msgid "Gli amministratori di WordPress hanno sempre accesso completo e non si modificano da qui."
+msgstr ""
+
+#: src/Staff/StaffService.php:346
+msgid "Questo operatore lavora anche in strutture che non gestisci: può modificarlo solo chi gestisce tutte le sue strutture."
+msgstr ""
+
+#: src/Staff/StaffService.php:368
+msgid "Puoi assegnare solo le strutture in cui lavori anche tu."
+msgstr ""
+
+#: src/Staff/StaffService.php:478
+msgid "Amministratore WordPress"
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:196
+#: src/Updates/UpdateChecker.php:542
+msgid "La tua licenza non comprende questa versione: rinnova la licenza per riceverla."
+msgstr ""
+
+#. translators: %s: date the updates period ended.
+#: src/Updates/UpdateChecker.php:198
+msgid "Il periodo di aggiornamenti della tua licenza è finito il %s: rinnova la licenza per ricevere questa versione."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:233
+msgid "Gli aggiornamenti arrivano dal server licenze: attiva la licenza nella sezione Licenza di Booking Manager per riceverli."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:271
+msgid "Versione da scaricare non valida."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:275
+msgid "Questo sito non ha una licenza attiva: attivala nella sezione Licenza di Booking Manager, poi riprova."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:285
+msgid "Il server licenze ha dato un permesso di download non valido: aggiornamento annullato."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:308
+msgid "Download non riuscito: il server licenze non risponde. Riprova più tardi."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: src/Updates/UpdateChecker.php:310
+msgid "Download non riuscito (errore %d): riprova più tardi."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:315
+msgid "Il file scaricato non è quello firmato dal server licenze: aggiornamento annullato, niente è stato cambiato."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:543
+msgid "Questa versione non è più disponibile sul server licenze."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:544
+msgid "Troppi download per questa licenza: riprova più tardi."
+msgstr ""
+
+#: src/Updates/UpdateChecker.php:546
+msgid "Il server licenze non risponde: riprova più tardi."
+msgstr ""
+
+#. translators: %s: error code from the licence server.
+#: src/Updates/UpdateChecker.php:548
+msgid "Il server licenze ha rifiutato il download (%s)."
+msgstr ""
+
+#: assets/build/admin.js:1
+msgid "Errore sconosciuto."
+msgstr ""
+
+#: assets/build/admin.js:1
+msgid "Connessione assente: controlla la rete e riprova."
+msgstr ""
+
+#: assets/build/admin.js:1
+msgid "Operazione non riuscita."
+msgstr ""
+
+#. translators: %d: number of nights.
+#: assets/build/admin.js:2
+#: assets/build/public.js:3
+msgid "%d notte"
+msgid_plural "%d notti"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of adults.
+#: assets/build/admin.js:3
+#: assets/build/public.js:4
+msgid "%d adulto"
+msgid_plural "%d adulti"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of children.
+#: assets/build/admin.js:4
+#: assets/build/public.js:5
+msgid "%d bambino"
+msgid_plural "%d bambini"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:20
+msgid "Da pagare"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Caparra pagata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagata in parte"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborsata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Inserita dallo staff"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+msgid "Sito web"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "API"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Canale esterno"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:5
+msgid "Solo pernottamento"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:5
+msgid "Colazione inclusa"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:5
+msgid "Mezza pensione"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:5
+msgid "Pensione completa"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:5
+msgid "All inclusive"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Contanti"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "POS / carta"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Bonifico"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Altro"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Lun"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Mar"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Mer"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Gio"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Ven"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Sab"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Dom"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Prenotazione creata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Dati modificati"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Stato cambiato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Date o camere cambiate"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Camera assegnata"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "Check-in"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Nuovo QR generato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Ospite modificato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Dati ospite esportati"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Ospite anonimizzato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagamento avviato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagamento registrato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagamento non riuscito"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagamento annullato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Incasso non riuscito"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Link di pagamento non creato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Importo pagato diverso dal dovuto"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Contestazione aperta"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborso richiesto"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborso aggiornato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborso non riuscito"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborso da verificare"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+msgid "Rimborsato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborso di un pagamento arrivato tardi"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborso di un pagamento tardivo non riuscito"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Notifica di pagamento rifiutata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Conto collegato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Conto scollegato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Errore del conto"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Conto incompleto"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Fornitore di pagamento scelto"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Struttura creata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Struttura modificata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Impostazioni struttura modificate"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Struttura archiviata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Struttura ripristinata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tipologia creata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tipologia modificata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tipologia archiviata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Camera creata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Camera modificata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Camera archiviata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Camera ripristinata"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:9
+msgid "Camera chiusa"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Camera riaperta"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tariffa creata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tariffa modificata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tariffa archiviata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Prezzi del periodo salvati"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Prezzi del periodo tolti"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Supplemento o sconto salvato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Supplemento o sconto archiviato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Regola salvata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Regola tolta"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Membro dello staff aggiunto"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Membro dello staff modificato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Membro dello staff tolto"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Ruolo modificato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Impostazioni modificate"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Cloudflare configurato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Regole Cloudflare applicate"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Licenza attivata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Licenza riattivata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Licenza disattivata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Stato della licenza cambiato"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Risposta del server licenze non valida"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagina di prenotazione creata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Configurazione completata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Configurazione saltata"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Riprova"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+msgid "Annulla"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "Precedenti"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "Successivi"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+msgid "Salva"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Pagamenti"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Struttura"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tipologie"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/public.js:11
+#: assets/build/public.js:20
+msgid "Camere"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Tariffe"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Staff"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Impostazioni"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Licenza"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Nascondi"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Dettagli"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Conferma"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Metti in opzione"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Annulla prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Segna no-show"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimetti in attesa"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Le camere tornano disponibili. I pagamenti ricevuti non vengono rimborsati da soli: usa «Rimborsa» nei pagamenti."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "L'ospite non si è presentato: le camere tornano disponibili."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tutte le camere in arrivo oggi risultano in struttura."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Tutte le camere risultano liberate. Le camere vanno in «Da pulire» se l'housekeeping è attivo."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Motivo dell'annullamento"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Stato aggiornato."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Modifica ospite e note"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Dati salvati."
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+#: assets/build/public.js:14
+msgid "Nome"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/public.js:14
+msgid "Cognome"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+#: assets/build/public.js:14
+msgid "Email"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/public.js:14
+msgid "Telefono"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "Lingua delle email"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:14
+msgid "Orario di arrivo previsto"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "Richieste dell'ospite"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Note interne (non visibili all'ospite)"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Modifica soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Salva il soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Soggiorno aggiornato."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Controlla le date."
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+msgid "Tipologia"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Adulti"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/public.js:9
+msgid "Bambini"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "Togli"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Aggiungi una camera"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:6
+msgid "Mantieni il prezzo attuale"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:11
+msgid "Ignora soggiorno minimo e chiusure"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Registra un pagamento"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Registra"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Pagamento registrato."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Per incassi in struttura (contanti, POS, bonifico). Nessun dato di carta viene chiesto o salvato."
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+msgid "Importo (€)"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+msgid "Metodo"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Nota (facoltativa)"
+msgstr ""
+
+#: assets/build/admin.js:4
+#: assets/build/admin.js:5
+msgid "Rimborsa"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Rimborso inviato. Lo stato si aggiorna quando il gestore lo conferma."
+msgstr ""
+
+#. translators: %s: refundable amount.
+#: assets/build/admin.js:5
+msgid "Rimborsabile: %s"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+msgid "Motivo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Registra pagamento"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Link di pagamento"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Pagina di pagamento pronta: copiala e inviala all'ospite."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Modalità di prova: nessun addebito reale."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Incassato"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Da incassare"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Caparra mancante"
+msgstr ""
+
+#. translators: %s: date.
+#: assets/build/admin.js:5
+msgid "entro il %s"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Data"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+msgid "Stato"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Importo"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+msgid "prova"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:11
+msgid "Aggiorna"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "QR di check-in"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "È nella email di conferma. Alla reception si legge con la fotocamera."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Genera un nuovo QR"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nuovo QR"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Il QR attuale smette subito di funzionare (email inoltrata o persa). Ricorda di inviare di nuovo la conferma."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Genera"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Invia un'email"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Messaggio"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Email inviata."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Email in coda: verrà ritentata."
+msgstr ""
+
+#. translators: %s: e-mail address.
+#: assets/build/admin.js:5
+msgid "Invia a %s"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:11
+msgid "Storico"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Sistema"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Prossimi arrivi"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:10
+#: assets/build/admin.js:12
+msgid "Tutte"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Fotocamera non disponibile o permesso negato. Serve una connessione HTTPS."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Questo browser non permette di usare la fotocamera. Inserisci il codice a mano."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Spegni la fotocamera"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Attiva la fotocamera"
+msgstr ""
+
+#. translators: %s: amount.
+#: assets/build/admin.js:5
+msgid "Saldo da incassare: %s"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Camera da assegnare"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessuna spunta: tutte le camere."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Consegna comunque le camere non ancora pronte"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Fai il check-in"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Fai il check-out"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "senza camera"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessuno."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Informativa privacy"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Comunicazioni promozionali"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+msgid "Condizioni di prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Modifica ospite"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/public.js:14
+msgid "Paese (sigla, es. IT)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Lingua (es. it)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Note sull'ospite"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessun cambio registrato."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nota (es. guasto, oggetti dimenticati)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Siti che usano già la licenza:"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Chiave di licenza"
+msgstr ""
+
+#. translators: %s: last characters of the key.
+#: assets/build/admin.js:5
+msgid "Chiave attuale: …%s"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Il server delle licenze non è configurato in questa installazione: usa lo zip ufficiale del plugin o chiedi assistenza."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Attiva Booking Manager"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Attiva la licenza"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Inserisci la chiave ricevuta con l'acquisto. Il sito si collega al server delle licenze per attivarla; finché non è attiva, prenotazioni e camere non si possono gestire."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Licenza attivata."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Stato della licenza"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Controlla ora"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Libera questo sito"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Chiave"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "Piano"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Scadenza"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessuna"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Aggiornamenti fino al"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Assistenza fino al"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Dominio attivato"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Ultima verifica riuscita"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Prossima verifica"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Periodo di tolleranza fino al"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Ultimo errore"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Aggiornamenti"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Cerca aggiornamenti"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Versione installata"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Ultima versione"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Sei aggiornato"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Ultimo controllo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Aggiorna dalla pagina Plugin"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "La licenza viene disattivata su questo sito e potrai usarla altrove. Booking Manager si blocca finché non attivi di nuovo una licenza. I dati restano."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Libera"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "In coda"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "In invio"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Inviato"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Non riuscito"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Non inviato"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Registro dei messaggi"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:10
+#: assets/build/admin.js:12
+msgid "Tutti"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessun messaggio"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Destinatario"
+msgstr ""
+
+#. translators: %s: time.
+#: assets/build/admin.js:5
+msgid "Nuovo tentativo: %s"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Messaggio inviato di nuovo."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Invia di nuovo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Testi delle email"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Lascia vuoto per usare il testo predefinito. Dettagli della prenotazione, QR e link per gestirla vengono aggiunti da soli."
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:11
+msgid "Lingua"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Oggetto"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Testo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Segnaposto:"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Testo salvato."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Anteprima"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Ripristinato il testo predefinito."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Torna al predefinito"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Premi «Anteprima» per vedere l'email con i dati di una prenotazione."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Dati di esempio: non ci sono ancora prenotazioni."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Anteprima email"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Email di prova"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Controlla che le email del sito arrivino (e non finiscano nello spam)."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Email inviata: controlla la casella."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Il server non ha accettato l'email."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Invia"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Fuori servizio"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Uso del proprietario"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Sposta il soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Sposta"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Soggiorno spostato."
+msgstr ""
+
+#. translators: 1: guest, 2: room code, 3: arrival date, 4: nights.
+#: assets/build/admin.js:6
+msgid "%1$s in camera %2$s dal %3$s (%4$s)."
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:9
+msgid "Chiudi una camera"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Camera chiusa per il periodo scelto."
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:9
+#: assets/build/admin.js:12
+msgid "Dal"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Al (escluso)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nota"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Nuova struttura"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Crea"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Tipo di struttura"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Dati della struttura salvati."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Tipo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prenotazioni online"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Su richiesta (le confermi tu)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Conferma immediata"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Check-in dalle"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Check-in fino alle"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Check-out entro le"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Fuso orario"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nel formato Europe/Rome"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Valuta"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Indirizzo e contatti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Città"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "CAP"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Provincia"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Paese (sigla)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Ragione sociale"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Partita IVA"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Impostazioni salvate."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Regole generali"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Soggiorno minimo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Soggiorno massimo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Anticipo minimo (giorni)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prenotabile fino a (giorni)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Arrivo in giornata fino alle"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Camere max per prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Età massima bambini"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Durata opzione (ore)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Assegna la camera in automatico"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Modulo online"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Inserisci il modulo in una pagina con questo shortcode:"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prenotazioni online attive"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Mostra i prezzi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "L'ospite può annullare dal link nell'email (secondo le condizioni della tariffa)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Chiedi il consenso alle comunicazioni promozionali"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Minuti di blocco della camera durante il pagamento"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Indirizzo dell'informativa privacy"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Imposta di soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Un importo a persona a notte aggiunto al totale. Verifica le regole del tuo Comune: non è un calcolo fiscale."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Applica l'imposta di soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "A persona a notte (€)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Fino a notti (0 = tutte)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Esenti sotto i … anni"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Invia email agli ospiti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Avvisa lo staff delle prenotazioni online e degli annullamenti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Email dello staff (vuoto = email della struttura)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nome del mittente"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "QR di check-in nella conferma"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Giorni prima dell'arrivo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Email di benvenuto al check-in"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Messaggi WhatsApp (richiede un servizio collegato)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Predisposto: senza un servizio WhatsApp collegato da un componente aggiuntivo i messaggi non partono e il registro lo indica."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Gestisci le pulizie delle camere"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Alla partenza la camera diventa «Da pulire»"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Impedisci il check-in in una camera non pronta"
+msgstr ""
+
+#. translators: 1: provider, 2: test or live.
+#: assets/build/admin.js:6
+msgid "%1$s · %2$s"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "reale"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Collega e verifica"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Account collegato e verificato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Le chiavi sono cifrate nel database e non vengono più mostrate. I dati delle carte restano sulla pagina del gestore: il sito non li vede mai."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "facoltativo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Lascia vuoto per non cambiarla"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Pagamento online"
+msgstr ""
+
+#. translators: 1: provider, 2: mode.
+#: assets/build/admin.js:6
+msgid "Attivo: %1$s in modalità %2$s."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nessun pagamento online: gli ospiti pagano in struttura. Collega Stripe o Nexi qui sotto e poi sceglilo."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Consiglio: definisci BKNG_SECRET_KEY in wp-config.php per cifrare le chiavi con una chiave dedicata."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Cosa chiedere online"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nulla"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "La caparra della tariffa"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "L'intero importo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Saldo dovuto giorni prima dell'arrivo (0 = in struttura)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Non disponibile in questa versione."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Account reale"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Account di prova"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "in uso"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "collegato"
+msgstr ""
+
+#. translators: %s: date.
+#: assets/build/admin.js:6
+msgid "verificato il %s"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "webhook manuale"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Webhook:"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Aggiorna chiavi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Collega"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Verifica completata."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Verifica"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Pagamento online attivato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Usa questo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Scollega"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Pagamento online disattivato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Disattiva il pagamento online"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Scollega l'account"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Le chiavi vengono cancellate. I pagamenti già fatti restano registrati."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Account scollegato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Canali di vendita (OTA)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Booking Manager è predisposto per ricevere prenotazioni dai portali e inviare la disponibilità tramite un channel manager. Il collegamento richiede un connettore dedicato (componente aggiuntivo) con le credenziali ufficiali del canale: nessun canale è collegato in automatico."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nessun connettore installato"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Quando un connettore è attivo, qui compaiono stato e abbinamenti delle tipologie."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Pronto"
+msgstr ""
+
+#. translators: %d: mapped room types.
+#: assets/build/admin.js:6
+msgid "%d tipologie abbinate"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Ultimi scambi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "ricevuta"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "inviata"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nessuna caparra"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Percentuale del totale"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Importo fisso"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prima notte"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Intero importo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nessuna penale"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Supplemento"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Sconto"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Sconto soggiorno lungo"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/public.js:8
+msgid "a soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/public.js:8
+msgid "a notte"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/public.js:8
+msgid "a persona a notte"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "a persona a soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Tipologie (nessuna = tutte)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuovo piano tariffario"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Piano tariffario salvato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "es. Non rimborsabile"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Trattamento"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Variazione sul prezzo (%)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "es. -10 per uno sconto del 10%, 15 per +15%."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Descrizione per l'ospite"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Cancellazione"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Rimborsabile"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Gratis fino a giorni prima dell'arrivo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Poi si paga"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Percentuale (%)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Testo delle condizioni (mostrato all'ospite)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Caparra"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Caparra richiesta"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Da pagare entro giorni prima dell'arrivo (0 = subito)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Visibile nel modulo online"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Piano predefinito"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Piani tariffari"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuovo piano"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nessun piano: si vende al prezzo base, senza condizioni particolari. Crea almeno un piano per indicare caparra e cancellazione."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "predefinito"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "solo staff"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/public.js:5
+msgid "Non rimborsabile"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "Modifica"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "Archivia"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Archivia il piano"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Non sarà più proposto. Le prenotazioni già fatte mantengono le loro condizioni."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Piano archiviato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Modifica prezzo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuovo prezzo per periodo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prezzo salvato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Tutti i piani"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Al (compreso)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prezzo a notte (€)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nome del periodo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "es. Alta stagione"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Adulto in più (€, vuoto = come tipologia)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Bambino in più (€, vuoto = come tipologia)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Giorni della settimana"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Priorità (vince il numero più alto se i periodi si sovrappongono)"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Prezzi per periodo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuovo prezzo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Dove non c'è un prezzo per la data vale il prezzo base della tipologia."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Periodo"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:9
+msgid "Giorni"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "A notte"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prezzo eliminato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Elimina"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuovo supplemento o sconto"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Salvato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "es. Animale domestico"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Calcolo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "In percentuale sul soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Da notti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Fino a notti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Valido dal"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:10
+msgid "al"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Descrizione"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Facoltativo (l'ospite lo sceglie)"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Supplementi e sconti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuovo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Es. colazione, animale, letto aggiunto, sconto 7 notti."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "automatico"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Archiviato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Modifica regola"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuova regola di soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Regola salvata."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Soggiorno minimo (notti)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Soggiorno massimo (notti)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Anticipo massimo (giorni)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Chiuso (nessuna vendita)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Arrivi chiusi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Partenze chiuse"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Arrivo solo nei giorni (nessuno = tutti)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Partenza solo nei giorni (nessuno = tutti)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "chiuso"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "arrivi chiusi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "partenze chiuse"
+msgstr ""
+
+#. translators: %d: nights.
+#: assets/build/admin.js:6
+msgid "minimo %d notti"
+msgstr ""
+
+#. translators: %d: nights.
+#: assets/build/admin.js:6
+msgid "massimo %d notti"
+msgstr ""
+
+#. translators: %d: days.
+#: assets/build/admin.js:6
+msgid "almeno %d giorni prima"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "giorni di arrivo fissi"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Regole di soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuova regola"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Le regole generali (soggiorno minimo, anticipo) sono in Struttura. Qui le eccezioni per periodo: Ferragosto minimo 7 notti, chiusure, arrivo solo il sabato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Regola eliminata."
+msgstr ""
+
+#. translators: %s: room type.
+#: assets/build/admin.js:6
+msgid "Modifica «%s»"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+msgid "Nuova tipologia"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Tipologia salvata."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Tipologia creata: ora aggiungi le camere."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "es. Camera doppia vista mare"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prezzo base a notte (€)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Usato quando non c'è un prezzo per le date nelle Tariffe."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Adulti max"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Bambini max"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Persone max"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Persone incluse nel prezzo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Adulto in più / notte (€)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Bambino in più / notte (€)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Metri quadri"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Letti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "es. 1 matrimoniale"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Descrizione per il modulo online"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Servizi (separati da virgola)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Wi-Fi, aria condizionata, balcone"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Togli la foto"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Foto della tipologia"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Usa queste foto"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Scegli le foto"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Prenotabile dal modulo online"
+msgstr ""
+
+#. translators: %s: room code.
+#: assets/build/admin.js:6
+msgid "Camera %s"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuova camera"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Camera salvata."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Numero o codice"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nome (facoltativo)"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+msgid "Note interne"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Conservazione dei dati"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Mesi dopo i quali i dati vengono cancellati o anonimizzati ogni notte. 0 = conserva sempre."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Ospiti senza soggiorni (anonimizza)"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Registro attività"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Registro messaggi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Registro check-in"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Salva l'indirizzo IP (troncato) nel registro attività"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Cancella tutti i dati quando il plugin viene eliminato"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Spento (consigliato): eliminando il plugin prenotazioni, ospiti e impostazioni restano nel database."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Anti-spam del modulo online (Cloudflare Turnstile)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Attivo."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Non attivo: il modulo usa solo i controlli interni (tempo di compilazione, limiti per indirizzo)."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Site key"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Secret key"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Salvata: lascia vuoto per non cambiarla"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Il sito riceve le visite attraverso Cloudflare e legge l'IP reale dei visitatori."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Il sito è dietro Cloudflare e l'hosting fornisce già l'IP reale: nulla da fare."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Ci sono intestazioni di Cloudflare, ma la richiesta passa da un altro proxy: l'IP dei visitatori non è affidabile. Controlla la configurazione dell'hosting."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Il sito non sembra passare da Cloudflare."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Collegamento del sito"
+msgstr ""
+
+#. translators: 1: address seen by the server, 2: visitor address.
+#: assets/build/admin.js:6
+msgid "Indirizzo che arriva al server: %1$s · indirizzo del visitatore: %2$s"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "API di Cloudflare (facoltativa)"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Con un token API il plugin crea da solo le regole consigliate. Permessi del token:"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Il token salvato non è più leggibile (sono cambiate le chiavi di WordPress): inseriscilo di nuovo."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Dati di Cloudflare salvati."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Zone ID"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Definito in wp-config.php"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Token API"
+msgstr ""
+
+#. translators: %s: last characters of the token.
+#: assets/build/admin.js:6
+msgid "Salvato (%s): lascia vuoto per non cambiarlo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Verifica collegamento"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Regole consigliate applicate."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Applica le regole consigliate"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Cancella il token"
+msgstr ""
+
+#. translators: 1: zone, 2: plan, 3: status.
+#: assets/build/admin.js:6
+msgid "Zona %1$s (%2$s), stato %3$s."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Attenzione: il dominio del sito non appartiene a questa zona."
+msgstr ""
+
+#. translators: %s: date.
+#: assets/build/admin.js:6
+msgid "Regole applicate il %s."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Regole consigliate"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Se preferisci crearle a mano nel pannello di Cloudflare, copia queste espressioni. Dopo aver collegato un nuovo account Stripe o Nexi, applica di nuovo le regole: l'indirizzo del webhook cambia."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Camere e prezzi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "La tua struttura"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Email per le prenotazioni"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Salva e continua"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Tipologie e camere"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Per ogni tipologia che vendi indica capienza, prezzo base a notte e i numeri delle camere (es. 101, 102, 103). Tariffe stagionali, caparre e cancellazione si impostano dopo in «Tariffe»."
+msgstr ""
+
+#. translators: %s: room type.
+#: assets/build/admin.js:6
+msgid "«%s» aggiunta."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "es. Camera doppia"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Persone"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Numeri delle camere"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "Aggiungi"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Già inserite"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Continua"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Pagina di prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Consiglio: imposta i permalink «Nome articolo» in Impostazioni → Permalink."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "La pagina esiste:"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Titolo della pagina"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Crea la pagina"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Oppure inserisci lo shortcode in una pagina esistente:"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Strutture"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Aggiungi allo staff"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Staff aggiornato."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Persona aggiunta allo staff."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Utente già registrato"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nuovo utente"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Cerca per nome o email"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+msgid "Cerca"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Nessun utente trovato: usa «Nuovo utente»."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Utente"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Scegli…"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Riceverà da WordPress l'email per scegliere la password."
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Ruolo"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Permessi dei ruoli"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Permessi salvati."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Permessi predefiniti ripristinati."
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Ripristina i predefiniti"
+msgstr ""
+
+#: assets/build/admin.js:6
+msgid "Dashboard"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:9
+msgid "Planning"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:11
+msgid "Reception"
+msgstr ""
+
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Messaggi"
+msgstr ""
+
+#. translators: %s: today's date.
+#: assets/build/admin.js:7
+msgid "Oggi, %s"
+msgstr ""
+
+#: assets/build/admin.js:7
+msgid "Apri il planning"
+msgstr ""
+
+#: assets/build/admin.js:7
+msgid "Arrivi di oggi"
+msgstr ""
+
+#. translators: %d: guests already arrived.
+#: assets/build/admin.js:7
+msgid "%d già arrivati"
+msgstr ""
+
+#: assets/build/admin.js:7
+msgid "Partenze di oggi"
+msgstr ""
+
+#. translators: %d: guests already left.
+#: assets/build/admin.js:7
+msgid "%d già partiti"
+msgstr ""
+
+#: assets/build/admin.js:7
+msgid "Ospiti in struttura"
+msgstr ""
+
+#: assets/build/admin.js:7
+msgid "Occupazione oggi"
+msgstr ""
+
+#. translators: %d: occupied rooms.
+#: assets/build/admin.js:8
+msgid "%d occupata"
+msgid_plural "%d occupate"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: free rooms.
+#: assets/build/admin.js:9
+msgid "%d libera"
+msgid_plural "%d libere"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/admin.js:9
+msgid "Occupazione 30 giorni"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Prenotazioni future"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Saldo da incassare"
+msgstr ""
+
+#. translators: %s: amount.
+#: assets/build/admin.js:9
+msgid "%s entro 7 giorni"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Caparre scadute"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Senza camera (7 giorni)"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Prenotazioni a cui assegnare la camera"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Camere fuori servizio"
+msgstr ""
+
+#. translators: %d: total rooms.
+#: assets/build/admin.js:9
+msgid "su %d camere"
+msgstr ""
+
+#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+msgid "Nessuna camera"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Aggiungi tipologie e camere per iniziare a ricevere prenotazioni."
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Vai a Camere"
+msgstr ""
+
+#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+msgid "Arrivi"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Nessun arrivo oggi."
+msgstr ""
+
+#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+msgid "Partenze"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Nessuna partenza oggi."
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Stato camere"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Richieste da confermare"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Trascina una prenotazione per cambiare camera o date. Doppio clic su un giorno libero per una nuova prenotazione."
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Settimana"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Oggi"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Aggiungi le camere in «Camere» per vedere il planning."
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Camere libere"
+msgstr ""
+
+#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+msgid "Da assegnare"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "In attesa / opzione"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Riapri la camera"
+msgstr ""
+
+#. translators: 1: start date, 2: end date.
+#: assets/build/admin.js:10
+msgid "La chiusura dal %1$s al %2$s viene tolta e la camera torna vendibile."
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Riapri"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Camera riaperta."
+msgstr ""
+
+#: assets/build/admin.js:10
+#: assets/build/admin.js:12
+msgid "Nuova prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Nome, email, telefono o codice"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Pagamento"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Origine"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Soggiorno dal"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Nessuna prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Nessuna prenotazione corrisponde ai filtri."
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Non puoi creare prenotazioni"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "1. Date e ospiti"
+msgstr ""
+
+#: assets/build/admin.js:10
+#: assets/build/public.js:8
+msgid "Adulti per camera"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Bambini per camera"
+msgstr ""
+
+#: assets/build/admin.js:10
+#: assets/build/public.js:9
+msgid "Cerca disponibilità"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Nessuna camera disponibile"
+msgstr ""
+
+#: assets/build/admin.js:10
+msgid "Prova altre date o meno ospiti per camera."
+msgstr ""
+
+#. translators: %d: rooms still free.
+#: assets/build/admin.js:11
+msgid "%d libere"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "2. Camere scelte"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Prezzo concordato"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Totale camera (€)"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "3. Ospite e conferma"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Opzione (scade da sola)"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Invia l'email all'ospite"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Crea la prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Elenco"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Annulla il check-in"
+msgstr ""
+
+#. translators: %s: date and time.
+#: assets/build/admin.js:11
+msgid "Opzione valida fino al %s: poi si annulla da sola."
+msgstr ""
+
+#. translators: %s: reason.
+#: assets/build/admin.js:11
+msgid "Motivo dell'annullamento: %s"
+msgstr ""
+
+#: assets/build/admin.js:11
+#: assets/build/public.js:16
+#: assets/build/public.js:20
+msgid "Soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Modifica date e camere"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Date"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Prezzo"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Camera assegnata."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Richieste"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Creata il"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Arrivi da fare"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Partenze da fare"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Partenze fatte"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Leggi il QR"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Oppure il codice della prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Inquadra il QR della email di conferma o scrivi il codice: qui compare la prenotazione con le camere."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Ultime operazioni di oggi"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Mostra"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Tutte le camere"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Con arrivo o partenza oggi"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "L'housekeeping è disattivato per questa struttura: gli stati non cambiano da soli alla partenza."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Partiti"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Partenza oggi"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Arrivo oggi"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Occupata"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Cambia stato"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Nome, email o telefono"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Nessun ospite"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Nessun ospite corrisponde alla ricerca."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Le schede si creano da sole con le prenotazioni."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Paese"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Soggiorni"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Scheda anonimizzata"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Esporta i dati (GDPR)"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Anonimizza"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Possibili doppioni"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Schede con la stessa email o lo stesso telefono."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Contatti"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Note"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Consensi"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "dato"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "negato"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Scheda salvata."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Anonimizza l'ospite"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Nome, contatti e note vengono cancellati da scheda, prenotazioni e messaggi. Restano solo date e importi per la contabilità. Non si può annullare."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "In questa struttura ogni alloggio si vende da solo: crea una tipologia per ogni alloggio."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Le tipologie sono ciò che vendi; le camere sono le stanze fisiche di ogni tipologia."
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Mostra archiviate"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Nessuna tipologia"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Crea la prima tipologia (es. «Camera doppia») e poi aggiungi le camere."
+msgstr ""
+
+#: assets/build/admin.js:11
+#: assets/build/admin.js:12
+msgid "archiviata"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "non online"
+msgstr ""
+
+#: assets/build/admin.js:11
+msgid "Aggiungi camera"
+msgstr ""
+
+#. translators: 1: max guests, 2: base price.
+#: assets/build/admin.js:12
+msgid "Fino a %1$d persone · da %2$s a notte"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Nessuna camera: senza camere la tipologia non è prenotabile."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Camera ripristinata."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Ripristina"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Archivia la tipologia"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Non sarà più prenotabile. Le prenotazioni esistenti restano. Non è possibile se ci sono soggiorni futuri."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Tipologia archiviata."
+msgstr ""
+
+#. translators: %s: room code.
+#: assets/build/admin.js:12
+msgid "Archivia la camera %s"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "La camera esce dalla disponibilità. Non è possibile se ha soggiorni futuri assegnati."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Camera archiviata."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Prima le camere"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Crea almeno una tipologia in «Camere» per impostare le tariffe."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Nessuna struttura"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Crea la prima struttura per iniziare."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Dati"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Prenotazioni e modulo online"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Canali"
+msgstr ""
+
+#. translators: %s: slug.
+#: assets/build/admin.js:12
+msgid "Identificativo per lo shortcode: %s"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Registro"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Testi"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Prova"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Ruoli e permessi"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "tu"
+msgstr ""
+
+#. translators: %s: person.
+#: assets/build/admin.js:12
+msgid "Togli %s dallo staff"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "L'account WordPress resta, ma non potrà più usare Booking Manager."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Tolto dallo staff."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Elemento"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Al"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Nessuna attività"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Quando"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Chi"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Cosa"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "apri"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Generali"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Cloudflare"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Configurazione guidata"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Pochi minuti per ricevere la prima prenotazione."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Salta la configurazione"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Tutto pronto"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Puoi già ricevere prenotazioni. Per completare:"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Tariffe stagionali, caparra e cancellazione"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Pagamenti online con Stripe o Nexi"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Account per lo staff"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Apri il modulo online"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Vai alla dashboard"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Apri Licenza"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Booking Manager non è ancora attivo"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Non sei assegnato a nessuna struttura: chiedi all'amministratore."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Crea la struttura"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Pagina non trovata"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Usa il menu per scegliere una sezione."
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Menu di Booking Manager"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Mostra il menu di WordPress"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Modalità operativa"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Esci dall'account"
+msgstr ""
+
+#: assets/build/admin.js:12
+msgid "Menu"
+msgstr ""
+
+#. translators: %d: days before arrival.
+#: assets/build/public.js:6
+msgid "Cancellazione gratuita fino a %d giorno prima dell’arrivo"
+msgid_plural "Cancellazione gratuita fino a %d giorni prima dell’arrivo"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/public.js:6
+msgid "Cancellazione con penale"
+msgstr ""
+
+#: assets/build/public.js:6
+msgid "Cancellazione gratuita"
+msgstr ""
+
+#. translators: %s: percentage.
+#: assets/build/public.js:7
+msgid "Caparra del %s%%"
+msgstr ""
+
+#. translators: %s: amount.
+#: assets/build/public.js:8
+msgid "Caparra di %s"
+msgstr ""
+
+#: assets/build/public.js:8
+msgid "Caparra: la prima notte"
+msgstr ""
+
+#: assets/build/public.js:8
+msgid "Pagamento anticipato dell’intero soggiorno"
+msgstr ""
+
+#: assets/build/public.js:8
+msgid "a persona"
+msgstr ""
+
+#: assets/build/public.js:8
+msgid "La verifica anti-robot non si è caricata. Disattiva eventuali blocchi dei contenuti e ricarica la pagina."
+msgstr ""
+
+#: assets/build/public.js:8
+#: assets/build/public.js:21
+msgid "Si è verificato un errore. Riprova tra poco."
+msgstr ""
+
+#. translators: %d: maximum age of a child.
+#: assets/build/public.js:9
+msgid "Bambini (fino a %d anni)"
+msgstr ""
+
+#. translators: 1: photo number, 2: total photos.
+#: assets/build/public.js:10
+msgid "Foto %1$d di %2$d"
+msgstr ""
+
+#. translators: %d: people.
+#: assets/build/public.js:11
+msgid "Fino a %d persona"
+msgid_plural "Fino a %d persone"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/public.js:11
+msgid "Ultime camere disponibili"
+msgstr ""
+
+#. translators: %d: rooms.
+#: assets/build/public.js:12
+msgid "%d camera"
+msgid_plural "%d camere"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/public.js:12
+msgid "Scegli"
+msgstr ""
+
+#: assets/build/public.js:12
+msgid "Servizi aggiuntivi"
+msgstr ""
+
+#. translators: %s: minutes:seconds.
+#: assets/build/public.js:13
+msgid "Teniamo le camere per te ancora %s."
+msgstr ""
+
+#: assets/build/public.js:13
+msgid "Il tuo soggiorno"
+msgstr ""
+
+#: assets/build/public.js:13
+msgid "per camera"
+msgstr ""
+
+#. translators: 1: check-in time, 2: check-out time.
+#: assets/build/public.js:14
+msgid "Check-in dalle %1$s · check-out entro le %2$s"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "I tuoi dati"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Richieste o note per la struttura"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Condizioni della struttura"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Ho letto l’informativa sulla privacy e accetto il trattamento dei dati per gestire la prenotazione."
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Leggi l’informativa"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Voglio ricevere offerte e novità dalla struttura (facoltativo)."
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Indietro"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Invia la richiesta"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Prenota"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "La struttura controlla la richiesta e ti conferma la prenotazione via email."
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Ti stiamo portando alla pagina di pagamento sicura…"
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Se non si apre, clicca qui."
+msgstr ""
+
+#: assets/build/public.js:14
+msgid "Richiesta inviata"
+msgstr ""
+
+#. translators: %s: guest's first name.
+#: assets/build/public.js:15
+msgid "Grazie %s, ti aspettiamo! Ti abbiamo inviato una email con i dettagli."
+msgstr ""
+
+#. translators: %s: guest's first name.
+#: assets/build/public.js:16
+msgid "Grazie %s! La struttura controlla la disponibilità e ti risponde via email."
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Il tempo per completare la prenotazione è scaduto: controlla di nuovo la disponibilità."
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Nessuna camera disponibile per queste date."
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Prova a cambiare le date o il numero di ospiti."
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Le prenotazioni online non sono disponibili in questo momento."
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Contatti:"
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "In attesa di conferma"
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "In attesa del pagamento"
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Soggiorno in corso"
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Non presentato"
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Grazie! Stiamo ricevendo la conferma del pagamento: la pagina si aggiorna da sola."
+msgstr ""
+
+#: assets/build/public.js:16
+msgid "Il pagamento non è stato completato. Puoi riprovare qui sotto."
+msgstr ""
+
+#. translators: %s: booking code.
+#: assets/build/public.js:17
+msgid "Prenotazione %s"
+msgstr ""
+
+#. translators: %s: date and time.
+#: assets/build/public.js:18
+msgid "Le camere restano bloccate fino al %s: completa il pagamento per confermare."
+msgstr ""
+
+#. translators: %s: time.
+#: assets/build/public.js:19
+msgid "dalle %s"
+msgstr ""
+
+#. translators: %s: time.
+#: assets/build/public.js:20
+msgid "entro le %s"
+msgstr ""
+
+#: assets/build/public.js:20
+msgid "Pagato"
+msgstr ""
+
+#: assets/build/public.js:20
+msgid "Paga online"
+msgstr ""
+
+#: assets/build/public.js:20
+msgid "Annulla la prenotazione"
+msgstr ""
+
+#: assets/build/public.js:20
+msgid "Vuoi annullare la prenotazione?"
+msgstr ""
+
+#. translators: %s: amount kept by the property.
+#: assets/build/public.js:21
+msgid "Secondo le condizioni della tariffa la struttura trattiene %s."
+msgstr ""
+
+#: assets/build/public.js:21
+msgid "L’annullamento è gratuito."
+msgstr ""
+
+#: assets/build/public.js:21
+msgid "Per i rimborsi di quanto pagato la struttura ti contatterà."
+msgstr ""
+
+#: assets/build/public.js:21
+msgid "No, tienila"
+msgstr ""
+
+#: assets/build/public.js:21
+msgid "Sì, annulla"
+msgstr ""
+
+#: assets/build/public.js:21
+msgid "Per modifiche o annullamenti contatta la struttura."
+msgstr ""
+
+#: assets/build/public.js:21
+msgid "Connessione non riuscita. Controlla la rete e riprova."
+msgstr ""
