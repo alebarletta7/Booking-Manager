@@ -36,7 +36,7 @@ trap 'rm -rf "$STAGE"' EXIT
 DEST="$STAGE/$SLUG"
 mkdir -p "$DEST/assets"
 
-cp "$SLUG.php" uninstall.php LICENSE "$DEST/"
+cp "$SLUG.php" uninstall.php LICENSE CHANGELOG.md "$DEST/"
 [[ -f readme.txt ]] && cp readme.txt "$DEST/"
 cp -R src "$DEST/src"
 cp -R assets/build "$DEST/assets/build"

@@ -39,7 +39,7 @@ Le regole del plugin si riconoscono dalla descrizione, che inizia sempre con `Bo
  or http.request.uri.path contains "/wp-json/booking-manager/")
 ```
 
-Disponibilità, prezzi e pagine dell'ospite devono essere sempre freschi. Le risposte dell'API hanno comunque `Cache-Control: no-store`.
+Disponibilità, prezzi e pagine dell'ospite devono essere sempre freschi. Le risposte del modulo pubblico hanno comunque `Cache-Control: no-store`.
 
 ### 2. Notifiche di pagamento senza controlli anti-bot
 

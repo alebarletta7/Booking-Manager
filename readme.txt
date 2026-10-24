@@ -1,0 +1,33 @@
+=== Booking Manager ===
+Contributors: alessandrobarletta
+Tags: booking, b&b, hotel, prenotazioni, affittacamere
+Requires at least: 6.6
+Tested up to: 6.6
+Requires PHP: 8.1
+Stable tag: 0.1.0
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Gestionale per B&B, affittacamere, case vacanza, appartamenti e hotel: camere, tariffe, prenotazioni, pagamenti, check-in e housekeeping.
+
+== Description ==
+
+* Strutture, tipologie e camere, planning con trascinamento.
+* Tariffe stagionali, supplementi, sconti, servizi aggiuntivi, regole di soggiorno, caparra e cancellazione.
+* Modulo di prenotazione sul sito con i colori del tema e pagina dell'ospite per vedere, pagare e annullare.
+* Pagamenti alla reception, con Stripe e con Nexi XPay (pagine di pagamento ospitate: i dati delle carte non passano dal sito).
+* Reception con check-in e check-out per camera e QR; housekeeping.
+* Email modificabili, promemoria; ruoli per lo staff; registro attività; esportazione e anonimizzazione dei dati degli ospiti.
+
+Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
+
+== Installation ==
+
+1. Carica lo zip da Plugin → Aggiungi nuovo → Carica plugin e attivalo.
+2. Apri Booking Manager e inserisci la chiave di licenza.
+3. Segui la configurazione guidata.
+
+== Changelog ==
+
+= 0.1.0 =
+* Prima versione.
