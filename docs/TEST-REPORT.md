@@ -1,4 +1,4 @@
-# Report dei test — Booking Manager 0.1.0 (Fase 2)
+# Report dei test — Booking Manager 0.1.3 (Fase 2)
 
 Data: 24 ottobre 2026 · ramo `fase-2/sviluppo`
 
@@ -64,7 +64,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 4. Pacchetto ZIP
 
-`bin/build-zip.sh` → `dist/booking-manager-0.1.0.zip` (464 KB, 159 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
+`bin/build-zip.sh` → `dist/booking-manager-0.1.3.zip` (464 KB, 159 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
 
 | Prova su WordPress 6.6 pulito (WP-CLI) | Esito |
 |---|---|

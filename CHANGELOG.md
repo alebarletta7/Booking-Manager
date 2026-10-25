@@ -1,13 +1,36 @@
 # Changelog
 
+## [0.1.3] — 25 ottobre 2026
+
+### Correzioni
+
+- Modulo sul sito: pulsanti e campi con stile proprio, uguali su ogni tema (temi come Astra non li deformano più e non li colorano di blu).
+
+### Novità
+
+- Colore del modulo a scelta in **Struttura → Prenotazioni e modulo online**, anche nella pagina dell'ospite; senza scelta, il colore principale del tema o il verde di Booking Manager.
+
+## [0.1.2] — 25 ottobre 2026
+
+### Novità
+
+- Nuova pagina di prenotazione sul sito: banner con foto (`intestazione="no"` lo toglie), ricerca per date e ospiti, filtri (tipologia, capacità, servizi, prezzo a notte, solo disponibili, cancellazione gratuita), ordinamento, schede camera con galleria e foto ingrandibili, prezzo a notte e totale.
+
+## [0.1.1] — 25 ottobre 2026
+
+### Novità
+
+- Camere: «Aggiungi più camere» per crearne molte insieme (es. 101-110, 201, 202), tutte o nessuna; le serie funzionano anche nella configurazione guidata.
+- Menu laterale come negli altri plugin della famiglia: voci a gruppi con icone, versione in fondo, utente in alto.
+
 ## [0.1.0] — prima versione
 
 ### Novità
 
-- Strutture, tipologie e camere (B&B, affittacamere, case vacanza, appartamenti, residence, guest house, hotel), con foto e servizi; camere aggiunte anche in serie (es. 101-110).
+- Strutture, tipologie e camere (B&B, affittacamere, case vacanza, appartamenti, residence, guest house, hotel), con foto e servizi.
 - Tariffe: piani tariffari, prezzi per periodo, supplementi e sconti, servizi aggiuntivi facoltativi, regole di soggiorno, caparra e condizioni di cancellazione.
 - Prenotazioni dal gestionale e dal sito, planning con trascinamento, nessuna doppia prenotazione anche con richieste contemporanee.
-- Modulo di prenotazione sul sito con i font del tema e un colore a scelta (Struttura → Prenotazioni e modulo online), uguale su ogni tema: ricerca per date e ospiti, filtri (tipologia, capacità, servizi, prezzo, cancellazione gratuita), ordinamento, schede camera con foto ingrandibili, blocco temporaneo delle camere, anti-spam e Cloudflare Turnstile; pagina dell'ospite per vedere, pagare e annullare.
+- Modulo di prenotazione sul sito con i colori del tema, blocco temporaneo delle camere, anti-spam e Cloudflare Turnstile; pagina dell'ospite per vedere, pagare e annullare.
 - Pagamenti alla reception, con Stripe e con Nexi XPay; rimborsi e link di pagamento.
 - Reception con check-in e check-out per camera e lettura del QR; housekeeping.
 - Email con testi modificabili per struttura, promemoria; WhatsApp e canali di vendita predisposti per componenti aggiuntivi.
