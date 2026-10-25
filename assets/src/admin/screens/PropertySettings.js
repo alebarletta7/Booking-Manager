@@ -2,7 +2,7 @@
  * The property: details, booking rules and online form, payments (Stripe, Nexi, at the
  * desk), e-mails, housekeeping, sales channels. A new property can be added here.
  */
-import { Button } from '@wordpress/components';
+import { Button, ColorPalette } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -46,6 +46,17 @@ const kindOptions = Object.entries( KINDS ).map( ( [ value, label ] ) => ( {
 	value,
 	label,
 } ) );
+
+// Suggestions for the colour of the public form; any other colour can be picked.
+const FORM_COLORS = [
+	{ name: __( 'Verde', 'booking-manager' ), color: '#1f5c43' },
+	{ name: __( 'Blu notte', 'booking-manager' ), color: '#1d3557' },
+	{ name: __( 'Petrolio', 'booking-manager' ), color: '#1f5f6b' },
+	{ name: __( 'Terracotta', 'booking-manager' ), color: '#a5523a' },
+	{ name: __( 'Bordeaux', 'booking-manager' ), color: '#7a2e3a' },
+	{ name: __( 'Sabbia', 'booking-manager' ), color: '#9a7b4f' },
+	{ name: __( 'Antracite', 'booking-manager' ), color: '#33393f' },
+];
 
 function NewPropertyModal( { onClose, onDone } ) {
 	const action = useAction();
@@ -411,6 +422,29 @@ function BookingTab( { data, onSaved } ) {
 								checked={ !! s.show_prices }
 								onChange={ set( 'show_prices' ) }
 							/>
+							<div className="bkng-color-field">
+								<p className="bkng-strong">
+									{ __(
+										'Colore del modulo',
+										'booking-manager'
+									) }
+								</p>
+								<ColorPalette
+									colors={ FORM_COLORS }
+									value={ s.form_color || undefined }
+									onChange={ ( c ) =>
+										set( 'form_color' )( c || '' )
+									}
+									disableAlpha
+									clearable
+								/>
+								<p className="bkng-help">
+									{ __(
+										'Pulsanti, prezzi e dettagli del modulo di prenotazione. Se non scegli un colore il modulo usa il colore principale del tema; se il tema non lo indica, il verde di Booking Manager.',
+										'booking-manager'
+									) }
+								</p>
+							</div>
 							<Toggle
 								label={ __(
 									"L'ospite può annullare dal link nell'email (secondo le condizioni della tariffa)",

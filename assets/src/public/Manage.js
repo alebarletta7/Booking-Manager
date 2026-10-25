@@ -6,7 +6,14 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
-import { date, dateTime, guestsLabel, money, nightsLabel } from './format';
+import {
+	applyColor,
+	date,
+	dateTime,
+	guestsLabel,
+	money,
+	nightsLabel,
+} from './format';
 import { ErrorBox, Spinner } from './ui';
 
 const STATUS = {
@@ -19,13 +26,17 @@ const STATUS = {
 	no_show: __( 'Non presentato', 'booking-manager' ),
 };
 
-export default function Manage( { api, code, token, paid } ) {
+export default function Manage( { api, code, token, paid, root } ) {
 	const [ booking, setBooking ] = useState( null );
 	const [ error, setError ] = useState( null );
 	const [ actionError, setActionError ] = useState( null );
 	const [ busy, setBusy ] = useState( false );
 	const [ confirming, setConfirming ] = useState( false );
 	const [ checks, setChecks ] = useState( 0 );
+
+	useEffect( () => {
+		applyColor( root, booking?.property?.color );
+	}, [ root, booking ] );
 
 	const load = useCallback(
 		() =>
@@ -209,7 +220,7 @@ export default function Manage( { api, code, token, paid } ) {
 					{ b.can_pay && (
 						<button
 							type="button"
-							className="bkng-p-button is-primary wp-element-button"
+							className="bkng-p-button is-primary"
 							onClick={ pay }
 							disabled={ busy }
 						>

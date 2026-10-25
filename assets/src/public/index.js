@@ -31,6 +31,7 @@ function mount( el ) {
 				code={ code }
 				token={ token }
 				paid={ params.get( 'bkng_paid' ) }
+				root={ el }
 			/>
 		);
 	} else if ( ! config.manageOnly && config.property ) {
@@ -39,6 +40,7 @@ function mount( el ) {
 				api={ api }
 				slug={ config.property }
 				hero={ !! config.hero }
+				root={ el }
 			/>
 		);
 	}

@@ -1197,3 +1197,8 @@ html.wp-toolbar:has(body.bkng-operational) {
 		gap: 6px;
 	}
 }
+
+// Colour of the public form (Struttura → Modulo online).
+.bkng-color-field {
+	max-width: 420px;
+}

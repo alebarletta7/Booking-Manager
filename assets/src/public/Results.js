@@ -277,7 +277,7 @@ export function SearchBar( {
 			<div className="bkng-p-searchbar__go">
 				<button
 					type="submit"
-					className="bkng-p-button is-primary wp-element-button"
+					className="bkng-p-button is-primary"
 					disabled={ busy || nights < 1 }
 				>
 					{ busy ? (
@@ -609,7 +609,7 @@ function Rates( { property, item, onChoose, busy } ) {
 							) }
 							<button
 								type="button"
-								className="bkng-p-button is-primary wp-element-button"
+								className="bkng-p-button is-primary"
 								disabled={ busy }
 								onClick={ () =>
 									onChoose( item.type, rate, quantity )
@@ -721,7 +721,7 @@ function RoomCard( { property, stay, item, onChoose, busy } ) {
 							) }
 							<button
 								type="button"
-								className="bkng-p-button is-primary wp-element-button"
+								className="bkng-p-button is-primary"
 								aria-expanded={ direct ? undefined : open }
 								disabled={ busy }
 								onClick={ select }
@@ -1136,7 +1136,7 @@ export function Results( {
 				/>
 				<button
 					type="button"
-					className="bkng-p-button is-primary wp-element-button bkng-p-filters__done"
+					className="bkng-p-button is-primary bkng-p-filters__done"
 					onClick={ () => setShowFilters( false ) }
 				>
 					{ sprintf(
@@ -1144,10 +1144,10 @@ export function Results( {
 						_n(
 							'Mostra %d camera',
 							'Mostra %d camere',
-							shown.length,
+							available,
 							'booking-manager'
 						),
-						shown.length
+						available
 					) }
 				</button>
 			</aside>

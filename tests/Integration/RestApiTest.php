@@ -192,6 +192,10 @@ final class RestApiTest extends TestCase {
 		$this->assertSame( 200, $view->get_status() );
 		$this->assertTrue( $view->get_data()['available'] );
 		$this->assertArrayNotHasKey( 'base_price', $view->get_data()['room_types'][0] );
+		// Colour of the form: only #rrggbb is kept (it ends up in a style attribute).
+		$this->assertSame( '', $view->get_data()['color'] );
+		$this->assertSame( '#a5523a', \BookingManager\Properties\PropertySettings::merge( array(), array( 'form_color' => '#A5523A' ) )['form_color'] );
+		$this->assertSame( '', \BookingManager\Properties\PropertySettings::merge( array(), array( 'form_color' => 'red;background:url(x)' ) )['form_color'] );
 		$this->assertStringContainsString( 'no-store', (string) $view->get_headers()['Cache-Control'] );
 
 		$search = $this->call( 'GET', '/properties/' . $p['slug'] . '/search', array(), array( 'arrival' => self::day( 30 ), 'departure' => self::day( 32 ), 'adults' => 2 ), true );

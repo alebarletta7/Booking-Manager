@@ -175,3 +175,19 @@ export function extraPrice( extra, currency ) {
 	}
 	return '';
 }
+
+/**
+ * The colour chosen in Struttura → Modulo online, on the form's container; the text on
+ * it is white or dark, whichever reads better.
+ */
+export function applyColor( el, hex ) {
+	if ( ! el || ! /^#[0-9a-f]{6}$/i.test( hex || '' ) ) {
+		return;
+	}
+	const [ r, g, b ] = [ 1, 3, 5 ].map( ( i ) =>
+		parseInt( hex.slice( i, i + 2 ), 16 )
+	);
+	const light = ( r * 299 + g * 587 + b * 114 ) / 1000 > 150;
+	el.style.setProperty( '--bkng-color', hex );
+	el.style.setProperty( '--bkng-color-text', light ? '#1e1e1e' : '#fff' );
+}

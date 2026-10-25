@@ -1,16 +1,21 @@
-// Public booking form. It takes the look of the site: fonts and text colour are
-// inherited, the main colour comes from the theme's palette (block themes: theme.json
-// presets; classic themes that register a "primary" colour), borders and soft
-// backgrounds are mixed from the text colour. Primary buttons also carry
-// .wp-element-button, so a block theme styles them like its own buttons: our rules
-// for them sit inside :where() and never win over the theme.
+// Public booking form. Fonts and text colour come from the site; the main colour is
+// the one chosen in Struttura → Modulo online (--bkng-color, set on the container),
+// otherwise the theme's "primary" (block themes and classic themes that register it),
+// otherwise the green of Booking Manager. Borders and soft backgrounds are mixed from
+// the text colour.
+//
+// Themes such as Astra style every <button> and <input> of the page (colours, padding,
+// line-height, hover). Every control of the form is therefore styled here with
+// selectors stronger than an element selector, hover and focus included, so the form
+// looks the same on any theme.
 
 .bkng-public {
 	--bkng-accent: var(
-		--wp--preset--color--primary,
-		var(--wp--preset--color--contrast, #1e1e1e)
+		--bkng-color,
+		var(--wp--preset--color--primary, #1f5c43)
 	);
-	--bkng-on-accent: var(--wp--preset--color--base, #fff);
+	--bkng-on-accent: var(--bkng-color-text, #fff);
+	--bkng-accent-hover: color-mix(in srgb, var(--bkng-accent) 85%, #000);
 	--bkng-line: color-mix(in srgb, currentColor 18%, transparent);
 	--bkng-soft: color-mix(in srgb, currentColor 5%, transparent);
 	--bkng-muted: color-mix(in srgb, currentColor 68%, transparent);
@@ -44,7 +49,7 @@
 		text-decoration: underline;
 	}
 
-	input,
+	input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 	select,
 	textarea {
 		font: inherit;
@@ -52,10 +57,21 @@
 		background: transparent;
 		border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
 		border-radius: calc(var(--bkng-radius) - 2px);
+		box-shadow: none;
 		padding: 0.55em 0.7em;
 		width: 100%;
+		height: auto;
 		min-height: 2.6em;
 		max-width: 100%;
+		line-height: 1.4;
+		margin: 0;
+
+		&:focus {
+			background: transparent;
+			border-color: var(--bkng-accent);
+			box-shadow: none;
+			outline: none;
+		}
 
 		&:focus-visible {
 			outline: 2px solid var(--bkng-accent);
@@ -80,6 +96,46 @@
 
 	textarea {
 		resize: vertical;
+	}
+}
+
+// Small inner controls (steppers, photos, links…): nothing of the theme's buttons.
+@mixin bare-button {
+	appearance: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	line-height: inherit;
+	letter-spacing: inherit;
+	text-transform: none;
+	text-decoration: none;
+	min-width: 0;
+	min-height: 0;
+	width: auto;
+	height: auto;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		background: none;
+		color: inherit;
+		border: 0;
+		box-shadow: none;
+		text-decoration: none;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--bkng-accent);
+		outline-offset: 2px;
 	}
 }
 
@@ -174,41 +230,65 @@
 	cursor: pointer;
 }
 
-// Buttons.
-.bkng-p-button {
+// Buttons: same shape on every theme, main colour of the form.
+.bkng-public .bkng-p-button {
+	@include bare-button;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
-	font: inherit;
-	cursor: pointer;
-	text-decoration: none;
+	padding: 0.65em 1.25em;
+	min-height: 2.75em;
+	border: 1px solid var(--bkng-line);
+	border-radius: var(--bkng-radius);
+	background: transparent;
+	color: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	text-align: center;
+	white-space: nowrap;
+
+	&:hover,
+	&:focus {
+		border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+		background: var(--bkng-soft);
+		color: inherit;
+	}
+
+	.bkng-p-icon {
+		display: block;
+	}
+
+	&.is-primary {
+		background: var(--bkng-accent);
+		border-color: var(--bkng-accent);
+		color: var(--bkng-on-accent);
+
+		&:hover,
+		&:focus {
+			background: var(--bkng-accent-hover);
+			border-color: var(--bkng-accent-hover);
+			color: var(--bkng-on-accent);
+		}
+	}
+
+	&.is-danger {
+		background: var(--bkng-danger);
+		border-color: var(--bkng-danger);
+		color: #fff;
+
+		&:hover,
+		&:focus {
+			background: color-mix(in srgb, var(--bkng-danger) 85%, #000);
+			border-color: transparent;
+			color: #fff;
+		}
+	}
 
 	&:disabled {
 		opacity: 0.55;
 		cursor: not-allowed;
 	}
-}
-
-:where(.bkng-public) :where(.bkng-p-button) {
-	padding: 0.6em 1.2em;
-	border-radius: var(--bkng-radius);
-	border: 1px solid currentColor;
-	background: transparent;
-	color: inherit;
-	line-height: 1.3;
-}
-
-:where(.bkng-public) :where(.bkng-p-button.is-primary) {
-	background: var(--bkng-accent);
-	border-color: var(--bkng-accent);
-	color: var(--bkng-on-accent);
-}
-
-:where(.bkng-public) :where(.bkng-p-button.is-danger) {
-	background: var(--bkng-danger);
-	border-color: var(--bkng-danger);
-	color: #fff;
 }
 
 .bkng-p-spinner {
@@ -261,15 +341,15 @@
 	padding: 24px 0;
 }
 
-.bkng-p-link {
-	background: none;
-	border: 0;
-	padding: 0;
-	font: inherit;
+.bkng-public .bkng-p-link {
+	@include bare-button;
 	font-size: 0.9em;
-	color: inherit;
 	text-decoration: underline;
-	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		text-decoration: underline;
+	}
 }
 
 .bkng-p-pill {
@@ -386,12 +466,24 @@
 		text-overflow: ellipsis;
 	}
 
-	.bkng-public & input[type="date"] {
+	// As strong as the base rule of the inputs, and after it.
+	.bkng-public &__field &__stack input[type="date"] {
 		border: 0;
 		padding: 0;
 		min-height: 0;
 		font-weight: 600;
 		background: transparent;
+		box-shadow: none;
+
+		&:focus {
+			border: 0;
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--bkng-accent);
+			outline-offset: 2px;
+		}
 	}
 
 	&__go {
@@ -413,33 +505,29 @@
 	}
 }
 
-.bkng-p-guests {
-	&__toggle {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: center;
-		column-gap: 8px;
-		flex: 1;
-		min-width: 0;
-		text-align: left;
-		background: none;
-		border: 0;
-		padding: 0;
-		font: inherit;
-		color: inherit;
-		cursor: pointer;
+.bkng-public .bkng-p-guests__toggle {
+	@include bare-button;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	column-gap: 8px;
+	flex: 1;
+	min-width: 0;
+	text-align: left;
+	border-radius: 4px;
 
-		.bkng-p-searchbar__label,
-		.bkng-p-searchbar__value {
-			grid-column: 1;
-		}
-
-		.bkng-p-icon {
-			grid-column: 2;
-			grid-row: 1 / span 2;
-		}
+	.bkng-p-searchbar__label,
+	.bkng-p-searchbar__value {
+		grid-column: 1;
 	}
 
+	.bkng-p-icon {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+	}
+}
+
+.bkng-p-guests {
 	&__panel {
 		position: absolute;
 		z-index: 20;
@@ -489,20 +577,28 @@
 			font-weight: 600;
 		}
 
-		button {
+		.bkng-public & button {
+			@include bare-button;
 			display: grid;
 			place-items: center;
 			width: 34px;
 			height: 34px;
 			border-radius: 50%;
 			border: 1px solid var(--bkng-line);
-			background: transparent;
-			color: inherit;
-			cursor: pointer;
+
+			&:hover,
+			&:focus {
+				border: 1px solid var(--bkng-accent);
+				color: var(--bkng-accent);
+			}
 
 			&:disabled {
 				opacity: 0.4;
 				cursor: not-allowed;
+			}
+
+			.bkng-p-icon {
+				display: block;
 			}
 		}
 	}
@@ -536,10 +632,12 @@
 		}
 	}
 
-	&__toggle,
-	&__done {
-		display: none;
-	}
+}
+
+// Only on narrow forms (below); as strong as the button rule.
+.bkng-public .bkng-p-filters__toggle,
+.bkng-public .bkng-p-filters__done {
+	display: none;
 }
 
 .bkng-p-filter {
@@ -932,16 +1030,21 @@
 		color: var(--bkng-muted);
 	}
 
-	button {
+	.bkng-public & button {
+		@include bare-button;
 		position: relative;
 		display: block;
-		padding: 0;
-		border: 0;
-		margin: 0;
+		width: 100%;
+		height: 100%;
 		background: var(--bkng-soft);
 		cursor: zoom-in;
 		overflow: hidden;
-		min-height: 0;
+		border-radius: 0;
+
+		&:hover,
+		&:focus {
+			background: var(--bkng-soft);
+		}
 
 		&:focus-visible {
 			outline: 2px solid var(--bkng-accent);
@@ -963,7 +1066,7 @@
 		gap: 4px;
 		min-height: 0;
 
-		button {
+		.bkng-public & button {
 			cursor: pointer;
 
 			&.is-active {
@@ -1015,13 +1118,19 @@
 	padding: 48px 56px;
 	color: #fff;
 
-	&__backdrop {
+	& &__backdrop {
+		@include bare-button;
 		position: absolute;
 		inset: 0;
-		border: 0;
-		padding: 0;
-		background: rgba(0, 0, 0, 0.88);
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.9);
 		cursor: zoom-out;
+
+		&:hover,
+		&:focus {
+			background: rgba(0, 0, 0, 0.9);
+		}
 	}
 
 	&__figure {
@@ -1047,24 +1156,27 @@
 		}
 	}
 
-	&__close,
-	&__prev,
-	&__next {
+	& &__close,
+	& &__prev,
+	& &__next {
+		@include bare-button;
 		position: absolute;
 		display: grid;
 		place-items: center;
 		width: 44px;
 		height: 44px;
 		border-radius: 50%;
-		border: 0;
-		padding: 0;
 		background: rgba(255, 255, 255, 0.14);
 		color: #fff;
-		cursor: pointer;
 
 		&:hover,
-		&:focus-visible {
+		&:focus {
 			background: rgba(255, 255, 255, 0.28);
+			color: #fff;
+		}
+
+		&:focus-visible {
+			outline-color: #fff;
 		}
 	}
 
@@ -1111,22 +1223,19 @@
 			display: block;
 		}
 
-		&.is-open .bkng-p-filters__done {
+		.bkng-public &.is-open .bkng-p-filters__done {
 			display: flex;
 			width: 100%;
 			margin-top: 8px;
 		}
 
-		&__toggle {
-			display: inline-flex;
-		}
 	}
 
 	.bkng-p-results:has(.bkng-p-filters.is-open) .bkng-p-filters {
 		grid-row: 1;
 	}
 
-	.bkng-p-filters__toggle {
+	.bkng-public .bkng-p-filters__toggle {
 		display: inline-flex;
 	}
 }

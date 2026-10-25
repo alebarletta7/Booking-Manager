@@ -8,6 +8,7 @@ import { __, sprintf } from '@wordpress/i18n';
 
 import {
 	addDays,
+	applyColor,
 	date,
 	extraPrice,
 	guestsLabel,
@@ -426,7 +427,7 @@ function GuestForm( {
 					</button>
 					<button
 						type="submit"
-						className="bkng-p-button is-primary wp-element-button"
+						className="bkng-p-button is-primary"
 						disabled={
 							busy ||
 							! privacy ||
@@ -544,7 +545,7 @@ function Done( { property, result } ) {
 
 /* ------------------------------------------------------------------ Form */
 
-export default function BookingForm( { api, slug, hero = false } ) {
+export default function BookingForm( { api, slug, hero = false, root } ) {
 	const [ property, setProperty ] = useState( null );
 	const [ loadError, setLoadError ] = useState( null );
 	const [ stay, setStay ] = useState( {
@@ -567,6 +568,7 @@ export default function BookingForm( { api, slug, hero = false } ) {
 	useEffect( () => {
 		api.get( 'properties/' + slug )
 			.then( ( p ) => {
+				applyColor( root, p.color );
 				setProperty( p );
 				setStay( ( s ) => ( {
 					...s,
@@ -578,7 +580,7 @@ export default function BookingForm( { api, slug, hero = false } ) {
 				} ) );
 			} )
 			.catch( setLoadError );
-	}, [ api, slug ] );
+	}, [ api, slug, root ] );
 
 	// Rooms held and the page closed: they go back on sale at once.
 	useEffect( () => {

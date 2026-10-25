@@ -34,6 +34,8 @@ final class PropertySettings {
 			// Public form.
 			'online_enabled'        => true,
 			'show_prices'           => true,
+			// Main colour of the form (#rrggbb); empty: the theme's colours.
+			'form_color'            => '',
 			// The guest may cancel from the link in the e-mail (the rate's cancellation
 			// terms decide what is refunded; a non-refundable rate can never be cancelled online).
 			'guest_cancel_online'   => true,
@@ -143,6 +145,9 @@ final class PropertySettings {
 		}
 		if ( 'privacy_url' === $key ) {
 			return esc_url_raw( $value );
+		}
+		if ( 'form_color' === $key ) {
+			return preg_match( '/^#[0-9a-f]{6}$/i', $value ) ? strtolower( $value ) : '';
 		}
 		if ( 'notify_email' === $key ) {
 			return is_email( $value ) ? $value : '';
