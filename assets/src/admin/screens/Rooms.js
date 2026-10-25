@@ -4,11 +4,12 @@
  */
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { get, post, put } from '../lib/api';
 import { can } from '../lib/boot';
 import { money } from '../lib/format';
+import { expandCodes, MAX_ROOMS_AT_ONCE } from '../lib/rooms';
 import { useAction, useLoad } from '../lib/hooks';
 import { useProperty } from '../lib/property';
 import {
@@ -391,6 +392,151 @@ function UnitModal( { property, types, unit, defaultType, onClose, onDone } ) {
 	);
 }
 
+/** Several rooms of one type at once: «101-110», «201, 202, 205». All or none. */
+function SeriesModal( { property, types, defaultType, onClose, onDone } ) {
+	const action = useAction();
+	const [ typeId, setTypeId ] = useState( defaultType || types[ 0 ]?.id );
+	const [ text, setText ] = useState( '' );
+	const [ floor, setFloor ] = useState( '' );
+	const codes = expandCodes( text );
+	const tooMany = codes.length > MAX_ROOMS_AT_ONCE;
+	const shown = codes.slice( 0, 24 );
+	return (
+		<FormModal
+			title={ __( 'Aggiungi più camere', 'booking-manager' ) }
+			onClose={ onClose }
+			busy={ action.busy }
+			error={ action.error }
+			submitLabel={
+				codes.length && ! tooMany
+					? sprintf(
+							/* translators: %d: number of rooms. */
+							_n(
+								'Crea %d camera',
+								'Crea %d camere',
+								codes.length,
+								'booking-manager'
+							),
+							codes.length
+					  )
+					: __( 'Crea le camere', 'booking-manager' )
+			}
+			onSubmit={ async () => {
+				if ( ! codes.length || tooMany ) {
+					action.setError(
+						new Error(
+							tooMany
+								? sprintf(
+										/* translators: %d: maximum number of rooms. */
+										__(
+											'Al massimo %d camere per volta.',
+											'booking-manager'
+										),
+										MAX_ROOMS_AT_ONCE
+								  )
+								: __(
+										'Indica i numeri delle camere.',
+										'booking-manager'
+								  )
+						)
+					);
+					return;
+				}
+				const res = await action.run( () =>
+					post( '/properties/' + property.id + '/units/batch', {
+						room_type_id: Number( typeId ),
+						codes,
+						floor,
+					} )
+				);
+				if ( res ) {
+					onDone(
+						sprintf(
+							/* translators: %d: number of rooms. */
+							_n(
+								'%d camera creata.',
+								'%d camere create.',
+								res.length,
+								'booking-manager'
+							),
+							res.length
+						)
+					);
+				}
+			} }
+		>
+			<Grid>
+				<Select
+					label={ __( 'Tipologia', 'booking-manager' ) }
+					value={ String( typeId || '' ) }
+					options={ types.map( ( t ) => ( {
+						value: String( t.id ),
+						label: t.name,
+					} ) ) }
+					onChange={ setTypeId }
+				/>
+				<Text
+					label={ __( 'Piano (facoltativo)', 'booking-manager' ) }
+					value={ floor }
+					onChange={ setFloor }
+				/>
+			</Grid>
+			<Text
+				label={ __( 'Numeri delle camere', 'booking-manager' ) }
+				value={ text }
+				onChange={ setText }
+				required
+				placeholder="101-110, 201, 202"
+				help={ __(
+					"Separati da virgola. Per una serie scrivi il primo e l'ultimo numero con un trattino: 101–110 crea 10 camere.",
+					'booking-manager'
+				) }
+			/>
+			{ codes.length > 0 && (
+				<div className="bkng-series-preview" aria-live="polite">
+					<p
+						className={
+							tooMany ? 'bkng-help is-error' : 'bkng-help'
+						}
+					>
+						{ tooMany
+							? sprintf(
+									/* translators: %d: maximum number of rooms. */
+									__(
+										'Troppe camere: al massimo %d per volta.',
+										'booking-manager'
+									),
+									MAX_ROOMS_AT_ONCE
+							  )
+							: sprintf(
+									/* translators: %d: number of rooms. */
+									_n(
+										'Verrà creata %d camera:',
+										'Verranno create %d camere:',
+										codes.length,
+										'booking-manager'
+									),
+									codes.length
+							  ) }
+					</p>
+					{ ! tooMany && (
+						<div className="bkng-row">
+							{ shown.map( ( c, i ) => (
+								<span className="bkng-badge" key={ c + i }>
+									{ c }
+								</span>
+							) ) }
+							{ codes.length > shown.length && (
+								<span className="bkng-muted">…</span>
+							) }
+						</div>
+					) }
+				</div>
+			) }
+		</FormModal>
+	);
+}
+
 export default function Rooms() {
 	const { property } = useProperty();
 	const [ archived, setArchived ] = useState( false );
@@ -534,6 +680,20 @@ export default function Rooms() {
 									>
 										{ __(
 											'Aggiungi camera',
+											'booking-manager'
+										) }
+									</Button>
+									<Button
+										variant="secondary"
+										onClick={ () =>
+											setModal( {
+												kind: 'series',
+												type: t.id,
+											} )
+										}
+									>
+										{ __(
+											'Aggiungi più camere',
 											'booking-manager'
 										) }
 									</Button>
@@ -704,6 +864,15 @@ export default function Rooms() {
 					property={ property }
 					types={ active }
 					unit={ modal.unit }
+					defaultType={ modal.type }
+					onClose={ () => setModal( null ) }
+					onDone={ done }
+				/>
+			) }
+			{ modal?.kind === 'series' && (
+				<SeriesModal
+					property={ property }
+					types={ active }
 					defaultType={ modal.type }
 					onClose={ () => setModal( null ) }
 					onDone={ done }

@@ -46,6 +46,7 @@ Richiede un utente collegato con le capability del ruolo (vedi [ARCHITETTURA.md]
 | POST, PUT, PATCH | `/room-types/{id}` |
 | POST | `/room-types/{id}/archive` |
 | GET, POST | `/properties/{property_id}/units` |
+| POST | `/properties/{property_id}/units/batch` — più camere della stessa tipologia (`room_type_id`, `codes[]` fino a 100, `floor`): tutte o nessuna |
 | POST, PUT, PATCH | `/units/{id}` |
 | POST | `/units/{id}/{action}` |
 | GET | `/properties/{property_id}/blocks` |

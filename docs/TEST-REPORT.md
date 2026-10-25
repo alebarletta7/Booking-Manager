@@ -18,7 +18,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 81 test, 874 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 82 test, 890 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|
@@ -27,7 +27,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Unit — riepilogo pagamenti | 3 | stato di pagamento, importi, condizioni di cancellazione per l'ospite |
 | Unit — motore prezzi | 9 | prezzo base, periodi e priorità, giorni della settimana, ospiti extra, modificatori, supplementi e sconti, tassa di soggiorno separata, arrotondamenti, caparra e cancellazione |
 | Unit — regole di soggiorno | 5 | soggiorno minimo/massimo, chiusure ad arrivo/partenza, regole per tipologia, anticipo e orario limite |
-| Integrazione — motore prenotazioni | 20 | ultima camera non vendibile due volte, giorno di partenza libero, doppia camera rifiutata dal database, blocco ottimistico (409), idempotenza, cambio date con nuovo prezzo, holds, regole e forzatura dello staff, chiusure, prezzo venduto invariato, **licenza: blocco di nuove prenotazioni e camere ma non del resto**, modalità online, schede ospite, archiviazione, B&B |
+| Integrazione — motore prenotazioni | 21 | camere in serie (tutte o nessuna, numeri già usati o ripetuti), ultima camera non vendibile due volte, giorno di partenza libero, doppia camera rifiutata dal database, blocco ottimistico (409), idempotenza, cambio date con nuovo prezzo, holds, regole e forzatura dello staff, chiusure, prezzo venduto invariato, **licenza: blocco di nuove prenotazioni e camere ma non del resto**, modalità online, schede ospite, archiviazione, B&B |
 | Integrazione — **concorrenza reale** | 1 | 8 processi PHP separati, ognuno con la sua connessione, prenotano l'ultima camera nello stesso istante: **ne riesce uno solo**, gli altri ricevono «non disponibile» (ripetuto 4 volte di fila, sempre superato) |
 | Integrazione — canali | 4 | importazione una sola volta e senza email, ciò che non entra viene registrato e riprovato, i connettori ricevono i cambi di disponibilità, anonimizzazione |
 | Integrazione — check-in | 9 | QR firmato senza dati personali, check-in una volta sola anche da due telefoni, codici errati o di altre strutture, check-out e camera da pulire, camere non pulite, camere separate, annullamento del check-in, housekeeping, permessi |
@@ -43,7 +43,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | `php -l` su tutti i file PHP del pacchetto | SUPERATO |
 | ESLint (`@wordpress/eslint-plugin`) su `assets/src` | SUPERATO (0 errori) |
 | Build `npm run build` | SUPERATO (admin ~316 KB, modulo pubblico ~30 KB con sole dipendenze `wp-element` e `wp-i18n`) |
-| Generazione `languages/booking-manager.pot` | SUPERATO (1.325 testi) |
+| Generazione `languages/booking-manager.pot` | SUPERATO (1.339 testi) |
 
 ## 3. Prove manuali su WordPress (browser)
 
@@ -52,6 +52,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Plugin appena installato: solo il passo Licenza | SUPERATO |
 | Configurazione guidata: struttura → camere e prezzi → pagina di prenotazione → fine | SUPERATO |
 | Tutte le 17 schermate del gestionale senza errori JavaScript né risposte HTTP di errore | SUPERATO |
+| Camere: «Aggiungi più camere» con serie 401-405 e 410 (anteprima, creazione, numeri già usati rifiutati senza creare nulla); menu laterale a gruppi su desktop e mobile | SUPERATO |
 | Reception: ricerca per codice e check-in, camera assegnata, prenotazione «in soggiorno» | SUPERATO |
 | Modulo pubblico (desktop 1280 px e mobile 390 px): ricerca, servizio aggiuntivo, scelta tariffa, blocco camere con conto alla rovescia, dati ospite, invio | SUPERATO — totale verificato: 3 notti × 95 € + parcheggio 3 × 10 € = 315 €, caparra 30% = 94,50 € |
 | Modulo pubblico con i colori e i font del tema (pulsanti `wp-element-button`) | SUPERATO (Twenty Twenty-Four) |

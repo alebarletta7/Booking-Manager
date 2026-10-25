@@ -219,6 +219,29 @@ final class BookingEngineTest extends TestCase {
 		$this->assertSame( 10000, $after['price_snapshot']['rooms'][0]['nightly'][0]['price'] );
 	}
 
+	public function test_rooms_in_series_are_created_all_or_none(): void {
+		$p         = $this->property();
+		$t         = $this->room_type( $p['id'], 1 );
+		$inventory = $this->service( \BookingManager\Inventory\InventoryService::class );
+
+		$made = $inventory->create_units( $p['id'], array( 'room_type_id' => $t['type']['id'], 'codes' => array( '101', '102', 'a3' ), 'floor' => '1' ) );
+		$this->assertIsArray( $made );
+		$this->assertSame( array( '101', '102', 'A3' ), array_column( $made, 'code' ) );
+		$this->assertSame( array( '1', '1', '1' ), array_column( $made, 'floor' ) );
+		$this->assertSame( 4, $this->service( \BookingManager\Inventory\UnitRepository::class )->count_active( $t['type']['id'] ) );
+
+		// One code already used: nothing is created and the error names it.
+		$taken = $inventory->create_units( $p['id'], array( 'room_type_id' => $t['type']['id'], 'codes' => array( '103', '102' ) ) );
+		$this->assertSame( 'bkng_validation', $taken->get_error_code() );
+		$this->assertStringContainsString( '102', $taken->get_error_data()['fields']['codes'] );
+		$this->assertSame( 4, $this->service( \BookingManager\Inventory\UnitRepository::class )->count_active( $t['type']['id'] ) );
+
+		$repeated = $inventory->create_units( $p['id'], array( 'room_type_id' => $t['type']['id'], 'codes' => array( '201', '201' ) ) );
+		$this->assertStringContainsString( '201', $repeated->get_error_data()['fields']['codes'] );
+		$this->assertInstanceOf( \WP_Error::class, $inventory->create_units( $p['id'], array( 'room_type_id' => 0, 'codes' => array( '301' ) ) ) );
+		$this->assertInstanceOf( \WP_Error::class, $inventory->create_units( $p['id'], array( 'room_type_id' => $t['type']['id'], 'codes' => array_map( 'strval', range( 1, 101 ) ) ) ) );
+	}
+
 	public function test_licence_blocks_new_bookings_and_room_management_but_not_existing_bookings(): void {
 		$p = $this->property();
 		$t = $this->room_type( $p['id'], 2 );
@@ -231,6 +254,7 @@ final class BookingEngineTest extends TestCase {
 		$this->assertSame( 'bkng_license_required', $online->get_error_code() );
 		$inventory = $this->service( \BookingManager\Inventory\InventoryService::class );
 		$this->assertSame( 'bkng_license_required', $inventory->create_unit( $p['id'], array( 'code' => 'X1' ) )->get_error_code() );
+		$this->assertSame( 'bkng_license_required', $inventory->create_units( $p['id'], array( 'room_type_id' => $t['type']['id'], 'codes' => array( 'X1', 'X2' ) ) )->get_error_code() );
 		$this->assertSame( 'bkng_license_required', $inventory->update_type( $t['type']['id'], array( 'name' => 'Nuovo' ) )->get_error_code() );
 
 		// A guest already booked is never stopped: check-in and cancellation still work.

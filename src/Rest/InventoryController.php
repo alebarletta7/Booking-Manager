@@ -5,6 +5,7 @@
  *   GET  /properties/{property_id}/room-types        POST (new type)
  *   PUT  /room-types/{id}                            POST /room-types/{id}/archive
  *   GET  /properties/{property_id}/units             POST (new room)
+ *   POST /properties/{property_id}/units/batch       (several rooms of one type)
  *   PUT  /units/{id}                                 POST /units/{id}/archive|restore
  *   GET  /properties/{property_id}/blocks?from&to    POST /units/{id}/blocks
  *   DELETE /blocks/{id}
@@ -89,6 +90,15 @@ class InventoryController extends RestController {
 					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->service->create_unit( (int) $r['property_id'], (array) $r->get_json_params() ), 201 ),
 					'permission_callback' => $rooms,
 				),
+			)
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/properties/(?P<property_id>\d+)/units/batch',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->service->create_units( (int) $r['property_id'], (array) $r->get_json_params() ), 201 ),
+				'permission_callback' => $rooms,
 			)
 		);
 		register_rest_route(

@@ -10,6 +10,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { get, post, put } from '../lib/api';
 import { boot } from '../lib/boot';
 import { money } from '../lib/format';
+import { expandCodes } from '../lib/rooms';
 import { useAction, useLoad } from '../lib/hooks';
 import { useProperty } from '../lib/property';
 import { navigate } from '../lib/router';
@@ -171,7 +172,7 @@ function RoomsStep( { data, onChanged, onNext } ) {
 			<Card title={ __( 'Tipologie e camere', 'booking-manager' ) }>
 				<p className="bkng-help">
 					{ __(
-						'Per ogni tipologia che vendi indica capienza, prezzo base a notte e i numeri delle camere (es. 101, 102, 103). Tariffe stagionali, caparre e cancellazione si impostano dopo in «Tariffe».',
+						'Per ogni tipologia che vendi indica capienza, prezzo base a notte e i numeri delle camere (es. 101, 102 oppure una serie: 101–110). Tariffe stagionali, caparre e cancellazione si impostano dopo in «Tariffe».',
 						'booking-manager'
 					) }
 				</p>
@@ -197,22 +198,27 @@ function RoomsStep( { data, onChanged, onNext } ) {
 						if ( ! type ) {
 							return;
 						}
-						const codes = form.codes
-							.split( /[,\s]+/ )
-							.map( ( c ) => c.trim() )
-							.filter( Boolean );
-						for ( const code of codes.length
-							? codes
-							: [ form.name.slice( 0, 30 ) ] ) {
-							const unit = await action.run( () =>
-								post( '/properties/' + property.id + '/units', {
-									code,
-									room_type_id: type.id,
-								} )
-							);
-							if ( ! unit ) {
-								break;
-							}
+						const codes = expandCodes( form.codes );
+						const units = await action.run( () =>
+							codes.length
+								? post(
+										'/properties/' +
+											property.id +
+											'/units/batch',
+										{ room_type_id: type.id, codes }
+								  )
+								: post(
+										'/properties/' + property.id + '/units',
+										{
+											code: form.name.slice( 0, 30 ),
+											room_type_id: type.id,
+										}
+								  )
+						);
+						if ( ! units ) {
+							// The type exists: the list below shows it without rooms.
+							onChanged();
+							return;
 						}
 						setForm( {
 							name: '',
@@ -267,7 +273,7 @@ function RoomsStep( { data, onChanged, onNext } ) {
 							) }
 							value={ form.codes }
 							onChange={ set( 'codes' ) }
-							placeholder="101, 102"
+							placeholder="101-110, 201"
 						/>
 					</Grid>
 					<Button

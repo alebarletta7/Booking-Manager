@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T22:14:45+00:00\n"
+"POT-Creation-Date: 2026-10-25T15:44:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: booking-manager\n"
@@ -53,8 +53,8 @@ msgstr ""
 
 #: src/Access/Capabilities.php:132
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
-#: assets/build/admin.js:10
+#: assets/build/admin.js:11
+#: assets/build/admin.js:15
 msgid "Prenotazioni"
 msgstr ""
 
@@ -65,16 +65,17 @@ msgstr ""
 #: src/Access/Capabilities.php:134
 #: assets/build/admin.js:6
 #: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "Housekeeping"
 msgstr ""
 
 #: src/Access/Capabilities.php:135
 #: src/Notifications/NotificationTemplates.php:282
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
-#: assets/build/admin.js:10
 #: assets/build/admin.js:11
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
 msgid "Ospiti"
 msgstr ""
 
@@ -87,6 +88,7 @@ msgid "Configurazione della struttura"
 msgstr ""
 
 #: src/Access/Capabilities.php:138
+#: assets/build/admin.js:11
 msgid "Amministrazione"
 msgstr ""
 
@@ -499,7 +501,7 @@ msgstr ""
 
 #: src/Bookings/BookingStatus.php:81
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "In attesa"
 msgstr ""
 
@@ -510,8 +512,8 @@ msgstr ""
 
 #: src/Bookings/BookingStatus.php:83
 #: assets/build/admin.js:4
-#: assets/build/admin.js:9
-#: assets/build/admin.js:11
+#: assets/build/admin.js:14
+#: assets/build/admin.js:16
 #: assets/build/public.js:16
 msgid "Confermata"
 msgstr ""
@@ -519,13 +521,13 @@ msgstr ""
 #: src/Bookings/BookingStatus.php:84
 #: src/Bookings/StayStatus.php:29
 #: assets/build/admin.js:4
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "In soggiorno"
 msgstr ""
 
 #: src/Bookings/BookingStatus.php:85
 #: assets/build/admin.js:4
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 #: assets/build/public.js:16
 msgid "Conclusa"
 msgstr ""
@@ -585,7 +587,7 @@ msgid "Non puoi impostare un prezzo manuale."
 msgstr ""
 
 #: src/Bookings/StayBuilder.php:134
-#: src/Inventory/InventoryService.php:180
+#: src/Inventory/InventoryService.php:182
 #: src/Rates/RateService.php:186
 #: src/Rates/RateService.php:196
 msgid "Prezzo non valido."
@@ -646,7 +648,7 @@ msgid "Il QR esiste solo per le prenotazioni confermate."
 msgstr ""
 
 #: src/Checkin/CheckinService.php:427
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Fatto"
 msgstr ""
 
@@ -660,7 +662,7 @@ msgstr ""
 
 #: src/Checkin/CheckinService.php:430
 #: assets/build/admin.js:5
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Da confermare"
 msgstr ""
 
@@ -929,7 +931,7 @@ msgid "Ospite non trovato."
 msgstr ""
 
 #: src/Housekeeping/HousekeepingService.php:132
-#: src/Inventory/InventoryService.php:606
+#: src/Inventory/InventoryService.php:680
 msgid "Camera non trovata."
 msgstr ""
 
@@ -944,7 +946,7 @@ msgstr ""
 
 #: src/Housekeeping/HousekeepingService.php:185
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Check-out"
 msgstr ""
 
@@ -974,77 +976,103 @@ msgstr ""
 msgid "Manutenzione"
 msgstr ""
 
-#: src/Inventory/InventoryService.php:123
+#: src/Inventory/InventoryService.php:125
 msgid "Ci sono prenotazioni future per questa tipologia: spostale prima di archiviarla."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:151
+#: src/Inventory/InventoryService.php:153
 msgid "Indica il nome della tipologia."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:170
+#: src/Inventory/InventoryService.php:172
 #: src/Rates/RateService.php:371
 msgid "Valore non valido."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:200
+#: src/Inventory/InventoryService.php:202
 msgid "Una delle immagini non è valida o non è pubblica."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:216
+#: src/Inventory/InventoryService.php:218
 msgid "Il numero massimo di ospiti deve essere almeno pari agli adulti."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:219
+#: src/Inventory/InventoryService.php:221
 msgid "Gli ospiti inclusi nel prezzo non possono superare il massimo."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:380
-msgid "Indica il numero o il codice della camera."
-msgstr ""
-
-#: src/Inventory/InventoryService.php:382
-msgid "Esiste già una camera con questo codice."
-msgstr ""
-
-#: src/Inventory/InventoryService.php:403
+#: src/Inventory/InventoryService.php:295
+#: src/Inventory/InventoryService.php:477
 #: src/Rates/RateService.php:170
 #: src/Rates/RateService.php:343
 msgid "Tipologia non valida."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:444
+#: src/Inventory/InventoryService.php:305
+#: assets/build/admin.js:8
+msgid "Indica i numeri delle camere."
+msgstr ""
+
+#. translators: %d: maximum number of rooms.
+#: src/Inventory/InventoryService.php:308
+#: assets/build/admin.js:8
+msgid "Al massimo %d camere per volta."
+msgstr ""
+
+#. translators: %s: room codes.
+#: src/Inventory/InventoryService.php:314
+msgid "Numeri ripetuti nell'elenco: %s."
+msgstr ""
+
+#. translators: %s: room codes.
+#: src/Inventory/InventoryService.php:317
+msgid "Esistono già camere con questi numeri: %s."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:335
+msgid "Le camere non sono state create: errore del database."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:454
+msgid "Indica il numero o il codice della camera."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:456
+msgid "Esiste già una camera con questo codice."
+msgstr ""
+
+#: src/Inventory/InventoryService.php:518
 msgid "La camera ha soggiorni futuri: spostali prima su un'altra camera."
 msgstr ""
 
 #. translators: %s: date.
-#: src/Inventory/InventoryService.php:466
+#: src/Inventory/InventoryService.php:540
 msgid "Senza questa camera non ci sarebbero abbastanza camere per le prenotazioni del %s."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:515
+#: src/Inventory/InventoryService.php:589
 msgid "Il periodo non è valido: la data di fine deve essere successiva all'inizio."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:524
+#: src/Inventory/InventoryService.php:598
 msgid "In questo periodo tutte le camere di questa tipologia sono già vendute: non si può togliere dalla vendita."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:539
+#: src/Inventory/InventoryService.php:613
 msgid "La camera ha già un soggiorno o un blocco in queste date."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:565
+#: src/Inventory/InventoryService.php:639
 #: src/Rates/RateService.php:164
 #: src/Rates/RateService.php:231
 msgid "Periodo non trovato."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:602
+#: src/Inventory/InventoryService.php:676
 msgid "Tipologia non trovata."
 msgstr ""
 
-#: src/Inventory/InventoryService.php:615
+#: src/Inventory/InventoryService.php:689
 msgid "La licenza non permette di modificare camere e tipologie."
 msgstr ""
 
@@ -1573,16 +1601,16 @@ msgstr ""
 #: src/Notifications/NotificationTemplates.php:271
 #: src/Notifications/NotificationTemplates.php:285
 #: assets/build/admin.js:6
-#: assets/build/admin.js:9
-#: assets/build/admin.js:11
+#: assets/build/admin.js:14
+#: assets/build/admin.js:16
 msgid "Camera"
 msgid_plural "Camere"
 msgstr[0] ""
 msgstr[1] ""
 
 #: src/Notifications/NotificationTemplates.php:276
-#: assets/build/admin.js:10
-#: assets/build/admin.js:11
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
 #: assets/build/public.js:16
 msgid "Codice"
 msgstr ""
@@ -1590,8 +1618,8 @@ msgstr ""
 #. translators: %s: check-in time.
 #: src/Notifications/NotificationTemplates.php:278
 #: assets/build/admin.js:4
-#: assets/build/admin.js:10
-#: assets/build/admin.js:11
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
 #: assets/build/public.js:8
 #: assets/build/public.js:18
 msgid "Arrivo"
@@ -1605,8 +1633,8 @@ msgstr ""
 #. translators: %s: check-out time.
 #: src/Notifications/NotificationTemplates.php:280
 #: assets/build/admin.js:4
-#: assets/build/admin.js:10
-#: assets/build/admin.js:11
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
 #: assets/build/public.js:8
 #: assets/build/public.js:19
 msgid "Partenza"
@@ -1618,22 +1646,22 @@ msgid "check-out entro le %s"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:281
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Notti"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:288
 #: assets/build/admin.js:5
-#: assets/build/admin.js:10
-#: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "Ospite"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:291
 #: assets/build/admin.js:5
-#: assets/build/admin.js:10
-#: assets/build/admin.js:11
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
 #: assets/build/public.js:13
 #: assets/build/public.js:16
 #: assets/build/public.js:20
@@ -1645,13 +1673,14 @@ msgid "Già pagato"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:294
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Saldo"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:299
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Indirizzo"
 msgstr ""
 
@@ -1781,7 +1810,7 @@ msgid "Operazione non disponibile con questo sistema di pagamento."
 msgstr ""
 
 #: src/Payments/Providers/ManualProvider.php:31
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "In struttura"
 msgstr ""
 
@@ -2030,7 +2059,7 @@ msgstr ""
 #: src/Rates/RateService.php:182
 #: src/Rates/RateService.php:281
 #: src/Rates/RateService.php:339
-#: src/Rest/InventoryController.php:146
+#: src/Rest/InventoryController.php:156
 msgid "Periodo non valido."
 msgstr ""
 
@@ -2138,7 +2167,7 @@ msgid "Il tuo account non può pubblicare pagine."
 msgstr ""
 
 #: src/Rest/SetupController.php:167
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Prenota il tuo soggiorno"
 msgstr ""
 
@@ -2416,7 +2445,7 @@ msgid "Camera assegnata"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Check-in"
 msgstr ""
 
@@ -2570,7 +2599,7 @@ msgid "Camera ripristinata"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Camera chiusa"
 msgstr ""
 
@@ -2684,30 +2713,32 @@ msgid "Annulla"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Precedenti"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Successivi"
 msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Salva"
 msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Pagamenti"
 msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Struttura"
 msgstr ""
 
@@ -2716,34 +2747,33 @@ msgid "Tipologie"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
 #: assets/build/admin.js:11
+#: assets/build/admin.js:16
 #: assets/build/public.js:11
 #: assets/build/public.js:20
 msgid "Camere"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Tariffe"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Staff"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Impostazioni"
 msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Licenza"
 msgstr ""
 
@@ -2811,15 +2841,16 @@ msgstr ""
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
 #: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 #: assets/build/public.js:14
 msgid "Nome"
 msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
-#: assets/build/admin.js:6
 #: assets/build/admin.js:11
+#: assets/build/admin.js:16
 #: assets/build/public.js:14
 msgid "Cognome"
 msgstr ""
@@ -2828,7 +2859,8 @@ msgstr ""
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
 #: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 #: assets/build/public.js:14
 msgid "Email"
 msgstr ""
@@ -2837,12 +2869,13 @@ msgstr ""
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
 #: assets/build/admin.js:11
+#: assets/build/admin.js:16
 #: assets/build/public.js:14
 msgid "Telefono"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Lingua delle email"
 msgstr ""
 
@@ -2852,7 +2885,7 @@ msgid "Orario di arrivo previsto"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Richieste dell'ospite"
 msgstr ""
 
@@ -2878,7 +2911,9 @@ msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:6
+#: assets/build/admin.js:9
 #: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Tipologia"
 msgstr ""
 
@@ -2892,8 +2927,8 @@ msgid "Bambini"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "Togli"
 msgstr ""
 
@@ -2907,7 +2942,7 @@ msgid "Mantieni il prezzo attuale"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Ignora soggiorno minimo e chiusure"
 msgstr ""
 
@@ -2999,8 +3034,8 @@ msgid "Data"
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/admin.js:10
-#: assets/build/admin.js:11
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
 msgid "Stato"
 msgstr ""
 
@@ -3014,7 +3049,7 @@ msgid "prova"
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Aggiorna"
 msgstr ""
 
@@ -3064,12 +3099,12 @@ msgid "Invia a %s"
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Storico"
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Sistema"
 msgstr ""
 
@@ -3079,8 +3114,8 @@ msgstr ""
 
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
-#: assets/build/admin.js:10
-#: assets/build/admin.js:12
+#: assets/build/admin.js:15
+#: assets/build/admin.js:17
 msgid "Tutte"
 msgstr ""
 
@@ -3222,8 +3257,8 @@ msgstr ""
 
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
-#: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "Piano"
 msgstr ""
 
@@ -3325,8 +3360,8 @@ msgstr ""
 
 #: assets/build/admin.js:5
 #: assets/build/admin.js:6
-#: assets/build/admin.js:10
-#: assets/build/admin.js:12
+#: assets/build/admin.js:15
+#: assets/build/admin.js:17
 msgid "Tutti"
 msgstr ""
 
@@ -3360,7 +3395,7 @@ msgid "Lascia vuoto per usare il testo predefinito. Dettagli della prenotazione,
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Lingua"
 msgstr ""
 
@@ -3450,7 +3485,7 @@ msgid "%1$s in camera %2$s dal %3$s (%4$s)."
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Chiudi una camera"
 msgstr ""
 
@@ -3459,8 +3494,8 @@ msgid "Camera chiusa per il periodo scelto."
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:9
-#: assets/build/admin.js:12
+#: assets/build/admin.js:14
+#: assets/build/admin.js:17
 msgid "Dal"
 msgstr ""
 
@@ -3473,7 +3508,7 @@ msgid "Nota"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Nuova struttura"
 msgstr ""
 
@@ -3490,6 +3525,7 @@ msgid "Dati della struttura salvati."
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Tipo"
 msgstr ""
 
@@ -3506,14 +3542,17 @@ msgid "Conferma immediata"
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Check-in dalle"
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Check-in fino alle"
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Check-out entro le"
 msgstr ""
 
@@ -3534,6 +3573,7 @@ msgid "Indirizzo e contatti"
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Città"
 msgstr ""
 
@@ -3558,7 +3598,7 @@ msgid "Partita IVA"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Impostazioni salvate."
 msgstr ""
 
@@ -3603,6 +3643,7 @@ msgid "Assegna la camera in automatico"
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Modulo online"
 msgstr ""
 
@@ -4022,7 +4063,7 @@ msgid "Piano predefinito"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Piani tariffari"
 msgstr ""
 
@@ -4043,20 +4084,20 @@ msgid "solo staff"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 #: assets/build/public.js:5
 msgid "Non rimborsabile"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "Modifica"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "Archivia"
 msgstr ""
 
@@ -4093,6 +4134,7 @@ msgid "Al (compreso)"
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Prezzo a notte (€)"
 msgstr ""
 
@@ -4121,7 +4163,7 @@ msgid "Priorità (vince il numero più alto se i periodi si sovrappongono)"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Prezzi per periodo"
 msgstr ""
 
@@ -4138,7 +4180,7 @@ msgid "Periodo"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Giorni"
 msgstr ""
 
@@ -4187,7 +4229,7 @@ msgid "Valido dal"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "al"
 msgstr ""
 
@@ -4200,7 +4242,7 @@ msgid "Facoltativo (l'ospite lo sceglie)"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Supplementi e sconti"
 msgstr ""
 
@@ -4296,7 +4338,7 @@ msgid "giorni di arrivo fissi"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Regole di soggiorno"
 msgstr ""
 
@@ -4318,7 +4360,7 @@ msgid "Modifica «%s»"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Nuova tipologia"
 msgstr ""
 
@@ -4432,1048 +4474,1100 @@ msgid "Nome (facoltativo)"
 msgstr ""
 
 #: assets/build/admin.js:6
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Note interne"
 msgstr ""
 
 #: assets/build/admin.js:6
+#: assets/build/admin.js:16
+msgid "Aggiungi più camere"
+msgstr ""
+
+#. translators: %d: number of rooms.
+#: assets/build/admin.js:7
+msgid "Crea %d camera"
+msgid_plural "Crea %d camere"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/admin.js:7
+msgid "Crea le camere"
+msgstr ""
+
+#. translators: %d: number of rooms.
+#: assets/build/admin.js:9
+msgid "%d camera creata."
+msgid_plural "%d camere create."
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/admin.js:9
+msgid "Piano (facoltativo)"
+msgstr ""
+
+#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+msgid "Numeri delle camere"
+msgstr ""
+
+#: assets/build/admin.js:9
+msgid "Separati da virgola. Per una serie scrivi il primo e l'ultimo numero con un trattino: 101–110 crea 10 camere."
+msgstr ""
+
+#. translators: %d: maximum number of rooms.
+#: assets/build/admin.js:10
+msgid "Troppe camere: al massimo %d per volta."
+msgstr ""
+
+#. translators: %d: number of rooms.
+#: assets/build/admin.js:11
+msgid "Verrà creata %d camera:"
+msgid_plural "Verranno create %d camere:"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/build/admin.js:11
 msgid "Conservazione dei dati"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Mesi dopo i quali i dati vengono cancellati o anonimizzati ogni notte. 0 = conserva sempre."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Ospiti senza soggiorni (anonimizza)"
 msgstr ""
 
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Registro attività"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Registro messaggi"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Registro check-in"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Salva l'indirizzo IP (troncato) nel registro attività"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Cancella tutti i dati quando il plugin viene eliminato"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Spento (consigliato): eliminando il plugin prenotazioni, ospiti e impostazioni restano nel database."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Anti-spam del modulo online (Cloudflare Turnstile)"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Attivo."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Non attivo: il modulo usa solo i controlli interni (tempo di compilazione, limiti per indirizzo)."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Site key"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Secret key"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Salvata: lascia vuoto per non cambiarla"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Il sito riceve le visite attraverso Cloudflare e legge l'IP reale dei visitatori."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Il sito è dietro Cloudflare e l'hosting fornisce già l'IP reale: nulla da fare."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Ci sono intestazioni di Cloudflare, ma la richiesta passa da un altro proxy: l'IP dei visitatori non è affidabile. Controlla la configurazione dell'hosting."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Il sito non sembra passare da Cloudflare."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Collegamento del sito"
 msgstr ""
 
 #. translators: 1: address seen by the server, 2: visitor address.
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Indirizzo che arriva al server: %1$s · indirizzo del visitatore: %2$s"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "API di Cloudflare (facoltativa)"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Con un token API il plugin crea da solo le regole consigliate. Permessi del token:"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Il token salvato non è più leggibile (sono cambiate le chiavi di WordPress): inseriscilo di nuovo."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Dati di Cloudflare salvati."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Zone ID"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Definito in wp-config.php"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Token API"
 msgstr ""
 
 #. translators: %s: last characters of the token.
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Salvato (%s): lascia vuoto per non cambiarlo"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Verifica collegamento"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Regole consigliate applicate."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Applica le regole consigliate"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Cancella il token"
 msgstr ""
 
 #. translators: 1: zone, 2: plan, 3: status.
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Zona %1$s (%2$s), stato %3$s."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Attenzione: il dominio del sito non appartiene a questa zona."
 msgstr ""
 
 #. translators: %s: date.
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Regole applicate il %s."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Regole consigliate"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Se preferisci crearle a mano nel pannello di Cloudflare, copia queste espressioni. Dopo aver collegato un nuovo account Stripe o Nexi, applica di nuovo le regole: l'indirizzo del webhook cambia."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Camere e prezzi"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "La tua struttura"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Email per le prenotazioni"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Salva e continua"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Tipologie e camere"
 msgstr ""
 
-#: assets/build/admin.js:6
-msgid "Per ogni tipologia che vendi indica capienza, prezzo base a notte e i numeri delle camere (es. 101, 102, 103). Tariffe stagionali, caparre e cancellazione si impostano dopo in «Tariffe»."
+#: assets/build/admin.js:11
+msgid "Per ogni tipologia che vendi indica capienza, prezzo base a notte e i numeri delle camere (es. 101, 102 oppure una serie: 101–110). Tariffe stagionali, caparre e cancellazione si impostano dopo in «Tariffe»."
 msgstr ""
 
 #. translators: %s: room type.
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "«%s» aggiunta."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "es. Camera doppia"
 msgstr ""
 
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Persone"
 msgstr ""
 
-#: assets/build/admin.js:6
-msgid "Numeri delle camere"
-msgstr ""
-
-#: assets/build/admin.js:6
 #: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "Aggiungi"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Già inserite"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Continua"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Pagina di prenotazione"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Consiglio: imposta i permalink «Nome articolo» in Impostazioni → Permalink."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "La pagina esiste:"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Titolo della pagina"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Crea la pagina"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Oppure inserisci lo shortcode in una pagina esistente:"
 msgstr ""
 
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Strutture"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Aggiungi allo staff"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Staff aggiornato."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Persona aggiunta allo staff."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Utente già registrato"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Nuovo utente"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Cerca per nome o email"
 msgstr ""
 
-#: assets/build/admin.js:6
-#: assets/build/admin.js:10
 #: assets/build/admin.js:11
+#: assets/build/admin.js:15
+#: assets/build/admin.js:16
 msgid "Cerca"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Nessun utente trovato: usa «Nuovo utente»."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Utente"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Scegli…"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Riceverà da WordPress l'email per scegliere la password."
 msgstr ""
 
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Ruolo"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Permessi dei ruoli"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Permessi salvati."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Permessi predefiniti ripristinati."
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Ripristina i predefiniti"
 msgstr ""
 
-#: assets/build/admin.js:6
+#: assets/build/admin.js:11
 msgid "Dashboard"
 msgstr ""
 
-#: assets/build/admin.js:6
-#: assets/build/admin.js:9
+#: assets/build/admin.js:11
+#: assets/build/admin.js:14
 msgid "Planning"
 msgstr ""
 
-#: assets/build/admin.js:6
 #: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Reception"
 msgstr ""
 
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
+#: assets/build/admin.js:11
+msgid "Gestione"
+msgstr ""
+
+#: assets/build/admin.js:11
+#: assets/build/admin.js:17
 msgid "Messaggi"
 msgstr ""
 
+#: assets/build/admin.js:11
+msgid "Staff e permessi"
+msgstr ""
+
 #. translators: %s: today's date.
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "Oggi, %s"
 msgstr ""
 
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "Apri il planning"
 msgstr ""
 
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "Arrivi di oggi"
 msgstr ""
 
 #. translators: %d: guests already arrived.
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "%d già arrivati"
 msgstr ""
 
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "Partenze di oggi"
 msgstr ""
 
 #. translators: %d: guests already left.
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "%d già partiti"
 msgstr ""
 
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "Ospiti in struttura"
 msgstr ""
 
-#: assets/build/admin.js:7
+#: assets/build/admin.js:12
 msgid "Occupazione oggi"
 msgstr ""
 
 #. translators: %d: occupied rooms.
-#: assets/build/admin.js:8
+#: assets/build/admin.js:13
 msgid "%d occupata"
 msgid_plural "%d occupate"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: free rooms.
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "%d libera"
 msgid_plural "%d libere"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Occupazione 30 giorni"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Prenotazioni future"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Saldo da incassare"
 msgstr ""
 
 #. translators: %s: amount.
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "%s entro 7 giorni"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Caparre scadute"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Senza camera (7 giorni)"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Prenotazioni a cui assegnare la camera"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Camere fuori servizio"
 msgstr ""
 
 #. translators: %d: total rooms.
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "su %d camere"
 msgstr ""
 
-#: assets/build/admin.js:9
-#: assets/build/admin.js:11
+#: assets/build/admin.js:14
+#: assets/build/admin.js:16
 msgid "Nessuna camera"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Aggiungi tipologie e camere per iniziare a ricevere prenotazioni."
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Vai a Camere"
 msgstr ""
 
-#: assets/build/admin.js:9
-#: assets/build/admin.js:11
+#: assets/build/admin.js:14
+#: assets/build/admin.js:16
 msgid "Arrivi"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Nessun arrivo oggi."
 msgstr ""
 
-#: assets/build/admin.js:9
-#: assets/build/admin.js:11
+#: assets/build/admin.js:14
+#: assets/build/admin.js:16
 msgid "Partenze"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Nessuna partenza oggi."
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Stato camere"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Richieste da confermare"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Trascina una prenotazione per cambiare camera o date. Doppio clic su un giorno libero per una nuova prenotazione."
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Settimana"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Oggi"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Aggiungi le camere in «Camere» per vedere il planning."
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Camere libere"
 msgstr ""
 
-#: assets/build/admin.js:9
-#: assets/build/admin.js:11
+#: assets/build/admin.js:14
+#: assets/build/admin.js:16
 msgid "Da assegnare"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "In attesa / opzione"
 msgstr ""
 
-#: assets/build/admin.js:9
+#: assets/build/admin.js:14
 msgid "Riapri la camera"
 msgstr ""
 
 #. translators: 1: start date, 2: end date.
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "La chiusura dal %1$s al %2$s viene tolta e la camera torna vendibile."
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Riapri"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Camera riaperta."
 msgstr ""
 
-#: assets/build/admin.js:10
-#: assets/build/admin.js:12
+#: assets/build/admin.js:15
+#: assets/build/admin.js:17
 msgid "Nuova prenotazione"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Nome, email, telefono o codice"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Pagamento"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Origine"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Soggiorno dal"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Nessuna prenotazione"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Nessuna prenotazione corrisponde ai filtri."
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Non puoi creare prenotazioni"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "1. Date e ospiti"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 #: assets/build/public.js:8
 msgid "Adulti per camera"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Bambini per camera"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 #: assets/build/public.js:9
 msgid "Cerca disponibilità"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Nessuna camera disponibile"
 msgstr ""
 
-#: assets/build/admin.js:10
+#: assets/build/admin.js:15
 msgid "Prova altre date o meno ospiti per camera."
 msgstr ""
 
 #. translators: %d: rooms still free.
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "%d libere"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "2. Camere scelte"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Prezzo concordato"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Totale camera (€)"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "3. Ospite e conferma"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Opzione (scade da sola)"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Invia l'email all'ospite"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Crea la prenotazione"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Elenco"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Annulla il check-in"
 msgstr ""
 
 #. translators: %s: date and time.
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Opzione valida fino al %s: poi si annulla da sola."
 msgstr ""
 
 #. translators: %s: reason.
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Motivo dell'annullamento: %s"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 #: assets/build/public.js:16
 #: assets/build/public.js:20
 msgid "Soggiorno"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Modifica date e camere"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Date"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Prezzo"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Camera assegnata."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Richieste"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Creata il"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Arrivi da fare"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Partenze da fare"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Partenze fatte"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Leggi il QR"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Oppure il codice della prenotazione"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Inquadra il QR della email di conferma o scrivi il codice: qui compare la prenotazione con le camere."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Ultime operazioni di oggi"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Mostra"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Tutte le camere"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Con arrivo o partenza oggi"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "L'housekeeping è disattivato per questa struttura: gli stati non cambiano da soli alla partenza."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Partiti"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Partenza oggi"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Arrivo oggi"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Occupata"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Cambia stato"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Nome, email o telefono"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Nessun ospite"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Nessun ospite corrisponde alla ricerca."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Le schede si creano da sole con le prenotazioni."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Paese"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Soggiorni"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Scheda anonimizzata"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Esporta i dati (GDPR)"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Anonimizza"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Possibili doppioni"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Schede con la stessa email o lo stesso telefono."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Contatti"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Note"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Consensi"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "dato"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "negato"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Scheda salvata."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Anonimizza l'ospite"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Nome, contatti e note vengono cancellati da scheda, prenotazioni e messaggi. Restano solo date e importi per la contabilità. Non si può annullare."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "In questa struttura ogni alloggio si vende da solo: crea una tipologia per ogni alloggio."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Le tipologie sono ciò che vendi; le camere sono le stanze fisiche di ogni tipologia."
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Mostra archiviate"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Nessuna tipologia"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Crea la prima tipologia (es. «Camera doppia») e poi aggiungi le camere."
 msgstr ""
 
-#: assets/build/admin.js:11
-#: assets/build/admin.js:12
+#: assets/build/admin.js:16
+#: assets/build/admin.js:17
 msgid "archiviata"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "non online"
 msgstr ""
 
-#: assets/build/admin.js:11
+#: assets/build/admin.js:16
 msgid "Aggiungi camera"
 msgstr ""
 
 #. translators: 1: max guests, 2: base price.
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Fino a %1$d persone · da %2$s a notte"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Nessuna camera: senza camere la tipologia non è prenotabile."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Camera ripristinata."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Ripristina"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Archivia la tipologia"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Non sarà più prenotabile. Le prenotazioni esistenti restano. Non è possibile se ci sono soggiorni futuri."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Tipologia archiviata."
 msgstr ""
 
 #. translators: %s: room code.
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Archivia la camera %s"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "La camera esce dalla disponibilità. Non è possibile se ha soggiorni futuri assegnati."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Camera archiviata."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Prima le camere"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Crea almeno una tipologia in «Camere» per impostare le tariffe."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Nessuna struttura"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Crea la prima struttura per iniziare."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Dati"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Prenotazioni e modulo online"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Canali"
 msgstr ""
 
 #. translators: %s: slug.
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Identificativo per lo shortcode: %s"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Registro"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Testi"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Prova"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Ruoli e permessi"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "tu"
 msgstr ""
 
 #. translators: %s: person.
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Togli %s dallo staff"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "L'account WordPress resta, ma non potrà più usare Booking Manager."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Tolto dallo staff."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Elemento"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Al"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Nessuna attività"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Quando"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Chi"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Cosa"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "apri"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Generali"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Cloudflare"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Configurazione guidata"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Pochi minuti per ricevere la prima prenotazione."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Salta la configurazione"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Tutto pronto"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Puoi già ricevere prenotazioni. Per completare:"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Tariffe stagionali, caparra e cancellazione"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Pagamenti online con Stripe o Nexi"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Account per lo staff"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Apri il modulo online"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Vai alla dashboard"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Apri Licenza"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Booking Manager non è ancora attivo"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Non sei assegnato a nessuna struttura: chiedi all'amministratore."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Crea la struttura"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Pagina non trovata"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Usa il menu per scegliere una sezione."
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Menu di Booking Manager"
 msgstr ""
 
-#: assets/build/admin.js:12
-msgid "Mostra il menu di WordPress"
+#: assets/build/admin.js:17
+msgid "Esci da modalità operativa"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Modalità operativa"
 msgstr ""
 
-#: assets/build/admin.js:12
-msgid "Esci dall'account"
+#: assets/build/admin.js:17
+msgid "Esci"
 msgstr ""
 
-#: assets/build/admin.js:12
+#: assets/build/admin.js:17
 msgid "Menu"
 msgstr ""
 

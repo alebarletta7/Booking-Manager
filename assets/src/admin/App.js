@@ -4,6 +4,25 @@
 import { Button, Notice, SelectControl } from '@wordpress/components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import {
+	brush as brushIcon,
+	calendar as calendarIcon,
+	category as categoryIcon,
+	check as checkIcon,
+	currencyEuro as currencyEuroIcon,
+	fullscreen as fullscreenIcon,
+	home as homeIcon,
+	inbox as inboxIcon,
+	key as keyIcon,
+	listView as listViewIcon,
+	arrowLeft as logoutIcon,
+	people as peopleIcon,
+	seen as seenIcon,
+	settings as settingsIcon,
+	shield as shieldIcon,
+	store as storeIcon,
+	Icon,
+} from '@wordpress/icons';
 
 import { get, put } from './lib/api';
 import { boot, can } from './lib/boot';
@@ -30,85 +49,101 @@ import Settings from './screens/Settings';
 import Setup from './screens/Setup';
 import Staff from './screens/Staff';
 
+// Grouped like the menus of the other plugins of the family.
 const NAV = [
 	{
-		path: '/',
-		label: __( 'Dashboard', 'booking-manager' ),
-		cap: 'bkng_view_dashboard',
-		icon: '◧',
+		label: '',
+		items: [
+			{
+				path: '/',
+				label: __( 'Dashboard', 'booking-manager' ),
+				cap: 'bkng_view_dashboard',
+				icon: homeIcon,
+			},
+			{
+				path: '/planning',
+				label: __( 'Planning', 'booking-manager' ),
+				cap: 'bkng_view_bookings',
+				icon: calendarIcon,
+			},
+			{
+				path: '/bookings',
+				label: __( 'Prenotazioni', 'booking-manager' ),
+				cap: 'bkng_view_bookings',
+				icon: listViewIcon,
+			},
+			{
+				path: '/frontdesk',
+				label: __( 'Reception', 'booking-manager' ),
+				cap: 'bkng_checkin',
+				icon: checkIcon,
+			},
+			{
+				path: '/housekeeping',
+				label: __( 'Housekeeping', 'booking-manager' ),
+				cap: 'bkng_view_housekeeping',
+				icon: brushIcon,
+				housekeeping: true,
+			},
+			{
+				path: '/guests',
+				label: __( 'Ospiti', 'booking-manager' ),
+				cap: 'bkng_view_guests',
+				icon: peopleIcon,
+			},
+		],
 	},
 	{
-		path: '/planning',
-		label: __( 'Planning', 'booking-manager' ),
-		cap: 'bkng_view_bookings',
-		icon: '▦',
+		label: __( 'Gestione', 'booking-manager' ),
+		items: [
+			{
+				path: '/rooms',
+				label: __( 'Camere', 'booking-manager' ),
+				cap: 'bkng_manage_rooms',
+				icon: categoryIcon,
+			},
+			{
+				path: '/rates',
+				label: __( 'Tariffe', 'booking-manager' ),
+				cap: 'bkng_manage_rates',
+				icon: currencyEuroIcon,
+			},
+			{
+				path: '/messages',
+				label: __( 'Messaggi', 'booking-manager' ),
+				cap: 'bkng_view_bookings',
+				icon: inboxIcon,
+			},
+		],
 	},
 	{
-		path: '/bookings',
-		label: __( 'Prenotazioni', 'booking-manager' ),
-		cap: 'bkng_view_bookings',
-		icon: '☰',
-	},
-	{
-		path: '/frontdesk',
-		label: __( 'Reception', 'booking-manager' ),
-		cap: 'bkng_checkin',
-		icon: '⌂',
-	},
-	{
-		path: '/housekeeping',
-		label: __( 'Housekeeping', 'booking-manager' ),
-		cap: 'bkng_view_housekeeping',
-		icon: '✓',
-		housekeeping: true,
-	},
-	{
-		path: '/guests',
-		label: __( 'Ospiti', 'booking-manager' ),
-		cap: 'bkng_view_guests',
-		icon: '☺',
-	},
-	{
-		path: '/rooms',
-		label: __( 'Camere', 'booking-manager' ),
-		cap: 'bkng_manage_rooms',
-		icon: '▭',
-	},
-	{
-		path: '/rates',
-		label: __( 'Tariffe', 'booking-manager' ),
-		cap: 'bkng_manage_rates',
-		icon: '€',
-	},
-	{
-		path: '/property',
-		label: __( 'Struttura', 'booking-manager' ),
-		cap: 'bkng_manage_property_settings',
-		icon: '⚑',
-	},
-	{
-		path: '/messages',
-		label: __( 'Messaggi', 'booking-manager' ),
-		cap: 'bkng_view_bookings',
-		icon: '✉',
-	},
-	{
-		path: '/staff',
-		label: __( 'Staff', 'booking-manager' ),
-		cap: 'bkng_manage_staff',
-		icon: '♟',
-	},
-	{
-		path: '/audit',
-		label: __( 'Registro attività', 'booking-manager' ),
-		cap: 'bkng_view_audit_log',
-		icon: '⧗',
-	},
-	{
-		path: '/settings',
-		label: __( 'Impostazioni', 'booking-manager' ),
-		cap: 'bkng_manage_settings',
-		icon: '⚙',
+		label: __( 'Amministrazione', 'booking-manager' ),
+		items: [
+			{
+				path: '/property',
+				label: __( 'Struttura', 'booking-manager' ),
+				cap: 'bkng_manage_property_settings',
+				icon: storeIcon,
+			},
+			{
+				path: '/staff',
+				label: __( 'Staff e permessi', 'booking-manager' ),
+				cap: 'bkng_manage_staff',
+				icon: shieldIcon,
+			},
+			{
+				path: '/audit',
+				label: __( 'Registro attività', 'booking-manager' ),
+				cap: 'bkng_view_audit_log',
+				icon: seenIcon,
+			},
+			{
+				path: '/settings',
+				label: __( 'Impostazioni', 'booking-manager' ),
+				cap: 'bkng_manage_settings',
+				icon: settingsIcon,
+			},
+		],
 	},
 ];
 
@@ -244,18 +279,33 @@ export default function App() {
 		);
 	}
 
-	const nav = NAV.filter(
-		( item ) =>
-			can( item.cap ) &&
-			( ! item.housekeeping || ! property || property.housekeeping )
-	);
-	if ( license.canManage ) {
-		nav.push( {
-			path: '/license',
-			label: __( 'Licenza', 'booking-manager' ),
-			icon: '🔑',
-		} );
-	}
+	const visible = ( item ) =>
+		can( item.cap ) &&
+		( ! item.housekeeping || ! property || property.housekeeping );
+	const groups = NAV.map( ( group, i ) => ( {
+		...group,
+		items: [
+			...group.items.filter( visible ),
+			// The licence is the last entry of Amministrazione, before Impostazioni.
+			...( i === NAV.length - 1 && license.canManage
+				? [
+						{
+							path: '/license',
+							label: __( 'Licenza', 'booking-manager' ),
+							icon: keyIcon,
+						},
+				  ]
+				: [] ),
+		],
+	} ) ).filter( ( group ) => group.items.length );
+	groups.forEach( ( group ) => {
+		const settings = group.items.findIndex(
+			( item ) => item.path === '/settings'
+		);
+		if ( settings > -1 && settings < group.items.length - 1 ) {
+			group.items.push( ...group.items.splice( settings, 1 ) );
+		}
+	} );
 	const found = resolve( route.path );
 	const needsProperty =
 		found &&
@@ -327,50 +377,67 @@ export default function App() {
 					) }
 				>
 					<div className="bkng-brand">
-						<span className="bkng-brand__mark">B</span> Booking
-						Manager
-					</div>
-					<nav>
-						<ul className="bkng-nav">
-							{ nav.map( ( item ) => {
-								const active =
-									item.path === '/'
-										? route.path === '/'
-										: route.path === item.path ||
-										  route.path.startsWith(
-												item.path + '/'
-										  );
-								return (
-									<li key={ item.path }>
-										<a
-											href={ '#' + item.path }
-											className={
-												active ? 'is-active' : ''
-											}
-											aria-current={
-												active ? 'page' : undefined
-											}
-										>
-											<span
-												className="bkng-nav__icon"
-												aria-hidden="true"
-											>
-												{ item.icon }
-											</span>
-											{ item.label }
-										</a>
-									</li>
-								);
-							} ) }
-						</ul>
-					</nav>
-					<div className="bkng-sidebar__footer">
-						<span className="bkng-sidebar__user">
-							{ me.display_name }
+						<span className="bkng-brand__mark" aria-hidden="true">
+							B
 						</span>
+						<span className="bkng-brand__name">
+							Booking Manager
+						</span>
+					</div>
+					<nav className="bkng-nav">
+						{ groups.map( ( group ) => (
+							<div
+								className="bkng-nav__group"
+								key={ group.label || 'main' }
+							>
+								{ group.label && (
+									<p className="bkng-nav__group-label">
+										{ group.label }
+									</p>
+								) }
+								<ul>
+									{ group.items.map( ( item ) => {
+										const active =
+											item.path === '/'
+												? route.path === '/'
+												: route.path === item.path ||
+												  route.path.startsWith(
+														item.path + '/'
+												  );
+										return (
+											<li key={ item.path }>
+												<a
+													href={ '#' + item.path }
+													className={
+														'bkng-nav__item' +
+														( active
+															? ' is-current'
+															: '' )
+													}
+													aria-current={
+														active
+															? 'page'
+															: undefined
+													}
+												>
+													<Icon
+														icon={ item.icon }
+														size={ 20 }
+													/>
+													{ item.label }
+												</a>
+											</li>
+										);
+									} ) }
+								</ul>
+							</div>
+						) ) }
+					</nav>
+					<div className="bkng-sidebar__foot">
 						{ ! me.preferences?.operational_locked && (
-							<Button
-								variant="link"
+							<button
+								type="button"
+								className="bkng-nav__item"
 								onClick={ async () => {
 									await put( '/me/preferences', {
 										operational_mode: ! operational,
@@ -378,24 +445,29 @@ export default function App() {
 									window.location.reload();
 								} }
 							>
+								<Icon icon={ fullscreenIcon } size={ 20 } />
 								{ operational
 									? __(
-											'Mostra il menu di WordPress',
+											'Esci da modalità operativa',
 											'booking-manager'
 									  )
 									: __(
 											'Modalità operativa',
 											'booking-manager'
 									  ) }
-							</Button>
+							</button>
 						) }
 						{ operational && (
 							<a
-								className="bkng-sidebar__logout"
+								className="bkng-nav__item"
 								href={ boot.logoutUrl }
 							>
-								{ __( "Esci dall'account", 'booking-manager' ) }
+								<Icon icon={ logoutIcon } size={ 20 } />
+								{ __( 'Esci', 'booking-manager' ) }
 							</a>
+						) }
+						{ boot.version && (
+							<p className="bkng-version">v{ boot.version }</p>
 						) }
 					</div>
 				</aside>
@@ -436,6 +508,19 @@ export default function App() {
 									'booking-manager'
 								) }
 							</Button>
+						) }
+						{ me.display_name && (
+							<span className="bkng-topbar__user">
+								<span
+									className="bkng-topbar__avatar"
+									aria-hidden="true"
+								>
+									{ me.display_name
+										.charAt( 0 )
+										.toUpperCase() }
+								</span>
+								{ me.display_name }
+							</span>
 						) }
 					</div>
 					<LicenseBand notice={ license.notice } />

@@ -321,6 +321,7 @@ final class RestApiTest extends TestCase {
 				'POST /properties/12/bookings',
 				'POST /properties/12/room-types',
 				'POST /properties/12/units',
+				'POST /properties/12/units/batch',
 				'POST /public/properties/villa-test/bookings',
 				'POST /public/properties/villa-test/holds',
 				'POST /room-types/12',

@@ -38,6 +38,8 @@ class InventoryService {
 
 	public const BLOCK_KINDS = array( 'out_of_service', 'maintenance', 'owner_use' );
 
+	public const MAX_BATCH_UNITS = 100;
+
 	public function __construct(
 		private RoomTypeRepository $types,
 		private UnitRepository $units,
@@ -270,6 +272,78 @@ class InventoryService {
 		$id = $this->units->create( $property_id, $data );
 		$this->log( 'unit.created', 'unit', $id, $property_id, $data + array( 'own_type' => $own_type ) );
 		return self::unit_payload( (array) $this->units->find( $id ) );
+	}
+
+	/**
+	 * Creates several rooms of the same type at once (e.g. 101 … 110): either all of them
+	 * or none. Codes already used, or repeated in the list, are named in the error.
+	 *
+	 * @param array<string, mixed> $input room_type_id, codes (string[]), floor (optional)
+	 * @return array<int, array<string, mixed>>|\WP_Error the rooms created
+	 */
+	public function create_units( int $property_id, array $input ): array|\WP_Error {
+		$gate = $this->gate();
+		if ( $gate ) {
+			return $gate;
+		}
+		if ( ! $this->properties->find( $property_id ) ) {
+			return PropertyService::not_found();
+		}
+		$errors = array();
+		$type   = $this->types->find( (int) ( $input['room_type_id'] ?? 0 ) );
+		if ( ! $type || (int) $type['property_id'] !== $property_id || 'active' !== $type['status'] ) {
+			$errors['room_type_id'] = __( 'Tipologia non valida.', 'booking-manager' );
+		}
+		$codes = array();
+		foreach ( (array) ( $input['codes'] ?? array() ) as $raw ) {
+			$code = strtoupper( mb_substr( sanitize_text_field( (string) $raw ), 0, 32 ) );
+			if ( '' !== $code ) {
+				$codes[] = $code;
+			}
+		}
+		if ( ! $codes ) {
+			$errors['codes'] = __( 'Indica i numeri delle camere.', 'booking-manager' );
+		} elseif ( count( $codes ) > self::MAX_BATCH_UNITS ) {
+			/* translators: %d: maximum number of rooms. */
+			$errors['codes'] = sprintf( __( 'Al massimo %d camere per volta.', 'booking-manager' ), self::MAX_BATCH_UNITS );
+		} else {
+			$repeated = array_keys( array_filter( array_count_values( $codes ), static fn( $n ) => $n > 1 ) );
+			$taken    = array_values( array_filter( array_unique( $codes ), fn( $c ) => $this->units->code_taken( $property_id, (string) $c ) ) );
+			if ( $repeated ) {
+				/* translators: %s: room codes. */
+				$errors['codes'] = sprintf( __( 'Numeri ripetuti nell\'elenco: %s.', 'booking-manager' ), implode( ', ', $repeated ) );
+			} elseif ( $taken ) {
+				/* translators: %s: room codes. */
+				$errors['codes'] = sprintf( __( 'Esistono già camere con questi numeri: %s.', 'booking-manager' ), implode( ', ', $taken ) );
+			}
+		}
+		if ( $errors ) {
+			return Validation::error( $errors );
+		}
+		$floor = sanitize_text_field( (string) ( $input['floor'] ?? '' ) );
+		$ids   = Abort::run(
+			function () use ( $property_id, $type, $codes, $floor ) {
+				$ids = array();
+				foreach ( $codes as $code ) {
+					$data = array(
+						'code'         => $code,
+						'room_type_id' => (int) $type['id'],
+						'floor'        => '' !== $floor ? mb_substr( $floor, 0, 20 ) : null,
+					);
+					$id   = $this->units->create( $property_id, $data );
+					if ( ! $id ) {
+						throw new Abort( new \WP_Error( 'bkng_db_error', __( 'Le camere non sono state create: errore del database.', 'booking-manager' ), array( 'status' => 500 ) ) );
+					}
+					$this->log( 'unit.created', 'unit', $id, $property_id, $data );
+					$ids[] = $id;
+				}
+				return $ids;
+			}
+		);
+		if ( $ids instanceof \WP_Error ) {
+			return $ids;
+		}
+		return array_map( fn( $id ) => self::unit_payload( (array) $this->units->find( $id ) ), $ids );
 	}
 
 	/**

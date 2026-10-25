@@ -83,7 +83,7 @@ class WriteGate {
 	public const BLOCKED = array(
 		'#^/properties/\d+/bookings$#',
 		'#^/public/properties/[a-z0-9-]+/(bookings|holds)$#',
-		'#^/properties/\d+/(room-types|units)$#',
+		'#^/properties/\d+/(room-types|units|units/batch)$#',
 		'#^/room-types/\d+(/archive)?$#',
 		'#^/units/\d+(/(archive|restore))?$#',
 	);
