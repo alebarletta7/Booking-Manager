@@ -7,7 +7,7 @@
 - Strutture, tipologie e camere (B&B, affittacamere, case vacanza, appartamenti, residence, guest house, hotel), con foto e servizi; camere aggiunte anche in serie (es. 101-110).
 - Tariffe: piani tariffari, prezzi per periodo, supplementi e sconti, servizi aggiuntivi facoltativi, regole di soggiorno, caparra e condizioni di cancellazione.
 - Prenotazioni dal gestionale e dal sito, planning con trascinamento, nessuna doppia prenotazione anche con richieste contemporanee.
-- Modulo di prenotazione sul sito con i colori del tema, blocco temporaneo delle camere, anti-spam e Cloudflare Turnstile; pagina dell'ospite per vedere, pagare e annullare.
+- Modulo di prenotazione sul sito con i colori del tema: ricerca per date e ospiti, filtri (tipologia, capacità, servizi, prezzo, cancellazione gratuita), ordinamento, schede camera con foto ingrandibili, blocco temporaneo delle camere, anti-spam e Cloudflare Turnstile; pagina dell'ospite per vedere, pagare e annullare.
 - Pagamenti alla reception, con Stripe e con Nexi XPay; rimborsi e link di pagamento.
 - Reception con check-in e check-out per camera e lettura del QR; housekeeping.
 - Email con testi modificabili per struttura, promemoria; WhatsApp e canali di vendita predisposti per componenti aggiuntivi.

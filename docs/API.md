@@ -176,7 +176,7 @@ Nessun login. Indirizzo usato dal modulo: `index.php?rest_route=/booking-manager
 | GET | `/` | indice |
 | GET | `/properties` | strutture che accettano prenotazioni online |
 | GET | `/properties/{slug}` | regole, tipologie, servizi aggiuntivi, token del modulo, Turnstile |
-| GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`) |
+| GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`); ogni tariffa dice anche se oggi la cancellazione è gratuita (`free_cancel`) |
 | POST | `/properties/{slug}/holds` | blocca le camere scelte per N minuti |
 | POST | `/holds/release` | libera il blocco |
 | POST | `/properties/{slug}/bookings` | crea la prenotazione (con `form_token`, campo trappola `website`, `captcha_token`, `hold_token`, `privacy`) |

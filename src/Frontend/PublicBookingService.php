@@ -189,6 +189,7 @@ class PublicBookingService {
 		$extras = array_values( array_filter( array_map( 'intval', (array) ( $q['extras'] ?? array() ) ) ) );
 		$found  = $this->availability->search( $property, $arrival, $departure, $adults, $children, true, $extras );
 		$show   = (bool) $property['settings']['show_prices'];
+		$today  = $this->clock->today_in( (string) $property['timezone'] );
 		$offers = array();
 		foreach ( $found['offers'] as $offer ) {
 			$rates = array();
@@ -199,6 +200,8 @@ class PublicBookingService {
 					'description'  => $rate['description'],
 					'meal_plan'    => $rate['meal_plan'],
 					'cancellation' => $rate['cancellation'],
+					// Cancelling today, for these dates, costs nothing (the "free cancellation" filter).
+					'free_cancel'  => is_array( $rate['cancellation'] ) && 0 === Policies::cancellation_penalty( $rate['cancellation'], $arrival, $today, 100, 100 ),
 					'deposit'      => $rate['deposit'],
 					'total'        => $show ? (int) $rate['quote']['total'] : null,
 					'tax'          => $show ? (int) $rate['quote']['tax'] : null,

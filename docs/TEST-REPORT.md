@@ -18,7 +18,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 82 test, 890 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 82 test, 891 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|
@@ -42,8 +42,8 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 |---|---|
 | `php -l` su tutti i file PHP del pacchetto | SUPERATO |
 | ESLint (`@wordpress/eslint-plugin`) su `assets/src` | SUPERATO (0 errori) |
-| Build `npm run build` | SUPERATO (admin ~316 KB, modulo pubblico ~30 KB con sole dipendenze `wp-element` e `wp-i18n`) |
-| Generazione `languages/booking-manager.pot` | SUPERATO (1.339 testi) |
+| Build `npm run build` | SUPERATO (admin ~316 KB, modulo pubblico ~48 KB con sole dipendenze `wp-element` e `wp-i18n`) |
+| Generazione `languages/booking-manager.pot` | SUPERATO (1.374 testi) |
 
 ## 3. Prove manuali su WordPress (browser)
 
@@ -56,6 +56,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Reception: ricerca per codice e check-in, camera assegnata, prenotazione «in soggiorno» | SUPERATO |
 | Modulo pubblico (desktop 1280 px e mobile 390 px): ricerca, servizio aggiuntivo, scelta tariffa, blocco camere con conto alla rovescia, dati ospite, invio | SUPERATO — totale verificato: 3 notti × 95 € + parcheggio 3 × 10 € = 315 €, caparra 30% = 94,50 € |
 | Modulo pubblico con i colori e i font del tema (pulsanti `wp-element-button`) | SUPERATO (Twenty Twenty-Four) |
+| Nuova pagina di ricerca (1400 px e 390 px): banner, date dal 28 al 30, ospiti con +/−, 4 tipologie con foto, filtri per servizio e cancellazione gratuita, prezzo a notte e totale, foto ingrandite con frecce ed Esc, tariffe aperte da «Seleziona», «Prenota» porta ai dati dell'ospite | SUPERATO |
 | Pagina «gestisci prenotazione» dal link: stato, importi, cancellazione | SUPERATO; un token errato risponde «Prenotazione non trovata» (404) |
 | Licenza non valida: modulo pubblico «prenotazioni non disponibili», banner nel gestionale | SUPERATO |
 | Tentativo di attivazione con server licenze irraggiungibile | SUPERATO — messaggio «Il server delle licenze non risponde», il plugin resta bloccato (nessun successo finto) |

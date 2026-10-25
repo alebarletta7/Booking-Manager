@@ -52,7 +52,9 @@ class PublicFrontend {
 	public function render( $atts ): string {
 		$atts = shortcode_atts(
 			array(
-				'struttura' => '',
+				'struttura'   => '',
+				// intestazione="no": no banner with the photo above the search.
+				'intestazione' => 'si',
 			),
 			is_array( $atts ) ? $atts : array(),
 			self::SHORTCODE
@@ -75,7 +77,7 @@ class PublicFrontend {
 			self::remember_page( $slug, $page_id );
 		}
 		$this->enqueue();
-		return $this->container( $slug, false );
+		return $this->container( $slug, false, ! in_array( strtolower( (string) $atts['intestazione'] ), array( 'no', '0', 'false' ), true ) );
 	}
 
 	/** Guest link opened on a page without the form (e.g. the home page). */
@@ -145,11 +147,12 @@ class PublicFrontend {
 		}
 	}
 
-	private function container( string $slug, bool $manage_only ): string {
+	private function container( string $slug, bool $manage_only, bool $hero = false ): string {
 		$config = array(
 			'restUrl'    => esc_url_raw( PublicController::url() ),
 			'property'   => $slug,
 			'manageOnly' => $manage_only,
+			'hero'       => $hero,
 			'captcha'    => $this->captcha->public_config(),
 			'locale'     => str_replace( '_', '-', determine_locale() ),
 			'args'       => array(

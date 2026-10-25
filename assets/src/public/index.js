@@ -34,7 +34,13 @@ function mount( el ) {
 			/>
 		);
 	} else if ( ! config.manageOnly && config.property ) {
-		root.render( <BookingForm api={ api } slug={ config.property } /> );
+		root.render(
+			<BookingForm
+				api={ api }
+				slug={ config.property }
+				hero={ !! config.hero }
+			/>
+		);
 	}
 }
 

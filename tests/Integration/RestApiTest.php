@@ -196,6 +196,8 @@ final class RestApiTest extends TestCase {
 
 		$search = $this->call( 'GET', '/properties/' . $p['slug'] . '/search', array(), array( 'arrival' => self::day( 30 ), 'departure' => self::day( 32 ), 'adults' => 2 ), true );
 		$this->assertSame( 20000, $search->get_data()['offers'][0]['rates'][0]['total'] );
+		// The "free cancellation" filter of the form reads this flag, worked out by the server.
+		$this->assertIsBool( $search->get_data()['offers'][0]['rates'][0]['free_cancel'] );
 
 		$hold = $this->call( 'POST', '/properties/' . $p['slug'] . '/holds', array( 'room_type_id' => $t['type']['id'], 'arrival' => self::day( 30 ), 'departure' => self::day( 32 ) ), array(), true );
 		$this->assertSame( 201, $hold->get_status() );

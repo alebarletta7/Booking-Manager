@@ -4,21 +4,19 @@
  * in the details; every price and rule is checked again by the server.
  */
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 import {
 	addDays,
-	cancellationText,
 	date,
-	depositText,
 	extraPrice,
 	guestsLabel,
-	MEAL_PLANS,
 	money,
 	nightsBetween,
 	nightsLabel,
 } from './format';
 import { Captcha } from './Captcha';
+import { Hero, Results, SearchBar } from './Results';
 import { Check, ErrorBox, Field, Spinner } from './ui';
 
 function newRequestId() {
@@ -28,322 +26,15 @@ function newRequestId() {
 	return String( Date.now() ) + Math.random().toString( 16 ).slice( 2 );
 }
 
-/* ------------------------------------------------------------------ Search */
-
-function SearchBar( { property, stay, setStay, onSearch, busy } ) {
-	const nights = nightsBetween( stay.arrival, stay.departure );
-	const minDeparture = addDays( stay.arrival || property.first_day, 1 );
-	return (
-		<form
-			className="bkng-p-search"
-			onSubmit={ ( e ) => {
-				e.preventDefault();
-				onSearch();
-			} }
-		>
-			<Field label={ __( 'Arrivo', 'booking-manager' ) }>
-				{ ( id ) => (
-					<input
-						id={ id }
-						type="date"
-						required
-						value={ stay.arrival }
-						min={ property.first_day }
-						max={ property.last_day }
-						onChange={ ( e ) => {
-							const arrival = e.target.value;
-							const departure =
-								stay.departure && stay.departure > arrival
-									? stay.departure
-									: addDays(
-											arrival,
-											Math.max(
-												1,
-												property.min_stay || 1
-											)
-									  );
-							setStay( { ...stay, arrival, departure } );
-						} }
-					/>
-				) }
-			</Field>
-			<Field label={ __( 'Partenza', 'booking-manager' ) }>
-				{ ( id ) => (
-					<input
-						id={ id }
-						type="date"
-						required
-						value={ stay.departure }
-						min={ minDeparture }
-						onChange={ ( e ) =>
-							setStay( { ...stay, departure: e.target.value } )
-						}
-					/>
-				) }
-			</Field>
-			<Field label={ __( 'Adulti per camera', 'booking-manager' ) }>
-				{ ( id ) => (
-					<input
-						id={ id }
-						type="number"
-						min="1"
-						max="20"
-						required
-						value={ stay.adults }
-						onChange={ ( e ) =>
-							setStay( {
-								...stay,
-								adults: Math.max(
-									1,
-									Number( e.target.value ) || 1
-								),
-							} )
-						}
-					/>
-				) }
-			</Field>
-			<Field
-				label={
-					property.children_max_age > 0
-						? sprintf(
-								/* translators: %d: maximum age of a child. */
-								__(
-									'Bambini (fino a %d anni)',
-									'booking-manager'
-								),
-								property.children_max_age
-						  )
-						: __( 'Bambini', 'booking-manager' )
-				}
-			>
-				{ ( id ) => (
-					<input
-						id={ id }
-						type="number"
-						min="0"
-						max="20"
-						value={ stay.children }
-						onChange={ ( e ) =>
-							setStay( {
-								...stay,
-								children: Math.max(
-									0,
-									Number( e.target.value ) || 0
-								),
-							} )
-						}
-					/>
-				) }
-			</Field>
-			<div className="bkng-p-search__go">
-				<button
-					type="submit"
-					className="bkng-p-button is-primary wp-element-button"
-					disabled={ busy || nights < 1 }
-				>
-					{ busy ? <Spinner /> : null }
-					{ __( 'Cerca disponibilità', 'booking-manager' ) }
-				</button>
-				{ nights > 0 && (
-					<span className="bkng-p-muted">
-						{ nightsLabel( nights ) }
-					</span>
-				) }
-			</div>
-		</form>
-	);
-}
-
-/* ------------------------------------------------------------------ Results */
-
-function Gallery( { type } ) {
-	const [ index, setIndex ] = useState( 0 );
-	const images = type.images || [];
-	if ( ! images.length ) {
-		return null;
-	}
-	const image = images[ index ] || images[ 0 ];
-	return (
-		<div className="bkng-p-gallery">
-			<img src={ image.url } alt={ type.name } loading="lazy" />
-			{ images.length > 1 && (
-				<div className="bkng-p-gallery__nav">
-					{ images.map( ( img, i ) => (
-						<button
-							key={ img.id }
-							type="button"
-							className={ i === index ? 'is-active' : '' }
-							aria-label={ sprintf(
-								/* translators: 1: photo number, 2: total photos. */
-								__( 'Foto %1$d di %2$d', 'booking-manager' ),
-								i + 1,
-								images.length
-							) }
-							onClick={ () => setIndex( i ) }
-						/>
-					) ) }
-				</div>
-			) }
-		</div>
-	);
-}
-
-function RoomFacts( { type } ) {
-	const facts = [];
-	if ( type.max_occupancy ) {
-		facts.push(
-			sprintf(
-				/* translators: %d: people. */
-				_n(
-					'Fino a %d persona',
-					'Fino a %d persone',
-					type.max_occupancy,
-					'booking-manager'
-				),
-				type.max_occupancy
-			)
-		);
-	}
-	if ( type.size_sqm ) {
-		facts.push( type.size_sqm + ' m²' );
-	}
-	if ( type.beds ) {
-		facts.push( type.beds );
-	}
-	return (
-		<>
-			{ facts.length > 0 && (
-				<p className="bkng-p-muted">{ facts.join( ' · ' ) }</p>
-			) }
-			{ type.amenities?.length > 0 && (
-				<ul className="bkng-p-tags">
-					{ type.amenities.map( ( a ) => (
-						<li key={ a }>{ a }</li>
-					) ) }
-				</ul>
-			) }
-		</>
-	);
-}
-
-function Offer( { property, type, offer, onChoose, busy } ) {
-	const [ quantity, setQuantity ] = useState( 1 );
-	const max = Math.max( 1, property.max_rooms || 1 );
-	return (
-		<article className="bkng-p-card bkng-p-offer">
-			<Gallery type={ type } />
-			<div className="bkng-p-offer__body">
-				<h3 className="bkng-p-offer__title">{ type.name }</h3>
-				<RoomFacts type={ type } />
-				{ type.description && (
-					<p className="bkng-p-offer__text">{ type.description }</p>
-				) }
-				{ offer.few_left && (
-					<p className="bkng-p-alert">
-						{ __( 'Ultime camere disponibili', 'booking-manager' ) }
-					</p>
-				) }
-				{ max > 1 && (
-					<Field label={ __( 'Camere', 'booking-manager' ) } inline>
-						{ ( id ) => (
-							<select
-								id={ id }
-								value={ quantity }
-								onChange={ ( e ) =>
-									setQuantity( Number( e.target.value ) )
-								}
-							>
-								{ Array.from(
-									{ length: max },
-									( _, i ) => i + 1
-								).map( ( n ) => (
-									<option key={ n } value={ n }>
-										{ n }
-									</option>
-								) ) }
-							</select>
-						) }
-					</Field>
-				) }
-				<ul className="bkng-p-rates">
-					{ offer.rates.map( ( rate ) => (
-						<li
-							key={ String( rate.rate_plan_id ) }
-							className="bkng-p-rate"
-						>
-							<div className="bkng-p-rate__info">
-								<strong>{ rate.name }</strong>
-								<span className="bkng-p-muted">
-									{ [
-										MEAL_PLANS[ rate.meal_plan ],
-										cancellationText( rate.cancellation ),
-										depositText(
-											rate.deposit,
-											property.currency
-										),
-									]
-										.filter( Boolean )
-										.join( ' · ' ) }
-								</span>
-								{ rate.description && (
-									<span className="bkng-p-muted">
-										{ rate.description }
-									</span>
-								) }
-							</div>
-							<div className="bkng-p-rate__price">
-								{ rate.total !== null && (
-									<>
-										<strong>
-											{ money(
-												rate.total * quantity,
-												property.currency
-											) }
-										</strong>
-										<span className="bkng-p-muted">
-											{ nightsLabel( rate.nights ) }
-											{ quantity > 1
-												? ' · ' +
-												  sprintf(
-														/* translators: %d: rooms. */
-														_n(
-															'%d camera',
-															'%d camere',
-															quantity,
-															'booking-manager'
-														),
-														quantity
-												  )
-												: '' }
-										</span>
-									</>
-								) }
-								<button
-									type="button"
-									className="bkng-p-button is-primary wp-element-button"
-									disabled={ busy }
-									onClick={ () =>
-										onChoose( type, rate, quantity )
-									}
-								>
-									{ __( 'Scegli', 'booking-manager' ) }
-								</button>
-							</div>
-						</li>
-					) ) }
-				</ul>
-			</div>
-		</article>
-	);
-}
-
 function Extras( { property, extras, chosen, setChosen } ) {
 	if ( ! extras.length ) {
 		return null;
 	}
 	return (
 		<fieldset className="bkng-p-card bkng-p-extras">
-			<legend>{ __( 'Servizi aggiuntivi', 'booking-manager' ) }</legend>
+			<legend>
+				{ __( 'Aggiungi al soggiorno', 'booking-manager' ) }
+			</legend>
 			{ extras.map( ( x ) => (
 				<Check
 					key={ x.id }
@@ -853,7 +544,7 @@ function Done( { property, result } ) {
 
 /* ------------------------------------------------------------------ Form */
 
-export default function BookingForm( { api, slug } ) {
+export default function BookingForm( { api, slug, hero = false } ) {
 	const [ property, setProperty ] = useState( null );
 	const [ loadError, setLoadError ] = useState( null );
 	const [ stay, setStay ] = useState( {
@@ -1005,8 +696,6 @@ export default function BookingForm( { api, slug } ) {
 		);
 	}
 
-	const typeOf = ( id ) => property.room_types.find( ( t ) => t.id === id );
-
 	return (
 		<div ref={ top } className="bkng-p-stack">
 			{ choice && hold ? (
@@ -1026,24 +715,42 @@ export default function BookingForm( { api, slug } ) {
 				/>
 			) : (
 				<>
+					{ hero && <Hero property={ property } /> }
 					<SearchBar
 						property={ property }
 						stay={ stay }
 						setStay={ setStay }
 						onSearch={ () => search() }
 						busy={ searching }
+						searched={ !! results }
 					/>
 					{ notice && <p className="bkng-p-note">{ notice }</p> }
 					<ErrorBox error={ error } />
+					{ ! results && ! searching && (
+						<p className="bkng-p-hint">
+							{ __(
+								'Scegli le date e il numero di ospiti, poi cerca: vedrai le camere libere e potrai filtrarle.',
+								'booking-manager'
+							) }
+						</p>
+					) }
 					{ results && (
-						<>
-							<Extras
-								property={ property }
-								extras={ property.extras || [] }
-								chosen={ extras }
-								setChosen={ changeExtras }
-							/>
-							{ results.offers.length === 0 ? (
+						<Results
+							property={ property }
+							stay={ results }
+							results={ results }
+							onChoose={ choose }
+							busy={ holding }
+							searching={ searching }
+							extras={
+								<Extras
+									property={ property }
+									extras={ property.extras || [] }
+									chosen={ extras }
+									setChosen={ changeExtras }
+								/>
+							}
+							empty={
 								<div className="bkng-p-card">
 									<p>
 										<strong>
@@ -1068,29 +775,8 @@ export default function BookingForm( { api, slug } ) {
 									</p>
 									<Contacts property={ property } />
 								</div>
-							) : (
-								<div
-									className="bkng-p-offers"
-									aria-busy={ searching }
-								>
-									{ results.offers.map( ( offer ) => {
-										const type = typeOf(
-											offer.room_type_id
-										);
-										return type ? (
-											<Offer
-												key={ offer.room_type_id }
-												property={ property }
-												type={ type }
-												offer={ offer }
-												onChoose={ choose }
-												busy={ holding }
-											/>
-										) : null;
-									} ) }
-								</div>
-							) }
-						</>
+							}
+						/>
 					) }
 				</>
 			) }

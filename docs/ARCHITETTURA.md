@@ -98,6 +98,6 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 ## Interfaccia
 
 - **Gestionale**: app React in una pagina di amministrazione (`#/` router con hash), palette verde (#173F2E barra laterale, #1F5C43 primario, #2F8A5F accento, #E3F0E8 tenue, #F2F6F3 sfondo). «Modalità operativa» nasconde il menu di WordPress per la reception su tablet.
-- **Modulo pubblico**: shortcode `[booking_manager_prenota struttura="slug"]` (la configurazione guidata crea la pagina). Usa i font e i colori del tema: variabili `--wp--preset--color--*` dei temi a blocchi e classe `wp-element-button` sui pulsanti principali. Script leggero (~30 KB, solo `wp-element` e `wp-i18n`).
+- **Modulo pubblico**: shortcode `[booking_manager_prenota struttura="slug"]` (la configurazione guidata crea la pagina; `intestazione="no"` toglie il banner con la foto). Ricerca per date e ospiti, poi filtri (tipologia, capacità, servizi, prezzo a notte, solo disponibili, cancellazione gratuita) e ordinamento applicati alle camere già trovate, senza nuove richieste; schede con galleria e foto ingrandibili. Usa i font e i colori del tema: variabili `--wp--preset--color--*` dei temi a blocchi e classe `wp-element-button` sui pulsanti principali. Script leggero (~48 KB, solo `wp-element` e `wp-i18n`).
 
 Altri documenti: [LICENZA.md](LICENZA.md), [PAGAMENTI.md](PAGAMENTI.md), [CLOUDFLARE.md](CLOUDFLARE.md), [HOOKS.md](HOOKS.md), [API.md](API.md), [SVILUPPO.md](SVILUPPO.md), [TEST-REPORT.md](TEST-REPORT.md).

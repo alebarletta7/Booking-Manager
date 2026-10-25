@@ -655,9 +655,12 @@ class InventoryService {
 		foreach ( $t['images'] as $image_id ) {
 			$url = wp_get_attachment_image_url( (int) $image_id, 'large' );
 			if ( $url ) {
+				$thumb    = wp_get_attachment_image_url( (int) $image_id, 'medium' );
 				$images[] = array(
-					'id'  => (int) $image_id,
-					'url' => $url,
+					'id'    => (int) $image_id,
+					'url'   => $url,
+					'thumb' => $thumb ? $thumb : $url,
+					'alt'   => (string) get_post_meta( (int) $image_id, '_wp_attachment_image_alt', true ),
 				);
 			}
 		}
