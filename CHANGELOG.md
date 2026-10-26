@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.6] — 26 ottobre 2026
+
+### Novità
+
+- Modulo sul sito: la data di arrivo proposta è il primo giorno con una camera libera (entro 60 giorni), non più semplicemente oggi.
+- Pagina della prenotazione aperta dal link nell'email nello stile delle email: stato, riepilogo con icone, quanto è pagato e da pagare, pagamento e annullamento, contatti.
+- Email: la foto dell'intestazione sfuma nello sfondo (a sinistra su computer, in alto su telefono).
+
+### Correzioni
+
+- Email su telefono: niente margini e bordi esterni, riepilogo su due colonne, testi più compatti: non risulta più stretta e lunga.
+
 ## [0.1.5] — 26 ottobre 2026
 
 ### Novità

@@ -177,7 +177,7 @@ Nessun login. Indirizzo usato dal modulo: `index.php?rest_route=/booking-manager
 |---|---|---|
 | GET | `/` | indice |
 | GET | `/properties` | strutture che accettano prenotazioni online |
-| GET | `/properties/{slug}` | regole, tipologie, servizi aggiuntivi, token del modulo, Turnstile |
+| GET | `/properties/{slug}` | regole, tipologie, servizi aggiuntivi, primo giorno con camere libere (`first_free`), token del modulo, Turnstile |
 | GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`); ogni tariffa dice anche se oggi la cancellazione è gratuita (`free_cancel`) e quanto costerebbe ogni servizio facoltativo per questo soggiorno (`options[]`: `id`, `amount` in centesimi); con `extras[]` il totale e le condizioni di cancellazione tengono conto dei servizi scelti |
 | POST | `/properties/{slug}/holds` | blocca le camere scelte per N minuti |
 | POST | `/holds/release` | libera il blocco |

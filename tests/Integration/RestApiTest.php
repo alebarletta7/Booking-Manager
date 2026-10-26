@@ -246,6 +246,17 @@ final class RestApiTest extends TestCase {
 	 * A non-refundable rate is never cancelled from the guest link; with the optional
 	 * supplement «Cancellazione gratuita» (paid on top) it is, up to N days before arrival.
 	 */
+	public function test_the_form_proposes_the_first_free_day(): void {
+		$this->admin();
+		$p = $this->property( array( 'settings' => array( 'min_advance_days' => 3, 'min_stay' => 1 ) ) );
+		$t = $this->room_type( $p['id'], 1 );
+		$this->book( $p['id'], $t['type']['id'], 3, 5 );
+		delete_transient( 'bkng_first_free_' . $p['id'] . '_' . self::day( 3 ) );
+		$form = $this->service( \BookingManager\Frontend\PublicBookingService::class )->property( $p['slug'] );
+		$this->assertSame( self::day( 3 ), $form['first_day'] );
+		$this->assertSame( self::day( 5 ), $form['first_free'], 'the two nights already booked are skipped' );
+	}
+
 	public function test_free_cancellation_sold_as_an_option(): void {
 		wp_set_current_user( 0 );
 		$p     = $this->property( array( 'booking_mode' => 'direct' ) );

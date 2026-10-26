@@ -6,14 +6,8 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
-import {
-	applyColor,
-	date,
-	dateTime,
-	guestsLabel,
-	money,
-	nightsLabel,
-} from './format';
+import { applyColor, dateTime, money } from './format';
+import { StayFooter, StayHead, StaySummary, stayItems } from './StayCard';
 import { ErrorBox, Spinner } from './ui';
 
 const STATUS = {
@@ -24,6 +18,18 @@ const STATUS = {
 	completed: __( 'Conclusa', 'booking-manager' ),
 	cancelled: __( 'Annullata', 'booking-manager' ),
 	no_show: __( 'Non presentato', 'booking-manager' ),
+};
+
+const TITLES = {
+	pending: __(
+		'La tua richiesta è in attesa di conferma',
+		'booking-manager'
+	),
+	option: __( 'Manca solo il pagamento', 'booking-manager' ),
+	confirmed: __( 'La tua prenotazione è confermata', 'booking-manager' ),
+	in_house: __( 'Buon soggiorno!', 'booking-manager' ),
+	completed: __( 'Grazie per essere stato nostro ospite', 'booking-manager' ),
+	cancelled: __( 'La prenotazione è annullata', 'booking-manager' ),
 };
 
 export default function Manage( { api, code, token, paid, root } ) {
@@ -112,6 +118,25 @@ export default function Manage( { api, code, token, paid, root } ) {
 	}
 	const b = booking;
 	const p = b.property;
+	const tone =
+		{ cancelled: 'off', no_show: 'off', pending: 'wait', option: 'wait' }[
+			b.status
+		] || 'ok';
+	const more =
+		b.total > 0
+			? [
+					b.paid > 0 && [
+						'card',
+						__( 'Già pagato', 'booking-manager' ),
+						money( b.paid, b.currency ),
+					],
+					b.balance > 0 && [
+						'coins',
+						__( 'Da pagare', 'booking-manager' ),
+						money( b.balance, b.currency ),
+					],
+			  ].filter( Boolean )
+			: [];
 
 	return (
 		<div className="bkng-p-stack">
@@ -131,22 +156,32 @@ export default function Manage( { api, code, token, paid, root } ) {
 					) }
 				</p>
 			) }
-			<div className="bkng-p-card">
-				<p className="bkng-p-muted">{ p.name }</p>
-				<h3 className="bkng-p-manage__title">
-					{ sprintf(
-						/* translators: %s: booking code. */
-						__( 'Prenotazione %s', 'booking-manager' ),
-						b.code
-					) }
-				</h3>
-				<p>
+			<div className="bkng-p-card bkng-p-done bkng-p-manage">
+				<StayHead
+					title={
+						TITLES[ b.status ] || STATUS[ b.status ] || b.status
+					}
+					tone={ tone }
+				/>
+				<p className="bkng-p-done__text">
+					<strong>
+						{ sprintf(
+							/* translators: %s: guest's first name. */
+							__( 'Ciao %s,', 'booking-manager' ),
+							b.first_name
+						) }
+					</strong>
+					<br />
+					{ __(
+						'qui trovi i dettagli del tuo soggiorno e puoi gestire la prenotazione.',
+						'booking-manager'
+					) }{ ' ' }
 					<span className={ 'bkng-p-badge is-' + b.status }>
 						{ STATUS[ b.status ] || b.status }
 					</span>
 				</p>
 				{ b.awaiting_payment && b.option_expires_at && (
-					<p>
+					<p className="bkng-p-note">
 						{ sprintf(
 							/* translators: %s: date and time. */
 							__(
@@ -157,91 +192,36 @@ export default function Manage( { api, code, token, paid, root } ) {
 						) }
 					</p>
 				) }
-				<dl className="bkng-p-facts">
-					<dt>{ __( 'Arrivo', 'booking-manager' ) }</dt>
-					<dd>
-						{ date( b.arrival ) }
-						{ p.checkin_from &&
-							' · ' +
-								sprintf(
-									/* translators: %s: time. */
-									__( 'dalle %s', 'booking-manager' ),
-									p.checkin_from.slice( 0, 5 )
-								) }
-					</dd>
-					<dt>{ __( 'Partenza', 'booking-manager' ) }</dt>
-					<dd>
-						{ date( b.departure ) }
-						{ p.checkout_until &&
-							' · ' +
-								sprintf(
-									/* translators: %s: time. */
-									__( 'entro le %s', 'booking-manager' ),
-									p.checkout_until.slice( 0, 5 )
-								) }
-					</dd>
-					<dt>{ __( 'Soggiorno', 'booking-manager' ) }</dt>
-					<dd>
-						{ nightsLabel( b.nights ) } ·{ ' ' }
-						{ guestsLabel( b.adults, b.children ) }
-					</dd>
-					<dt>{ __( 'Camere', 'booking-manager' ) }</dt>
-					<dd>
-						{ b.rooms.map( ( r, i ) => (
-							<span key={ i } className="bkng-p-block">
-								{ r.room_type } ·{ ' ' }
-								{ guestsLabel( r.adults, r.children ) }
-							</span>
-						) ) }
-					</dd>
-					{ b.total > 0 && (
-						<>
-							<dt>{ __( 'Totale', 'booking-manager' ) }</dt>
-							<dd>{ money( b.total, b.currency ) }</dd>
-							<dt>{ __( 'Pagato', 'booking-manager' ) }</dt>
-							<dd>{ money( b.paid, b.currency ) }</dd>
-							{ b.balance > 0 && (
-								<>
-									<dt>
-										{ __( 'Da pagare', 'booking-manager' ) }
-									</dt>
-									<dd>
-										<strong>
-											{ money( b.balance, b.currency ) }
-										</strong>
-									</dd>
-								</>
-							) }
-						</>
-					) }
-				</dl>
+				<StaySummary items={ stayItems( b, more ) } />
 				<ErrorBox error={ actionError } />
-				<div className="bkng-p-actions">
-					{ b.can_pay && (
-						<button
-							type="button"
-							className="bkng-p-button is-primary"
-							onClick={ pay }
-							disabled={ busy }
-						>
-							{ busy ? <Spinner /> : null }
-							{ __( 'Paga online', 'booking-manager' ) }
-						</button>
-					) }
-					{ b.can_cancel && ! confirming && (
-						<button
-							type="button"
-							className="bkng-p-button"
-							onClick={ () => setConfirming( true ) }
-							disabled={ busy }
-						>
-							{ __(
-								'Annulla la prenotazione',
-								'booking-manager'
-							) }
-						</button>
-					) }
-				</div>
+				{ ( b.can_pay || ( b.can_cancel && ! confirming ) ) && (
+					<div className="bkng-p-actions bkng-p-manage__actions">
+						{ b.can_cancel && ! confirming && (
+							<button
+								type="button"
+								className="bkng-p-button"
+								onClick={ () => setConfirming( true ) }
+								disabled={ busy }
+							>
+								{ __(
+									'Annulla la prenotazione',
+									'booking-manager'
+								) }
+							</button>
+						) }
+						{ b.can_pay && (
+							<button
+								type="button"
+								className="bkng-p-button is-primary"
+								onClick={ pay }
+								disabled={ busy }
+							>
+								{ busy ? <Spinner /> : null }
+								{ __( 'Paga online', 'booking-manager' ) }
+							</button>
+						) }
+					</div>
+				) }
 				{ confirming && (
 					<div
 						className="bkng-p-confirm"
@@ -308,22 +288,7 @@ export default function Manage( { api, code, token, paid, root } ) {
 							) }
 						</p>
 					) }
-				{ ( p.phone || p.email ) && (
-					<p className="bkng-p-muted">
-						{ p.address && (
-							<span className="bkng-p-block">{ p.address }</span>
-						) }
-						{ p.phone && (
-							<a href={ 'tel:' + p.phone.replace( /\s+/g, '' ) }>
-								{ p.phone }
-							</a>
-						) }
-						{ p.phone && p.email ? ' · ' : '' }
-						{ p.email && (
-							<a href={ 'mailto:' + p.email }>{ p.email }</a>
-						) }
-					</p>
-				) }
+				<StayFooter name={ p.name } where={ p } signoff={ p.signoff } />
 			</div>
 		</div>
 	);

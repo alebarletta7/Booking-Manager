@@ -1737,6 +1737,20 @@
 		}
 	}
 
+	&__tick.is-wait {
+		background: color-mix(in srgb, var(--bkng-accent) 14%, transparent);
+		color: var(--bkng-accent);
+
+		.bkng-p-icon {
+			stroke-width: 2;
+		}
+	}
+
+	&__tick.is-off {
+		background: color-mix(in srgb, currentColor 12%, transparent);
+		color: var(--bkng-muted);
+	}
+
 	&__text {
 		font-size: 1.05em;
 		line-height: 1.6;
@@ -1886,5 +1900,16 @@
 			padding: 0.8em 1em;
 			font-size: 1em;
 		}
+	}
+}
+
+.bkng-p-manage {
+	.bkng-p-badge {
+		vertical-align: middle;
+		margin-left: 4px;
+	}
+
+	&__actions {
+		justify-content: center;
 	}
 }

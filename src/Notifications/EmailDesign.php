@@ -46,7 +46,8 @@ final class EmailDesign {
 
 		// Header: logo, name, subtitle and sentence on the left; the photo on the right.
 		$logo   = $brand->logo();
-		$banner = $brand->banner();
+		$banner = $brand->banner( 'left' );
+		$mobile = $banner ? $brand->banner( 'top' ) : null;
 		$name   = '<div style="color:' . $k['primary'] . ';font:700 26px/1.2 ' . $f . '">' . $e( $t['name'] ) . '</div>'
 			. ( '' === $t['subtitle'] ? '' : '<div style="margin-top:6px;color:' . $k['ink'] . ';font:600 12px/1.4 ' . $f . ';letter-spacing:3px;text-transform:uppercase">' . $e( $t['subtitle'] ) . '</div>' );
 		$brand_block = null === $logo ? $name
@@ -54,8 +55,11 @@ final class EmailDesign {
 		$tagline = '' === $t['tagline'] ? '' : '<div style="margin-top:14px;color:' . $k['primary'] . ';font:italic 19px/1.3 ' . self::SCRIPT . '">' . $e( $t['tagline'] ) . '</div>';
 		$header  = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $k['header'] . '"><tr>'
 			. '<td class="bk-col bk-head" width="' . ( $banner ? '52%' : '100%' ) . '" style="padding:28px 28px 28px 32px;vertical-align:middle">' . $brand_block . $tagline . '</td>'
-			. ( $banner ? '<td class="bk-col" width="48%" style="padding:0;vertical-align:middle"><img src="' . esc_attr( $banner ) . '" width="288" alt="" style="display:block;border:0;width:100%;max-width:100%;height:auto"></td>' : '' )
-			. '</tr></table>';
+			. ( $banner ? '<td class="bk-col bk-wide" width="48%" style="padding:0;vertical-align:middle"><img src="' . esc_attr( $banner ) . '" width="300" alt="" style="display:block;border:0;width:100%;max-width:100%;height:auto"></td>' : '' )
+			. '</tr>'
+			// Phones: the photo below the text, fading upwards (shown only where the media query works).
+			. ( $mobile && $mobile !== $banner ? '<tr><td class="bk-narrow" colspan="2" style="display:none;max-height:0;overflow:hidden;mso-hide:all;padding:0"><img src="' . esc_attr( $mobile ) . '" width="320" alt="" style="display:block;border:0;width:100%;height:auto"></td></tr>' : '' )
+			. '</table>';
 
 		// Title and text: the greeting line ("Ciao Anna,") in bold.
 		$tick  = empty( $c['tick'] ) ? null : $brand->icon( 'check' );
@@ -76,24 +80,24 @@ final class EmailDesign {
 			$cells = array();
 			foreach ( $c['rows'] as $row ) {
 				$parts   = explode( "\n", (string) $row[1] );
-				$value   = '<div style="color:' . $k['ink'] . ';font:700 16px/1.35 ' . $f . '">' . $e( (string) array_shift( $parts ) ) . '</div>';
+				$value   = '<div class="bk-val" style="color:' . $k['ink'] . ';font:700 16px/1.35 ' . $f . '">' . $e( (string) array_shift( $parts ) ) . '</div>';
 				foreach ( $parts as $part ) {
 					$value .= '<div style="color:' . $k['ink'] . ';font:14px/1.45 ' . $f . '">' . $e( $part ) . '</div>';
 				}
 				$icon    = isset( $row[2] ) ? $brand->icon( $row[2] ) : null;
 				$cells[] = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-					. ( null === $icon ? '' : '<td width="44" style="width:44px;vertical-align:top;padding-top:2px">' . $img( $icon, 28 ) . '</td>' )
+					. ( null === $icon ? '' : '<td class="bk-icon" width="44" style="width:44px;vertical-align:top;padding-top:2px">' . $img( $icon, 28 ) . '</td>' )
 					. '<td style="vertical-align:top"><div style="color:' . $k['muted'] . ';font:13px/1.4 ' . $f . '">' . $e( (string) $row[0] ) . '</div>' . $value . '</td></tr></table>';
 			}
 			$grid  = '';
 			$pairs = array_chunk( $cells, 2 );
 			foreach ( $pairs as $i => $pair ) {
 				$line  = $i < count( $pairs ) - 1 ? 'border-bottom:1px solid ' . $k['line'] . ';' : '';
-				$grid .= '<tr><td class="bk-col bk-flat" width="50%" style="' . $line . 'padding:14px 16px 14px 0;vertical-align:top">' . $pair[0] . '</td>'
-					. '<td class="bk-col bk-flat" width="50%" style="' . $line . 'padding:14px 0 14px 16px;vertical-align:top">' . ( $pair[1] ?? '' ) . '</td></tr>';
+				$grid .= '<tr><td class="bk-cell" width="50%" style="' . $line . 'padding:14px 16px 14px 0;vertical-align:top">' . $pair[0] . '</td>'
+					. '<td class="bk-cell" width="50%" style="' . $line . 'padding:14px 0 14px 16px;vertical-align:top">' . ( $pair[1] ?? '' ) . '</td></tr>';
 			}
 			$cal     = $brand->icon( 'calendar' );
-			$summary = '<tr><td class="bk-pad" style="padding-top:26px;' . $pad . '"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $k['soft'] . ';border:1px solid ' . $k['line'] . ';border-radius:12px"><tr><td style="padding:22px 24px 10px">'
+			$summary = '<tr><td class="bk-pad" style="padding-top:26px;' . $pad . '"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $k['soft'] . ';border:1px solid ' . $k['line'] . ';border-radius:12px"><tr><td class="bk-box" style="padding:22px 24px 10px">'
 				. '<table role="presentation" cellpadding="0" cellspacing="0"><tr>' . ( null === $cal ? '' : '<td style="padding-right:12px;vertical-align:middle">' . $img( $cal, 28 ) . '</td>' )
 				. '<td style="vertical-align:middle;color:' . $k['primary'] . ';font:700 19px/1.3 ' . $f . '">' . $e( __( 'Riepilogo prenotazione', 'booking-manager' ) ) . '</td></tr></table>'
 				. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px">' . $grid . '</table>'
@@ -139,13 +143,13 @@ final class EmailDesign {
 			. '</tr></table></td></tr>';
 		$bar = '<tr><td style="padding:12px 20px;background:' . $k['primary'] . ';color:' . $on . ';text-align:center;font:12px/1.4 ' . $f . '"><strong>' . $e( $t['name'] ) . '</strong>' . ( '' === $t['subtitle'] ? '' : ' &nbsp;|&nbsp; ' . $e( $t['subtitle'] ) ) . '</td></tr>';
 
-		$style = '<style>@media only screen and (max-width:620px){.bk-col{display:block!important;width:100%!important;box-sizing:border-box}.bk-pad{padding-left:20px!important;padding-right:20px!important}.bk-left{text-align:left!important}td.bk-flat{padding-left:0!important;padding-right:0!important}td.bk-head{padding:24px 20px!important}}</style>';
+		$style = '<style>@media only screen and (max-width:620px){.bk-col{display:block!important;width:100%!important;box-sizing:border-box}.bk-pad{padding-left:16px!important;padding-right:16px!important}td.bk-outer{padding:0!important}.bk-card{border-radius:0!important;border:0!important}td.bk-box{padding:16px 14px 6px!important}td.bk-cell{padding:12px 6px 12px 0!important}td.bk-icon{width:30px!important}td.bk-icon img{width:22px!important;height:22px!important}.bk-val{font-size:15px!important}.bk-left{text-align:left!important}td.bk-flat{padding-left:0!important;padding-right:0!important}td.bk-head{padding:24px 20px!important}.bk-wide{display:none!important}.bk-narrow{display:block!important;max-height:none!important}}</style>';
 
 		return '<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $e( $c['title'] ) . '</title>' . $style . '</head>'
 			. '<body style="margin:0;padding:0;background:' . $k['page'] . '">'
 			. '<span style="display:none;max-height:0;overflow:hidden;opacity:0">' . $e( wp_trim_words( $c['intro'], 20 ) ) . '</span>'
-			. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $k['page'] . '"><tr><td align="center" style="padding:24px 10px">'
-			. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid ' . $k['line'] . '">'
+			. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $k['page'] . '"><tr><td class="bk-outer" align="center" style="padding:24px 10px">'
+			. '<table class="bk-card" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid ' . $k['line'] . '">'
 			. '<tr><td style="padding:0">' . $header . '</td></tr>'
 			. $heading . $summary . $note . $qr . $button . $footer . $bar
 			. '</table></td></tr></table></body></html>';

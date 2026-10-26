@@ -1,4 +1,4 @@
-# Report dei test — Booking Manager 0.1.5 (Fase 2)
+# Report dei test — Booking Manager 0.1.6 (Fase 2)
 
 Data: 26 ottobre 2026 · ramo `fase-2/sviluppo`
 
@@ -18,7 +18,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 84 test, 953 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 85 test, 958 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|
@@ -33,7 +33,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Integrazione — check-in | 9 | QR firmato senza dati personali, check-in una volta sola anche da due telefoni, codici errati o di altre strutture, check-out e camera da pulire, camere non pulite, camere separate, annullamento del check-in, housekeeping, permessi |
 | Integrazione — messaggi | 8 | richiesta all'ospite e alla struttura, conferma con QR (tutte le immagini dentro l'email, nessuna remota), **aspetto della struttura (sottotitolo, frasi, colori; anteprima con le scelte non salvate)**, messaggi non più veri non inviati, promemoria una volta, testi della struttura, server di posta in errore riprovato e segnalato, **WhatsApp predisposto che non finge invii** |
 | Integrazione — pagamenti (fornitore finto) | 5 | incassi alla reception, prenotazione online confermata solo dal fornitore, pagina che non si apre libera le camere, pagamento tardivo rimborsato, ritorno dell'ospite che legge lo stato dal fornitore |
-| Integrazione — API REST | 11 | 401 senza login, 403/404 per ruolo e struttura, housekeeping senza importi né contatti, reception senza conferme e cancellazioni, modulo pubblico e cancellazione dal link, **cancellazione gratuita venduta come opzione (senza l'opzione una tariffa non rimborsabile non si annulla online, con l'opzione sì; prezzo dell'opzione e totale)**, modulo chiuso e modulo troppo vecchio, **ogni rotta di scrittura classificata dalla licenza**, blocco totale |
+| Integrazione — API REST | 12 | 401 senza login, 403/404 per ruolo e struttura, housekeeping senza importi né contatti, reception senza conferme e cancellazioni, modulo pubblico e cancellazione dal link, **primo giorno libero proposto dal modulo**, **cancellazione gratuita venduta come opzione (senza l'opzione una tariffa non rimborsabile non si annulla online, con l'opzione sì; prezzo dell'opzione e totale)**, modulo chiuso e modulo troppo vecchio, **ogni rotta di scrittura classificata dalla licenza**, blocco totale |
 | Integrazione — base | 2 | tutte le tabelle, ruoli creati |
 
 ## 2. Controlli di qualità
@@ -43,7 +43,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | `php -l` su tutti i file PHP del pacchetto | SUPERATO |
 | ESLint (`@wordpress/eslint-plugin`) su `assets/src` | SUPERATO (0 errori) |
 | Build `npm run build` | SUPERATO (admin ~316 KB, modulo pubblico ~48 KB con sole dipendenze `wp-element` e `wp-i18n`) |
-| Generazione `languages/booking-manager.pot` | SUPERATO (1.425 testi) |
+| Generazione `languages/booking-manager.pot` | SUPERATO (1.427 testi) |
 
 ## 3. Prove manuali su WordPress (browser)
 
@@ -63,13 +63,16 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Email nella nuova grafica (anteprima e invio di prova in locale, 800 px e 390 px): intestazione con foto, riepilogo con icone nel colore scelto, pulsante, piè di pagina; colonne una sotto l'altra su telefono | SUPERATO (resa nei programmi di posta reali come Gmail e Outlook NON ESEGUITA: nessun server di posta raggiungibile da questo ambiente) |
 | Messaggi → Aspetto: sottotitolo, frase, colore, anteprima dal vivo su computer e telefono, salvataggio | SUPERATO |
 | Pagina dopo la prenotazione (1280 px e 390 px, anche con le regole di Astra) nello stile dell'email; tema che stampa la pagina da bordo a bordo: il modulo prende 16 px di margine | SUPERATO |
+| Primo giorno proposto dal modulo dopo l'orario limite di oggi: domani | SUPERATO |
+| Pagina della prenotazione dal link (1280 px e 390 px, con le regole di Astra) nello stile delle email | SUPERATO |
+| Email su telefono (390 px): senza margini esterni, riepilogo su due colonne, foto sfumata in alto; su computer foto sfumata a sinistra | SUPERATO (resa in Gmail e Outlook reali NON ESEGUITA) |
 | Pagina «gestisci prenotazione» dal link: stato, importi, cancellazione | SUPERATO; un token errato risponde «Prenotazione non trovata» (404) |
 | Licenza non valida: modulo pubblico «prenotazioni non disponibili», banner nel gestionale | SUPERATO |
 | Tentativo di attivazione con server licenze irraggiungibile | SUPERATO — messaggio «Il server delle licenze non risponde», il plugin resta bloccato (nessun successo finto) |
 
 ## 4. Pacchetto ZIP
 
-`bin/build-zip.sh` → `dist/booking-manager-0.1.5.zip` (520 KB, 174 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
+`bin/build-zip.sh` → `dist/booking-manager-0.1.6.zip` (520 KB, 174 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
 
 | Prova su WordPress 6.6 pulito (WP-CLI) | Esito |
 |---|---|

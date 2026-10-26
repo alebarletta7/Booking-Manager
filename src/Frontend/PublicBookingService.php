@@ -120,6 +120,8 @@ class PublicBookingService {
 			'checkout_until'    => (string) $property['checkout_until'],
 			'today'             => $today,
 			'first_day'         => Dates::add_days( $today, (int) $s['min_advance_days'] ),
+			// The day the form proposes: the first one with a free room.
+			'first_free'        => $this->first_free( $property, Dates::add_days( $today, (int) $s['min_advance_days'] ), Dates::add_days( $today, (int) $s['max_advance_days'] ) ),
 			'last_day'          => Dates::add_days( $today, (int) $s['max_advance_days'] ),
 			'min_stay'          => (int) $s['min_stay'],
 			'max_stay'          => (int) $s['max_stay'],
@@ -137,6 +139,34 @@ class PublicBookingService {
 			'extras'            => $this->extras( (int) $property['id'], (bool) $s['show_prices'] ),
 			'available'         => (bool) $types,
 		);
+	}
+
+	/** Days looked at for the first free arrival. */
+	private const FIRST_FREE_DAYS = 60;
+
+	/**
+	 * The first arrival, from $from, with a room free online for the minimum stay and two
+	 * adults (what the form proposes); $from when none is found in the next days. Kept
+	 * for two minutes: the form asks it at every page view.
+	 *
+	 * @param array<string, mixed> $property
+	 */
+	private function first_free( array $property, string $from, string $until ): string {
+		$key    = 'bkng_first_free_' . $property['id'] . '_' . $from;
+		$cached = get_transient( $key );
+		if ( is_string( $cached ) && '' !== $cached ) {
+			return $cached;
+		}
+		$nights = max( 1, (int) $property['settings']['min_stay'] );
+		$found  = $from;
+		for ( $i = 0, $day = $from; $i < self::FIRST_FREE_DAYS && $day <= $until; $i++, $day = Dates::add_days( $day, 1 ) ) {
+			if ( $this->availability->search( $property, $day, Dates::add_days( $day, $nights ), 2, 0, true )['offers'] ) {
+				$found = $day;
+				break;
+			}
+		}
+		set_transient( $key, $found, 2 * MINUTE_IN_SECONDS );
+		return $found;
 	}
 
 	/**
@@ -545,6 +575,7 @@ class PublicBookingService {
 				'checkin_from'   => (string) ( $property['checkin_from'] ?? '' ),
 				'checkout_until' => (string) ( $property['checkout_until'] ?? '' ),
 				'color'          => (string) ( $property['settings']['form_color'] ?? '' ),
+				'signoff'        => (string) ( $property['settings']['email_signoff'] ?? '' ),
 			),
 			'first_name'     => (string) $b['first_name'],
 			'status'         => (string) $b['status'],

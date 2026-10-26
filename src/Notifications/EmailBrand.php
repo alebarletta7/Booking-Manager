@@ -85,8 +85,61 @@ final class EmailBrand {
 	}
 
 	/** The header photo as an embedded image (src), or null. */
-	public function banner(): ?string {
-		return $this->banner_id ? $this->photo( 'banner', $this->banner_id, 'medium_large' ) : null;
+	public function banner( string $fade = 'left' ): ?string {
+		if ( ! $this->banner_id ) {
+			return null;
+		}
+		$key = 'banner-' . $fade;
+		if ( isset( $this->used[ $key ] ) ) {
+			return 'cid:' . $this->used[ $key ]['cid'];
+		}
+		$file = self::file( $this->banner_id, 'medium_large' );
+		$data = null === $file ? null : self::faded( $file, $fade, $this->colors['header'] );
+		return null === $data ? $this->photo( 'banner', $this->banner_id, 'medium_large' ) : $this->use( $key, $data, 'header-' . $fade . '.jpg', 'image/jpeg' );
+	}
+
+	/**
+	 * The header photo cut to the header's shape, fading into the header's background on
+	 * the side of the text: to the left beside it (computer), at the top below it (phone).
+	 * Done on the image, so every mail program shows it. Null without GD.
+	 */
+	private static function faded( string $file, string $fade, string $background ): ?string {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			return null;
+		}
+		$raw = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$src = '' === $raw ? false : @imagecreatefromstring( $raw ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( ! $src ) {
+			return null;
+		}
+		[ $w, $h ]   = 'top' === $fade ? array( 640, 300 ) : array( 600, 420 );
+		$out         = imagecreatetruecolor( $w, $h );
+		$sw          = imagesx( $src );
+		$sh          = imagesy( $src );
+		$scale       = max( $w / $sw, $h / $sh );
+		$cw          = (int) round( $w / $scale );
+		$ch          = (int) round( $h / $scale );
+		imagecopyresampled( $out, $src, 0, 0, (int) ( ( $sw - $cw ) / 2 ), (int) ( ( $sh - $ch ) / 2 ), $w, $h, $cw, $ch );
+		[ $r, $g, $b ] = self::rgb( $background );
+		imagealphablending( $out, true );
+		$span = 'top' === $fade ? (int) ( $h * 0.45 ) : (int) ( $w * 0.45 );
+		for ( $i = 0; $i < $span; $i++ ) {
+			// Smooth: solid at the edge, gone at $span.
+			$t     = $i / $span;
+			$alpha = (int) round( 127 * ( $t * $t * ( 3 - 2 * $t ) ) );
+			$color = imagecolorallocatealpha( $out, $r, $g, $b, $alpha );
+			if ( 'top' === $fade ) {
+				imageline( $out, 0, $i, $w - 1, $i, $color );
+			} else {
+				imageline( $out, $i, 0, $i, $h - 1, $color );
+			}
+		}
+		ob_start();
+		imagejpeg( $out, null, 85 );
+		$data = (string) ob_get_clean();
+		imagedestroy( $out );
+		imagedestroy( $src );
+		return '' === $data ? null : $data;
 	}
 
 	/** A line icon of assets/email in the main colour (or white), as src; null without GD. */

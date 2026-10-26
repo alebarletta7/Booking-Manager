@@ -18,9 +18,8 @@ import {
 import { Captcha } from './Captcha';
 import { Hero, Results, SearchBar } from './Results';
 import { Icon } from './icons';
+import { LONG, StayFooter, StayHead, StaySummary, stayItems } from './StayCard';
 import { Check, ErrorBox, Field, Spinner } from './ui';
-
-const LONG = { day: 'numeric', month: 'long', year: 'numeric' };
 
 function newRequestId() {
 	if ( window.crypto?.randomUUID ) {
@@ -458,73 +457,18 @@ function Done( { property, result } ) {
 		);
 	}
 	const confirmed = b.status === 'confirmed';
-	const where = b.property || {};
-	const time = ( t ) => String( t || '' ).slice( 0, 5 );
-	const rooms = {};
-	( b.rooms || [] ).forEach( ( r ) => {
-		rooms[ r.room_type ] = ( rooms[ r.room_type ] || 0 ) + 1;
-	} );
-	const roomText = Object.entries( rooms )
-		.map( ( [ name, n ] ) => ( n > 1 ? n + ' × ' : '' ) + name )
-		.join( ', ' );
-	const items = [
-		[
-			'calendar',
-			__( 'Arrivo', 'booking-manager' ),
-			date( b.arrival, LONG ),
-			where.checkin_from &&
-				sprintf(
-					/* translators: %s: time. */
-					__( 'check-in dalle %s', 'booking-manager' ),
-					time( where.checkin_from )
-				),
-		],
-		[
-			'calendar',
-			__( 'Partenza', 'booking-manager' ),
-			date( b.departure, LONG ),
-			where.checkout_until &&
-				sprintf(
-					/* translators: %s: time. */
-					__( 'check-out entro le %s', 'booking-manager' ),
-					time( where.checkout_until )
-				),
-		],
-		[ 'moon', __( 'Notti', 'booking-manager' ), String( b.nights ) ],
-		[
-			'users',
-			__( 'Ospiti', 'booking-manager' ),
-			guestsLabel( b.adults, b.children ),
-		],
-		roomText && [
-			'bed',
-			( b.rooms || [] ).length > 1
-				? __( 'Camere', 'booking-manager' )
-				: __( 'Camera', 'booking-manager' ),
-			roomText,
-		],
-		b.total > 0 && [
-			'coins',
-			__( 'Totale', 'booking-manager' ),
-			money( b.total, b.currency ),
-		],
-		[ 'tag', __( 'Codice prenotazione', 'booking-manager' ), b.code ],
-	].filter( Boolean );
 	return (
 		<div className="bkng-p-card bkng-p-done" role="status" tabIndex="-1">
-			<div className="bkng-p-done__head">
-				<span className="bkng-p-done__tick" aria-hidden="true">
-					<Icon name="check" size={ 26 } />
-				</span>
-				<h3>
-					{ confirmed
+			<StayHead
+				title={
+					confirmed
 						? __( 'Prenotazione confermata', 'booking-manager' )
 						: __(
 								'Abbiamo ricevuto la tua richiesta',
 								'booking-manager'
-						  ) }
-				</h3>
-			</div>
+						  )
+				}
+			/>
 			<p className="bkng-p-done__text">
 				<strong>
 					{ sprintf(
@@ -554,30 +498,7 @@ function Done( { property, result } ) {
 							date( b.departure, LONG )
 					  ) }
 			</p>
-			<section className="bkng-p-done__summary">
-				<h4>
-					<Icon name="calendar" size={ 22 } />
-					{ __( 'Riepilogo prenotazione', 'booking-manager' ) }
-				</h4>
-				<dl>
-					{ items.map( ( [ icon, label, value, extra ] ) => (
-						<div key={ label }>
-							<Icon name={ icon } size={ 24 } />
-							<span>
-								<dt>{ label }</dt>
-								<dd>
-									<strong>{ value }</strong>
-									{ extra && (
-										<span className="bkng-p-block">
-											{ extra }
-										</span>
-									) }
-								</dd>
-							</span>
-						</div>
-					) ) }
-				</dl>
-			</section>
+			<StaySummary items={ stayItems( b ) } />
 			{ result.manage_url && (
 				<p className="bkng-p-done__go">
 					<a
@@ -592,47 +513,11 @@ function Done( { property, result } ) {
 					</a>
 				</p>
 			) }
-			<footer className="bkng-p-done__foot">
-				<div>
-					<Icon name="pin" />
-					<span>
-						<strong>{ property.name }</strong>
-						{ where.address && (
-							<span className="bkng-p-block">
-								{ where.address }
-							</span>
-						) }
-					</span>
-				</div>
-				{ ( where.phone || where.email ) && (
-					<div>
-						<span className="bkng-p-done__contacts">
-							{ where.phone && (
-								<a
-									href={
-										'tel:' +
-										where.phone.replace( /[^0-9+]/g, '' )
-									}
-								>
-									<Icon name="phone" />
-									{ where.phone }
-								</a>
-							) }
-							{ where.email && (
-								<a href={ 'mailto:' + where.email }>
-									<Icon name="mail" />
-									{ where.email }
-								</a>
-							) }
-						</span>
-					</div>
-				) }
-				{ property.signoff && (
-					<p className="bkng-p-done__signoff">
-						{ property.signoff } ♡
-					</p>
-				) }
-			</footer>
+			<StayFooter
+				name={ property.name }
+				where={ b.property }
+				signoff={ property.signoff }
+			/>
 		</div>
 	);
 }
@@ -664,13 +549,11 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 			.then( ( p ) => {
 				applyColor( root, p.color );
 				setProperty( p );
+				const first = p.first_free || p.first_day;
 				setStay( ( s ) => ( {
 					...s,
-					arrival: p.first_day,
-					departure: addDays(
-						p.first_day,
-						Math.max( 1, p.min_stay || 1 )
-					),
+					arrival: first,
+					departure: addDays( first, Math.max( 1, p.min_stay || 1 ) ),
 				} ) );
 			} )
 			.catch( setLoadError );

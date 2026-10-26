@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Booking Manager 0.1.5\n"
+"Project-Id-Version: Booking Manager 0.1.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/booking-manager\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T19:08:22+00:00\n"
+"POT-Creation-Date: 2026-10-26T19:23:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: booking-manager\n"
@@ -76,7 +76,7 @@ msgstr ""
 #: assets/build/admin.js:12
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
-#: assets/build/public.js:25
+#: assets/build/public.js:23
 msgid "Ospiti"
 msgstr ""
 
@@ -474,7 +474,7 @@ msgid "Questa camera non appartiene alla tipologia della prenotazione."
 msgstr ""
 
 #: src/Bookings/BookingService.php:924
-#: src/Frontend/PublicBookingService.php:254
+#: src/Frontend/PublicBookingService.php:284
 msgid "Camera non valida."
 msgstr ""
 
@@ -566,7 +566,7 @@ msgid "Date non valide."
 msgstr ""
 
 #: src/Bookings/StayBuilder.php:92
-#: src/Frontend/PublicBookingService.php:192
+#: src/Frontend/PublicBookingService.php:222
 msgid "Numero di ospiti non valido."
 msgstr ""
 
@@ -838,48 +838,48 @@ msgstr ""
 msgid "Conferma di non essere un robot e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:187
-#: src/Frontend/PublicBookingService.php:257
+#: src/Frontend/PublicBookingService.php:217
+#: src/Frontend/PublicBookingService.php:287
 msgid "Scegli date di arrivo e partenza valide."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:291
+#: src/Frontend/PublicBookingService.php:321
 msgid "Non è stato possibile inviare la richiesta. Ricarica la pagina e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:295
+#: src/Frontend/PublicBookingService.php:325
 msgid "Hai inviato il modulo troppo in fretta. Controlla i dati e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:298
+#: src/Frontend/PublicBookingService.php:328
 msgid "Il modulo è scaduto. Ricarica la pagina e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:363
+#: src/Frontend/PublicBookingService.php:393
 msgid "Pagamento online non avviato."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:404
+#: src/Frontend/PublicBookingService.php:434
 msgid "Per questa prenotazione non c'è nulla da pagare online."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:420
+#: src/Frontend/PublicBookingService.php:450
 msgid "Questa prenotazione non si può annullare online. Contatta la struttura."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:429
+#: src/Frontend/PublicBookingService.php:459
 msgid "Annullata dall'ospite con il link della prenotazione."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:640
+#: src/Frontend/PublicBookingService.php:671
 msgid "Prenotazione non trovata. Controlla il link ricevuto."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:656
+#: src/Frontend/PublicBookingService.php:687
 msgid "Le prenotazioni online non sono disponibili per questa struttura."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:672
+#: src/Frontend/PublicBookingService.php:703
 msgid "Troppe richieste in poco tempo. Riprova più tardi."
 msgstr ""
 
@@ -1320,20 +1320,20 @@ msgstr ""
 msgid "Nessun servizio WhatsApp collegato."
 msgstr ""
 
-#: src/Notifications/EmailDesign.php:98
-#: assets/build/public.js:28
+#: src/Notifications/EmailDesign.php:102
+#: assets/build/public.js:23
 msgid "Riepilogo prenotazione"
 msgstr ""
 
-#: src/Notifications/EmailDesign.php:109
+#: src/Notifications/EmailDesign.php:113
 msgid "QR per il check-in"
 msgstr ""
 
-#: src/Notifications/EmailDesign.php:110
+#: src/Notifications/EmailDesign.php:114
 msgid "Mostra questo QR alla reception per un check-in più veloce."
 msgstr ""
 
-#: src/Notifications/EmailDesign.php:111
+#: src/Notifications/EmailDesign.php:115
 msgid "Codice prenotazione:"
 msgstr ""
 
@@ -1574,6 +1574,7 @@ msgid "Prenotazione confermata – {struttura}"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:114
+#: assets/build/public.js:28
 msgid "La tua prenotazione è confermata"
 msgstr ""
 
@@ -1616,7 +1617,7 @@ msgstr ""
 #: assets/build/admin.js:6
 #: assets/build/admin.js:15
 #: assets/build/admin.js:17
-#: assets/build/public.js:25
+#: assets/build/public.js:23
 msgid "Camera"
 msgid_plural "Camere"
 msgstr[0] ""
@@ -1627,15 +1628,14 @@ msgstr[1] ""
 #: assets/build/admin.js:4
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
-#: assets/build/public.js:23
-#: assets/build/public.js:30
+#: assets/build/public.js:21
 msgid "Arrivo"
 msgstr ""
 
 #. translators: %s: check-in time.
 #. translators: %s: time.
 #: src/Notifications/NotificationTemplates.php:300
-#: assets/build/public.js:24
+#: assets/build/public.js:22
 msgid "check-in dalle %s"
 msgstr ""
 
@@ -1644,21 +1644,20 @@ msgstr ""
 #: assets/build/admin.js:4
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
-#: assets/build/public.js:24
-#: assets/build/public.js:31
+#: assets/build/public.js:22
 msgid "Partenza"
 msgstr ""
 
 #. translators: %s: check-out time.
 #. translators: %s: time.
 #: src/Notifications/NotificationTemplates.php:302
-#: assets/build/public.js:25
+#: assets/build/public.js:23
 msgid "check-out entro le %s"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:303
 #: assets/build/admin.js:17
-#: assets/build/public.js:25
+#: assets/build/public.js:23
 msgid "Notti"
 msgstr ""
 
@@ -1675,13 +1674,13 @@ msgstr ""
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
 #: assets/build/public.js:17
-#: assets/build/public.js:22
-#: assets/build/public.js:25
-#: assets/build/public.js:32
+#: assets/build/public.js:23
+#: assets/build/public.js:24
 msgid "Totale"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:315
+#: assets/build/public.js:28
 msgid "Già pagato"
 msgstr ""
 
@@ -1691,7 +1690,7 @@ msgid "Saldo"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:319
-#: assets/build/public.js:25
+#: assets/build/public.js:23
 msgid "Codice prenotazione"
 msgstr ""
 
@@ -2351,7 +2350,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/build/admin.js:4
-#: assets/build/public.js:32
+#: assets/build/public.js:28
 msgid "Da pagare"
 msgstr ""
 
@@ -2783,8 +2782,7 @@ msgstr ""
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
 #: assets/build/public.js:17
-#: assets/build/public.js:25
-#: assets/build/public.js:32
+#: assets/build/public.js:23
 msgid "Camere"
 msgstr ""
 
@@ -2878,7 +2876,7 @@ msgstr ""
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
 #: assets/build/admin.js:18
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Nome"
 msgstr ""
 
@@ -2886,7 +2884,7 @@ msgstr ""
 #: assets/build/admin.js:5
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Cognome"
 msgstr ""
 
@@ -2895,7 +2893,7 @@ msgstr ""
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
 #: assets/build/admin.js:18
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Email"
 msgstr ""
 
@@ -2903,7 +2901,7 @@ msgstr ""
 #: assets/build/admin.js:5
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Telefono"
 msgstr ""
 
@@ -2913,7 +2911,7 @@ msgid "Lingua delle email"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Orario di arrivo previsto"
 msgstr ""
 
@@ -3219,7 +3217,7 @@ msgid "Modifica ospite"
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Paese (sigla, es. IT)"
 msgstr ""
 
@@ -5366,7 +5364,6 @@ msgid "Motivo dell'annullamento: %s"
 msgstr ""
 
 #: assets/build/admin.js:17
-#: assets/build/public.js:32
 msgid "Soggiorno"
 msgstr ""
 
@@ -5843,7 +5840,7 @@ msgid "La verifica anti-robot non si è caricata. Disattiva eventuali blocchi de
 msgstr ""
 
 #: assets/build/public.js:8
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "Si è verificato un errore. Riprova tra poco."
 msgstr ""
 
@@ -5922,7 +5919,7 @@ msgid "Servizi aggiuntivi"
 msgstr ""
 
 #: assets/build/public.js:17
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Prenota"
 msgstr ""
 
@@ -6042,69 +6039,70 @@ msgid "Azzera i filtri"
 msgstr ""
 
 #. translators: %s: minutes:seconds.
-#: assets/build/public.js:22
+#: assets/build/public.js:24
 msgid "Teniamo le camere per te ancora %s."
 msgstr ""
 
-#: assets/build/public.js:22
+#: assets/build/public.js:24
 msgid "Il tuo soggiorno"
 msgstr ""
 
-#: assets/build/public.js:22
+#: assets/build/public.js:24
 msgid "per camera"
 msgstr ""
 
 #. translators: 1: check-in time, 2: check-out time.
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Check-in dalle %1$s · check-out entro le %2$s"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "I tuoi dati"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Richieste o note per la struttura"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Condizioni della struttura"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Ho letto l’informativa sulla privacy e accetto il trattamento dei dati per gestire la prenotazione."
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Leggi l’informativa"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Voglio ricevere offerte e novità dalla struttura (facoltativo)."
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Indietro"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Invia la richiesta"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "La struttura controlla la richiesta e ti conferma la prenotazione via email."
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Ti stiamo portando alla pagina di pagamento sicura…"
 msgstr ""
 
-#: assets/build/public.js:23
+#: assets/build/public.js:25
 msgid "Se non si apre, clicca qui."
 msgstr ""
 
 #. translators: %s: guest's first name.
 #: assets/build/public.js:26
+#: assets/build/public.js:29
 msgid "Ciao %s,"
 msgstr ""
 
@@ -6159,6 +6157,26 @@ msgid "Non presentato"
 msgstr ""
 
 #: assets/build/public.js:28
+msgid "La tua richiesta è in attesa di conferma"
+msgstr ""
+
+#: assets/build/public.js:28
+msgid "Manca solo il pagamento"
+msgstr ""
+
+#: assets/build/public.js:28
+msgid "Buon soggiorno!"
+msgstr ""
+
+#: assets/build/public.js:28
+msgid "Grazie per essere stato nostro ospite"
+msgstr ""
+
+#: assets/build/public.js:28
+msgid "La prenotazione è annullata"
+msgstr ""
+
+#: assets/build/public.js:28
 msgid "Grazie! Stiamo ricevendo la conferma del pagamento: la pagina si aggiorna da sola."
 msgstr ""
 
@@ -6166,9 +6184,8 @@ msgstr ""
 msgid "Il pagamento non è stato completato. Puoi riprovare qui sotto."
 msgstr ""
 
-#. translators: %s: booking code.
 #: assets/build/public.js:29
-msgid "Prenotazione %s"
+msgid "qui trovi i dettagli del tuo soggiorno e puoi gestire la prenotazione."
 msgstr ""
 
 #. translators: %s: date and time.
@@ -6176,57 +6193,43 @@ msgstr ""
 msgid "Le camere restano bloccate fino al %s: completa il pagamento per confermare."
 msgstr ""
 
-#. translators: %s: time.
-#: assets/build/public.js:31
-msgid "dalle %s"
-msgstr ""
-
-#. translators: %s: time.
-#: assets/build/public.js:32
-msgid "entro le %s"
-msgstr ""
-
-#: assets/build/public.js:32
-msgid "Pagato"
-msgstr ""
-
-#: assets/build/public.js:32
-msgid "Paga online"
-msgstr ""
-
-#: assets/build/public.js:32
+#: assets/build/public.js:30
 msgid "Annulla la prenotazione"
 msgstr ""
 
-#: assets/build/public.js:32
+#: assets/build/public.js:30
+msgid "Paga online"
+msgstr ""
+
+#: assets/build/public.js:30
 msgid "Vuoi annullare la prenotazione?"
 msgstr ""
 
 #. translators: %s: amount kept by the property.
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "Secondo le condizioni della tariffa la struttura trattiene %s."
 msgstr ""
 
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "L’annullamento è gratuito."
 msgstr ""
 
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "Per i rimborsi di quanto pagato la struttura ti contatterà."
 msgstr ""
 
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "No, tienila"
 msgstr ""
 
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "Sì, annulla"
 msgstr ""
 
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "Per modifiche o annullamenti contatta la struttura."
 msgstr ""
 
-#: assets/build/public.js:33
+#: assets/build/public.js:31
 msgid "Connessione non riuscita. Controlla la rete e riprova."
 msgstr ""
