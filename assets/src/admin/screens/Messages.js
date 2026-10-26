@@ -1,9 +1,10 @@
 /**
  * Messages: the log of e-mails (and WhatsApp, when connected) with retries, the texts of
- * the property in every language with a preview, a test e-mail.
+ * the property in every language with a preview, their look (logo, photo, colours) and
+ * a test e-mail.
  */
-import { Button } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { Button, ColorPalette } from '@wordpress/components';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import { del, getPaged, get, post, put } from '../lib/api';
@@ -11,6 +12,7 @@ import { boot, can } from '../lib/boot';
 import { dateTime } from '../lib/format';
 import { useAction, useLoad } from '../lib/hooks';
 import { useProperty } from '../lib/property';
+import { FORM_COLORS } from './PropertySettings';
 import {
 	Badge,
 	Card,
@@ -406,6 +408,407 @@ function Templates( { property } ) {
 	);
 }
 
+/* ------------------------------------------------------------------ Look of the e-mails */
+
+const DESIGN_KEYS = [
+	'email_logo_id',
+	'email_banner_id',
+	'email_subtitle',
+	'email_tagline',
+	'email_signoff',
+	'email_color',
+	'email_header_bg',
+	'email_page_bg',
+];
+
+const BACKGROUNDS = [
+	{ name: __( 'Crema', 'booking-manager' ), color: '#f6f1e9' },
+	{ name: __( 'Bianco', 'booking-manager' ), color: '#ffffff' },
+	{ name: __( 'Salvia', 'booking-manager' ), color: '#e8efe9' },
+	{ name: __( 'Cielo', 'booking-manager' ), color: '#e8eff5' },
+	{ name: __( 'Sabbia', 'booking-manager' ), color: '#efe6d8' },
+	{ name: __( 'Grigio chiaro', 'booking-manager' ), color: '#f4f6f4' },
+];
+
+/** One image of the media library: its thumbnail, «Scegli» and «Rimuovi». */
+function ImageField( { label, help, id, onChange, empty } ) {
+	const [ url, setUrl ] = useState( '' );
+	useEffect( () => {
+		setUrl( '' );
+		if ( id > 0 && window.wp?.media?.attachment ) {
+			const a = window.wp.media.attachment( id );
+			a.fetch().then( () =>
+				setUrl(
+					a.get( 'sizes' )?.thumbnail?.url || a.get( 'url' ) || ''
+				)
+			);
+		}
+	}, [ id ] );
+	const pick = () => {
+		if ( ! window.wp?.media ) {
+			return;
+		}
+		const frame = window.wp.media( {
+			title: label,
+			library: { type: 'image' },
+			multiple: false,
+			button: { text: __( 'Usa questa immagine', 'booking-manager' ) },
+		} );
+		frame.on( 'select', () => {
+			const a = frame.state().get( 'selection' ).first().toJSON();
+			setUrl( a.sizes?.thumbnail?.url || a.url );
+			onChange( a.id );
+		} );
+		frame.open();
+	};
+	return (
+		<div className="bkng-image-field">
+			<p className="bkng-strong">{ label }</p>
+			<div className="bkng-image-field__row">
+				<span className="bkng-image-field__thumb">
+					{ id > 0 && url ? (
+						<img src={ url } alt="" />
+					) : (
+						<span className="bkng-small bkng-muted">{ empty }</span>
+					) }
+				</span>
+				<Button variant="secondary" onClick={ pick }>
+					{ id > 0
+						? __( 'Cambia', 'booking-manager' )
+						: __( 'Scegli', 'booking-manager' ) }
+				</Button>
+				{ id > 0 && (
+					<Button
+						variant="tertiary"
+						isDestructive
+						onClick={ () => onChange( 0 ) }
+					>
+						{ __( 'Rimuovi', 'booking-manager' ) }
+					</Button>
+				) }
+			</div>
+			{ help && <p className="bkng-help">{ help }</p> }
+		</div>
+	);
+}
+
+function ColorField( { label, help, value, colors, onChange } ) {
+	return (
+		<div className="bkng-color-field">
+			<p className="bkng-strong">{ label }</p>
+			<ColorPalette
+				colors={ colors }
+				value={ value || undefined }
+				onChange={ ( c ) => onChange( c || '' ) }
+				disableAlpha
+				clearable
+			/>
+			{ help && <p className="bkng-help">{ help }</p> }
+		</div>
+	);
+}
+
+/** The e-mail as on a computer (scaled to the card) or on a phone. */
+function MailFrame( { html } ) {
+	const box = useRef( null );
+	const [ phone, setPhone ] = useState( false );
+	const [ width, setWidth ] = useState( 0 );
+	useEffect( () => {
+		const el = box.current;
+		if ( ! el || ! window.ResizeObserver ) {
+			return undefined;
+		}
+		const observer = new window.ResizeObserver( () =>
+			setWidth( el.clientWidth )
+		);
+		observer.observe( el );
+		return () => observer.disconnect();
+	}, [] );
+	const size = phone ? 390 : 700;
+	const scale = width ? Math.min( 1, width / size ) : 1;
+	const height = 760;
+	return (
+		<>
+			<div className="bkng-segmented" style={ { marginBottom: 12 } }>
+				<Button
+					variant={ phone ? 'secondary' : 'primary' }
+					onClick={ () => setPhone( false ) }
+				>
+					{ __( 'Computer', 'booking-manager' ) }
+				</Button>
+				<Button
+					variant={ phone ? 'primary' : 'secondary' }
+					onClick={ () => setPhone( true ) }
+				>
+					{ __( 'Telefono', 'booking-manager' ) }
+				</Button>
+			</div>
+			<div ref={ box } className="bkng-mail-frame" style={ { height } }>
+				<iframe
+					title={ __( 'Anteprima email', 'booking-manager' ) }
+					sandbox=""
+					srcDoc={ html }
+					style={ {
+						width: size,
+						height: height / scale,
+						transform: 'scale(' + scale + ')',
+						transformOrigin: '0 0',
+						marginLeft:
+							scale === 1 && width > size
+								? ( width - size ) / 2
+								: 0,
+					} }
+				/>
+			</div>
+		</>
+	);
+}
+
+function Appearance( { property } ) {
+	const data = useLoad(
+		() => get( '/properties/' + property.id ),
+		[ property.id ]
+	);
+	const [ form, setForm ] = useState( null );
+	const [ key, setKey ] = useState( 'guest_received' );
+	const [ preview, setPreview ] = useState( null );
+	const [ notice, setNotice ] = useState( '' );
+	const [ own, setOwn ] = useState( false );
+	const action = useAction();
+	useEffect( () => {
+		if ( data.data ) {
+			setForm(
+				Object.fromEntries(
+					DESIGN_KEYS.map( ( k ) => [ k, data.data.settings[ k ] ] )
+				)
+			);
+		}
+	}, [ data.data ] );
+	// The preview follows what is typed, a moment after the last change.
+	useEffect( () => {
+		if ( ! form ) {
+			return undefined;
+		}
+		let live = true;
+		const timer = window.setTimeout( () => {
+			post(
+				'/properties/' + property.id + '/templates/' + key + '/preview',
+				{ design: form }
+			)
+				.then( ( res ) => live && setPreview( res ) )
+				.catch( () => {} );
+		}, 400 );
+		return () => {
+			live = false;
+			window.clearTimeout( timer );
+		};
+	}, [ form, key, property.id ] );
+
+	if ( data.loading && ! data.data ) {
+		return <Loading />;
+	}
+	if ( data.error ) {
+		return <ErrorNotice error={ data.error } onRetry={ data.reload } />;
+	}
+	if ( ! form ) {
+		return null;
+	}
+	const set = ( k ) => ( v ) => setForm( ( f ) => ( { ...f, [ k ]: v } ) );
+	const banner = form.email_banner_id;
+	return (
+		<div className="bkng-columns bkng-columns--preview">
+			<Card title={ __( 'Aspetto delle email', 'booking-manager' ) }>
+				<p className="bkng-help">
+					{ __(
+						'Vale per tutte le email agli ospiti e alla struttura. Testi e dettagli della prenotazione restano quelli di «Testi».',
+						'booking-manager'
+					) }
+				</p>
+				<Success onDismiss={ () => setNotice( '' ) }>
+					{ notice }
+				</Success>
+				<ErrorNotice
+					error={ action.error }
+					onDismiss={ () => action.setError( null ) }
+				/>
+				<div className="bkng-stack">
+					<ImageField
+						label={ __( 'Logo', 'booking-manager' ) }
+						id={ form.email_logo_id }
+						onChange={ set( 'email_logo_id' ) }
+						empty={ __( 'Nessun logo', 'booking-manager' ) }
+						help={ __(
+							'Accanto al nome della struttura, in alto a sinistra.',
+							'booking-manager'
+						) }
+					/>
+					<Select
+						label={ __( 'Foto in alto', 'booking-manager' ) }
+						value={ own || banner > 0 ? 'own' : String( banner ) }
+						options={ [
+							{
+								value: '0',
+								label: __(
+									'La prima foto delle camere',
+									'booking-manager'
+								),
+							},
+							{
+								value: 'own',
+								label: __(
+									'Una foto scelta da me',
+									'booking-manager'
+								),
+							},
+							{
+								value: '-1',
+								label: __( 'Nessuna foto', 'booking-manager' ),
+							},
+						] }
+						onChange={ ( v ) => {
+							setOwn( v === 'own' );
+							if ( v !== 'own' ) {
+								set( 'email_banner_id' )( Number( v ) );
+							}
+						} }
+					/>
+					{ ( own || banner > 0 ) && (
+						<ImageField
+							label={ __( 'Foto', 'booking-manager' ) }
+							id={ banner }
+							onChange={ ( id ) =>
+								set( 'email_banner_id' )( id || 0 )
+							}
+							empty={ __(
+								'Nessuna foto scelta',
+								'booking-manager'
+							) }
+						/>
+					) }
+					<Text
+						label={ __(
+							'Sottotitolo sotto il nome',
+							'booking-manager'
+						) }
+						value={ form.email_subtitle }
+						placeholder={ __(
+							'es. B&B & Hotel',
+							'booking-manager'
+						) }
+						onChange={ set( 'email_subtitle' ) }
+					/>
+					<Text
+						label={ __( 'Frase in alto', 'booking-manager' ) }
+						value={ form.email_tagline }
+						placeholder={ __(
+							'es. La tua ospitalità ci sta a cuore',
+							'booking-manager'
+						) }
+						onChange={ set( 'email_tagline' ) }
+					/>
+					<Text
+						label={ __( 'Saluto in fondo', 'booking-manager' ) }
+						value={ form.email_signoff }
+						placeholder={ __(
+							'es. Grazie per averci scelto!',
+							'booking-manager'
+						) }
+						onChange={ set( 'email_signoff' ) }
+					/>
+					<ColorField
+						label={ __( 'Colore principale', 'booking-manager' ) }
+						colors={ FORM_COLORS }
+						value={ form.email_color }
+						onChange={ set( 'email_color' ) }
+						help={ __(
+							'Titoli, icone, pulsante e barra in fondo. Senza scelta: il colore del modulo di prenotazione.',
+							'booking-manager'
+						) }
+					/>
+					<ColorField
+						label={ __(
+							"Sfondo dell'intestazione",
+							'booking-manager'
+						) }
+						colors={ BACKGROUNDS }
+						value={ form.email_header_bg }
+						onChange={ set( 'email_header_bg' ) }
+					/>
+					<ColorField
+						label={ __( 'Sfondo della pagina', 'booking-manager' ) }
+						colors={ BACKGROUNDS }
+						value={ form.email_page_bg }
+						onChange={ set( 'email_page_bg' ) }
+					/>
+				</div>
+				<div className="bkng-page__actions" style={ { marginTop: 16 } }>
+					<Button
+						variant="primary"
+						isBusy={ action.busy }
+						onClick={ async () => {
+							const res = await action.run( () =>
+								put(
+									'/properties/' + property.id + '/settings',
+									Object.fromEntries(
+										DESIGN_KEYS.map( ( k ) => [
+											k,
+											form[ k ],
+										] )
+									)
+								)
+							);
+							if ( res ) {
+								data.reload();
+								setNotice(
+									__( 'Aspetto salvato.', 'booking-manager' )
+								);
+							}
+						} }
+					>
+						{ __( 'Salva', 'booking-manager' ) }
+					</Button>
+				</div>
+			</Card>
+			<Card
+				title={ __( 'Anteprima', 'booking-manager' ) }
+				actions={
+					<Select
+						label={ __( 'Messaggio', 'booking-manager' ) }
+						hideLabelFromVision
+						value={ key }
+						options={ [
+							{
+								value: 'guest_received',
+								label: __(
+									'Richiesta ricevuta',
+									'booking-manager'
+								),
+							},
+							{
+								value: 'guest_confirmed',
+								label: __(
+									'Prenotazione confermata',
+									'booking-manager'
+								),
+							},
+							{
+								value: 'guest_pre_arrival',
+								label: __(
+									"Promemoria prima dell'arrivo",
+									'booking-manager'
+								),
+							},
+						] }
+						onChange={ setKey }
+					/>
+				}
+			>
+				{ preview ? <MailFrame html={ preview.html } /> : <Loading /> }
+			</Card>
+		</div>
+	);
+}
+
 function TestEmail( { property } ) {
 	const [ to, setTo ] = useState( boot.me?.email || '' );
 	const action = useAction();
@@ -489,6 +892,7 @@ export default function Messages() {
 					tabs={ [
 						[ 'log', __( 'Registro', 'booking-manager' ) ],
 						[ 'templates', __( 'Testi', 'booking-manager' ) ],
+						[ 'look', __( 'Aspetto', 'booking-manager' ) ],
 						[ 'test', __( 'Prova', 'booking-manager' ) ],
 					] }
 				/>
@@ -496,6 +900,9 @@ export default function Messages() {
 			{ tab === 'log' && <Log property={ property } /> }
 			{ tab === 'templates' && settings && (
 				<Templates property={ property } />
+			) }
+			{ tab === 'look' && settings && (
+				<Appearance property={ property } />
 			) }
 			{ tab === 'test' && settings && (
 				<TestEmail property={ property } />

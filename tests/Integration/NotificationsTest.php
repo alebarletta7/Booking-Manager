@@ -118,7 +118,13 @@ final class NotificationsTest extends TestCase {
 		$this->assertStringContainsString( 'cid:bkng-qr-' . $b['code'], $mailer->Body );
 		$this->assertStringContainsString( 'Via Roma 1, Lucca', $mailer->Body );
 		$images = array_filter( $mailer->getAttachments(), static fn( array $a ) => 'inline' === $a[6] );
-		$this->assertCount( 1, $images, 'the QR is embedded, not a remote image' );
+		$cids   = array_column( $images, 7 );
+		$this->assertContains( 'bkng-qr-' . $b['code'], $cids, 'the QR is embedded, not a remote image' );
+		preg_match_all( '/src="([^"]+)"/', $mailer->Body, $sources );
+		foreach ( $sources[1] as $src ) {
+			$this->assertStringStartsWith( 'cid:', $src, 'no remote image in the e-mail' );
+			$this->assertContains( substr( $src, 4 ), $cids, 'every image travels with the e-mail' );
+		}
 
 		$imported = $this->book( $p['id'], $t['type']['id'], 10, 12, array(), array( 'channel' => 'import' ) );
 		$this->assertIsArray( $imported );
@@ -176,6 +182,37 @@ final class NotificationsTest extends TestCase {
 		$preview = $this->notifications()->preview( $p['id'], 'guest_confirmed', 'Prova {codice}', '' );
 		$this->assertSame( 'Prova ' . $b['code'], $preview['subject'] );
 		$this->assertFalse( $preview['example'] );
+	}
+
+	public function test_the_look_of_the_emails_is_the_propertys(): void {
+		$this->admin();
+		$p = $this->guest_property(
+			array(
+				'email_subtitle'  => 'B&B & Hotel',
+				'email_tagline'   => 'La tua ospitalità ci sta a cuore',
+				'email_signoff'   => 'A presto!',
+				'email_color'     => '#7A2E3A',
+				'email_header_bg' => '#efe6d8',
+				'email_page_bg'   => 'rosso',
+				'email_banner_id' => -1,
+			)
+		);
+		$this->assertSame( '#7a2e3a', $p['settings']['email_color'] );
+		$this->assertSame( '', $p['settings']['email_page_bg'], 'only #rrggbb colours are kept' );
+		$t = $this->room_type( $p['id'], 1 );
+		$b = $this->book( $p['id'], $t['type']['id'], 10, 12 );
+		$this->notifications()->run();
+		$body = tests_retrieve_phpmailer_instance()->Body;
+		foreach ( array( 'B&amp;B &amp; Hotel', 'La tua ospitalità ci sta a cuore', 'A presto!', '#7a2e3a', '#efe6d8', 'Riepilogo prenotazione', $b['code'] ) as $text ) {
+			$this->assertStringContainsString( $text, $body );
+		}
+
+		// The preview shows what is being chosen, not saved, with the images inside.
+		$preview = $this->notifications()->preview( $p['id'], 'guest_received', null, null, array( 'email_color' => '#1d3557', 'email_subtitle' => 'Guest house' ) );
+		$this->assertStringContainsString( '#1d3557', $preview['html'] );
+		$this->assertStringContainsString( 'Guest house', $preview['html'] );
+		$this->assertStringNotContainsString( 'cid:', $preview['html'] );
+		$this->assertStringContainsString( 'data:image/png;base64,', $preview['html'] );
 	}
 
 	public function test_a_failing_mail_server_is_retried_then_reported(): void {

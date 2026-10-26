@@ -4,7 +4,7 @@ Tags: booking, b&b, hotel, prenotazioni, affittacamere
 Requires at least: 6.6
 Tested up to: 6.6
 Requires PHP: 8.1
-Stable tag: 0.1.4
+Stable tag: 0.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,9 @@ Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
 3. Segui la configurazione guidata.
 
 == Changelog ==
+
+= 0.1.5 =
+* Nuova grafica delle email, personalizzabile in Messaggi → Aspetto; pagina dopo la prenotazione nello stesso stile; margini del modulo su telefono.
 
 = 0.1.4 =
 * Scheda della camera con foto a schermo intero, tariffe e servizi a pagamento (colazione, cancellazione gratuita…); corretta la cancellazione online delle tariffe non rimborsabili.

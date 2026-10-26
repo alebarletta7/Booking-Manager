@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Booking Manager 0.1.4\n"
+"Project-Id-Version: Booking Manager 0.1.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/booking-manager\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T13:30:24+00:00\n"
+"POT-Creation-Date: 2026-10-26T19:08:22+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: booking-manager\n"
@@ -63,7 +63,7 @@ msgid "Reception e pagamenti"
 msgstr ""
 
 #: src/Access/Capabilities.php:134
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
 #: assets/build/admin.js:18
@@ -71,11 +71,12 @@ msgid "Housekeeping"
 msgstr ""
 
 #: src/Access/Capabilities.php:135
-#: src/Notifications/NotificationTemplates.php:282
+#: src/Notifications/NotificationTemplates.php:304
 #: assets/build/admin.js:4
 #: assets/build/admin.js:12
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
+#: assets/build/public.js:25
 msgid "Ospiti"
 msgstr ""
 
@@ -316,7 +317,7 @@ msgstr ""
 #: src/Admin/AdminApp.php:89
 #: src/Frontend/PublicFrontend.php:166
 #: assets/build/admin.js:4
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Caricamento…"
 msgstr ""
 
@@ -473,7 +474,7 @@ msgid "Questa camera non appartiene alla tipologia della prenotazione."
 msgstr ""
 
 #: src/Bookings/BookingService.php:924
-#: src/Frontend/PublicBookingService.php:252
+#: src/Frontend/PublicBookingService.php:254
 msgid "Camera non valida."
 msgstr ""
 
@@ -514,7 +515,7 @@ msgstr ""
 #: assets/build/admin.js:4
 #: assets/build/admin.js:15
 #: assets/build/admin.js:17
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Confermata"
 msgstr ""
 
@@ -528,13 +529,13 @@ msgstr ""
 #: src/Bookings/BookingStatus.php:85
 #: assets/build/admin.js:4
 #: assets/build/admin.js:15
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Conclusa"
 msgstr ""
 
 #: src/Bookings/BookingStatus.php:86
 #: assets/build/admin.js:4
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Annullata"
 msgstr ""
 
@@ -565,7 +566,7 @@ msgid "Date non valide."
 msgstr ""
 
 #: src/Bookings/StayBuilder.php:92
-#: src/Frontend/PublicBookingService.php:190
+#: src/Frontend/PublicBookingService.php:192
 msgid "Numero di ospiti non valido."
 msgstr ""
 
@@ -837,48 +838,48 @@ msgstr ""
 msgid "Conferma di non essere un robot e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:185
-#: src/Frontend/PublicBookingService.php:255
+#: src/Frontend/PublicBookingService.php:187
+#: src/Frontend/PublicBookingService.php:257
 msgid "Scegli date di arrivo e partenza valide."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:289
+#: src/Frontend/PublicBookingService.php:291
 msgid "Non è stato possibile inviare la richiesta. Ricarica la pagina e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:293
+#: src/Frontend/PublicBookingService.php:295
 msgid "Hai inviato il modulo troppo in fretta. Controlla i dati e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:296
+#: src/Frontend/PublicBookingService.php:298
 msgid "Il modulo è scaduto. Ricarica la pagina e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:361
+#: src/Frontend/PublicBookingService.php:363
 msgid "Pagamento online non avviato."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:402
+#: src/Frontend/PublicBookingService.php:404
 msgid "Per questa prenotazione non c'è nulla da pagare online."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:418
+#: src/Frontend/PublicBookingService.php:420
 msgid "Questa prenotazione non si può annullare online. Contatta la struttura."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:427
+#: src/Frontend/PublicBookingService.php:429
 msgid "Annullata dall'ospite con il link della prenotazione."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:638
+#: src/Frontend/PublicBookingService.php:640
 msgid "Prenotazione non trovata. Controlla il link ricevuto."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:654
+#: src/Frontend/PublicBookingService.php:656
 msgid "Le prenotazioni online non sono disponibili per questa struttura."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:670
+#: src/Frontend/PublicBookingService.php:672
 msgid "Troppe richieste in poco tempo. Riprova più tardi."
 msgstr ""
 
@@ -1319,15 +1320,20 @@ msgstr ""
 msgid "Nessun servizio WhatsApp collegato."
 msgstr ""
 
-#: src/Notifications/EmailDesign.php:53
+#: src/Notifications/EmailDesign.php:98
+#: assets/build/public.js:28
+msgid "Riepilogo prenotazione"
+msgstr ""
+
+#: src/Notifications/EmailDesign.php:109
 msgid "QR per il check-in"
 msgstr ""
 
-#: src/Notifications/EmailDesign.php:54
+#: src/Notifications/EmailDesign.php:110
 msgid "Mostra questo QR alla reception per un check-in più veloce."
 msgstr ""
 
-#: src/Notifications/EmailDesign.php:55
+#: src/Notifications/EmailDesign.php:111
 msgid "Codice prenotazione:"
 msgstr ""
 
@@ -1388,39 +1394,41 @@ msgstr ""
 msgid "Indirizzo o struttura non validi."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:434
+#: src/Notifications/NotificationService.php:435
 msgid "Questa è una e-mail di prova di Booking Manager. Se la leggi, le e-mail della struttura partono correttamente."
 msgstr ""
 
 #. translators: %s: property name.
-#: src/Notifications/NotificationService.php:442
+#: src/Notifications/NotificationService.php:443
 msgid "Prova e-mail – %s"
 msgstr ""
 
-#: src/Notifications/NotificationService.php:446
+#: src/Notifications/NotificationService.php:447
 msgid "E-mail di prova"
 msgstr ""
 
-#: src/Notifications/NotificationService.php:469
+#: src/Notifications/NotificationService.php:475
 msgid "Struttura o messaggio non validi."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:624
+#: src/Notifications/NotificationService.php:632
 msgid "Mario"
 msgstr ""
 
-#: src/Notifications/NotificationService.php:625
+#: src/Notifications/NotificationService.php:633
 msgid "Rossi"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:48
 #: assets/build/admin.js:4
+#: assets/build/admin.js:5
 msgid "Richiesta ricevuta"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:49
 #: assets/build/admin.js:4
-#: assets/build/public.js:23
+#: assets/build/admin.js:5
+#: assets/build/public.js:25
 msgid "Prenotazione confermata"
 msgstr ""
 
@@ -1431,7 +1439,7 @@ msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:52
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Promemoria prima dell'arrivo"
 msgstr ""
 
@@ -1457,6 +1465,7 @@ msgid "Richiesta di prenotazione ricevuta – {struttura}"
 msgstr ""
 
 #: src/Notifications/NotificationTemplates.php:74
+#: assets/build/public.js:25
 msgid "Abbiamo ricevuto la tua richiesta"
 msgstr ""
 
@@ -1583,76 +1592,77 @@ msgid_plural "%d ospiti"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Notifications/NotificationTemplates.php:216
+#: src/Notifications/NotificationTemplates.php:217
 msgid "Apri la prenotazione"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:221
-#: assets/build/public.js:25
+#: src/Notifications/NotificationTemplates.php:222
+#: assets/build/public.js:28
 msgid "Vedi o gestisci la prenotazione"
 msgstr ""
 
 #. translators: %s: reason of the cancellation.
-#: src/Notifications/NotificationTemplates.php:227
+#: src/Notifications/NotificationTemplates.php:228
 msgid "Motivo: %s"
 msgstr ""
 
 #. translators: %s: the guest's notes.
-#: src/Notifications/NotificationTemplates.php:230
+#: src/Notifications/NotificationTemplates.php:231
 msgid "Note dell'ospite: %s"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:271
-#: src/Notifications/NotificationTemplates.php:285
+#: src/Notifications/NotificationTemplates.php:294
+#: src/Notifications/NotificationTemplates.php:307
 #: assets/build/admin.js:6
 #: assets/build/admin.js:15
 #: assets/build/admin.js:17
+#: assets/build/public.js:25
 msgid "Camera"
 msgid_plural "Camere"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Notifications/NotificationTemplates.php:276
-#: assets/build/admin.js:16
-#: assets/build/admin.js:17
-#: assets/build/public.js:25
-msgid "Codice"
-msgstr ""
-
 #. translators: %s: check-in time.
-#: src/Notifications/NotificationTemplates.php:278
+#: src/Notifications/NotificationTemplates.php:300
 #: assets/build/admin.js:4
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
-#: assets/build/public.js:27
+#: assets/build/public.js:23
+#: assets/build/public.js:30
 msgid "Arrivo"
 msgstr ""
 
 #. translators: %s: check-in time.
-#: src/Notifications/NotificationTemplates.php:278
+#. translators: %s: time.
+#: src/Notifications/NotificationTemplates.php:300
+#: assets/build/public.js:24
 msgid "check-in dalle %s"
 msgstr ""
 
 #. translators: %s: check-out time.
-#: src/Notifications/NotificationTemplates.php:280
+#: src/Notifications/NotificationTemplates.php:302
 #: assets/build/admin.js:4
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
-#: assets/build/public.js:28
+#: assets/build/public.js:24
+#: assets/build/public.js:31
 msgid "Partenza"
 msgstr ""
 
 #. translators: %s: check-out time.
-#: src/Notifications/NotificationTemplates.php:280
+#. translators: %s: time.
+#: src/Notifications/NotificationTemplates.php:302
+#: assets/build/public.js:25
 msgid "check-out entro le %s"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:281
+#: src/Notifications/NotificationTemplates.php:303
 #: assets/build/admin.js:17
+#: assets/build/public.js:25
 msgid "Notti"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:288
+#: src/Notifications/NotificationTemplates.php:310
 #: assets/build/admin.js:5
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
@@ -1660,29 +1670,33 @@ msgstr ""
 msgid "Ospite"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:291
+#: src/Notifications/NotificationTemplates.php:313
 #: assets/build/admin.js:5
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
 #: assets/build/public.js:17
 #: assets/build/public.js:22
 #: assets/build/public.js:25
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "Totale"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:293
+#: src/Notifications/NotificationTemplates.php:315
 msgid "Già pagato"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:294
+#: src/Notifications/NotificationTemplates.php:316
 #: assets/build/admin.js:16
 msgid "Saldo"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:299
+#: src/Notifications/NotificationTemplates.php:319
+#: assets/build/public.js:25
+msgid "Codice prenotazione"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:322
 #: assets/build/admin.js:5
-#: assets/build/admin.js:6
 #: assets/build/admin.js:12
 msgid "Indirizzo"
 msgstr ""
@@ -1962,37 +1976,37 @@ msgid "Il pagamento non risulta ancora incassato da Stripe."
 msgstr ""
 
 #: src/Properties/PropertyService.php:33
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "B&B"
 msgstr ""
 
 #: src/Properties/PropertyService.php:34
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Affittacamere"
 msgstr ""
 
 #: src/Properties/PropertyService.php:35
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Casa vacanze"
 msgstr ""
 
 #: src/Properties/PropertyService.php:36
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Appartamenti"
 msgstr ""
 
 #: src/Properties/PropertyService.php:37
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Residence"
 msgstr ""
 
 #: src/Properties/PropertyService.php:38
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Guest house"
 msgstr ""
 
 #: src/Properties/PropertyService.php:39
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Hotel"
 msgstr ""
 
@@ -2034,6 +2048,10 @@ msgstr ""
 
 #: src/Properties/PropertyService.php:267
 msgid "Paese non valido (codice di due lettere, es. IT)."
+msgstr ""
+
+#: src/Properties/PropertySettings.php:72
+msgid "Grazie per averci scelto!"
 msgstr ""
 
 #: src/Rates/RateService.php:107
@@ -2145,7 +2163,7 @@ msgstr ""
 msgid "La modalità operativa è sempre attiva per il tuo profilo."
 msgstr ""
 
-#: src/Rest/NotificationsController.php:204
+#: src/Rest/NotificationsController.php:206
 msgid "Messaggio sconosciuto."
 msgstr ""
 
@@ -2333,7 +2351,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/build/admin.js:4
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "Da pagare"
 msgstr ""
 
@@ -2358,7 +2376,7 @@ msgid "Inserita dallo staff"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 msgid "Sito web"
 msgstr ""
 
@@ -2740,7 +2758,6 @@ msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
-#: assets/build/admin.js:6
 #: assets/build/admin.js:12
 msgid "Salva"
 msgstr ""
@@ -2752,7 +2769,7 @@ msgid "Pagamenti"
 msgstr ""
 
 #: assets/build/admin.js:4
-#: assets/build/admin.js:6
+#: assets/build/admin.js:5
 #: assets/build/admin.js:12
 #: assets/build/admin.js:18
 msgid "Struttura"
@@ -2766,7 +2783,8 @@ msgstr ""
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
 #: assets/build/public.js:17
-#: assets/build/public.js:29
+#: assets/build/public.js:25
+#: assets/build/public.js:32
 msgid "Camere"
 msgstr ""
 
@@ -2874,7 +2892,6 @@ msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
-#: assets/build/admin.js:6
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
 #: assets/build/admin.js:18
@@ -2884,7 +2901,6 @@ msgstr ""
 
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
-#: assets/build/admin.js:6
 #: assets/build/admin.js:12
 #: assets/build/admin.js:17
 #: assets/build/public.js:23
@@ -3063,7 +3079,6 @@ msgid "Importo"
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/admin.js:6
 msgid "prova"
 msgstr ""
 
@@ -3196,7 +3211,6 @@ msgid "Comunicazioni promozionali"
 msgstr ""
 
 #: assets/build/admin.js:5
-#: assets/build/admin.js:6
 msgid "Condizioni di prenotazione"
 msgstr ""
 
@@ -3355,6 +3369,469 @@ msgid "Libera"
 msgstr ""
 
 #: assets/build/admin.js:5
+msgid "Verde"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Blu notte"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Petrolio"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Terracotta"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Bordeaux"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Sabbia"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Antracite"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:18
+msgid "Nuova struttura"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Crea"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Tipo di struttura"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Dati della struttura salvati."
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+#: assets/build/admin.js:12
+msgid "Tipo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Prenotazioni online"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Su richiesta (le confermi tu)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Conferma immediata"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Check-in dalle"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Check-in fino alle"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Check-out entro le"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Fuso orario"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nel formato Europe/Rome"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Valuta"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Indirizzo e contatti"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Città"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "CAP"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Provincia"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Paese (sigla)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Ragione sociale"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Partita IVA"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:18
+msgid "Impostazioni salvate."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Regole generali"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Soggiorno minimo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Soggiorno massimo"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:7
+msgid "Anticipo minimo (giorni)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Prenotabile fino a (giorni)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Arrivo in giornata fino alle"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Camere max per prenotazione"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Età massima bambini"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Durata opzione (ore)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Assegna la camera in automatico"
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:12
+msgid "Modulo online"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Inserisci il modulo in una pagina con questo shortcode:"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Prenotazioni online attive"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Mostra i prezzi"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Colore del modulo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Pulsanti, prezzi e dettagli del modulo di prenotazione. Se non scegli un colore il modulo usa il colore principale del tema; se il tema non lo indica, il verde di Booking Manager."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "L'ospite può annullare dal link nell'email (secondo le condizioni della tariffa)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Chiedi il consenso alle comunicazioni promozionali"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Minuti di blocco della camera durante il pagamento"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Indirizzo dell'informativa privacy"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Imposta di soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Un importo a persona a notte aggiunto al totale. Verifica le regole del tuo Comune: non è un calcolo fiscale."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Applica l'imposta di soggiorno"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "A persona a notte (€)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Fino a notti (0 = tutte)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Esenti sotto i … anni"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Invia email agli ospiti"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Avvisa lo staff delle prenotazioni online e degli annullamenti"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Email dello staff (vuoto = email della struttura)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nome del mittente"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "QR di check-in nella conferma"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Giorni prima dell'arrivo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Email di benvenuto al check-in"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Messaggi WhatsApp (richiede un servizio collegato)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Predisposto: senza un servizio WhatsApp collegato da un componente aggiuntivo i messaggi non partono e il registro lo indica."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Gestisci le pulizie delle camere"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Alla partenza la camera diventa «Da pulire»"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Impedisci il check-in in una camera non pronta"
+msgstr ""
+
+#. translators: 1: provider, 2: test or live.
+#: assets/build/admin.js:5
+msgid "%1$s · %2$s"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "reale"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Collega e verifica"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Account collegato e verificato."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Le chiavi sono cifrate nel database e non vengono più mostrate. I dati delle carte restano sulla pagina del gestore: il sito non li vede mai."
+msgstr ""
+
+#: assets/build/admin.js:5
+#: assets/build/admin.js:6
+msgid "facoltativo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Lascia vuoto per non cambiarla"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Pagamento online"
+msgstr ""
+
+#. translators: 1: provider, 2: mode.
+#: assets/build/admin.js:5
+msgid "Attivo: %1$s in modalità %2$s."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessun pagamento online: gli ospiti pagano in struttura. Collega Stripe o Nexi qui sotto e poi sceglilo."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Consiglio: definisci BKNG_SECRET_KEY in wp-config.php per cifrare le chiavi con una chiave dedicata."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Cosa chiedere online"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nulla"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "La caparra della tariffa"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "L'intero importo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Saldo dovuto giorni prima dell'arrivo (0 = in struttura)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Non disponibile in questa versione."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Account reale"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Account di prova"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "in uso"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "collegato"
+msgstr ""
+
+#. translators: %s: date.
+#: assets/build/admin.js:5
+msgid "verificato il %s"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "webhook manuale"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Webhook:"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Aggiorna chiavi"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Collega"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Verifica completata."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Verifica"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Pagamento online attivato."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Usa questo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Scollega"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Pagamento online disattivato."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Disattiva il pagamento online"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Scollega l'account"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Le chiavi vengono cancellate. I pagamenti già fatti restano registrati."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Account scollegato."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Canali di vendita (OTA)"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Booking Manager è predisposto per ricevere prenotazioni dai portali e inviare la disponibilità tramite un channel manager. Il collegamento richiede un connettore dedicato (componente aggiuntivo) con le credenziali ufficiali del canale: nessun canale è collegato in automatico."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessun connettore installato"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Quando un connettore è attivo, qui compaiono stato e abbinamenti delle tipologie."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Pronto"
+msgstr ""
+
+#. translators: %d: mapped room types.
+#: assets/build/admin.js:5
+msgid "%d tipologie abbinate"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Ultimi scambi"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "ricevuta"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "inviata"
+msgstr ""
+
+#: assets/build/admin.js:5
 msgid "In coda"
 msgstr ""
 
@@ -3461,6 +3938,134 @@ msgid "Anteprima email"
 msgstr ""
 
 #: assets/build/admin.js:5
+msgid "Crema"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Bianco"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Salvia"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Cielo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Grigio chiaro"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Usa questa immagine"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Cambia"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Scegli"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Rimuovi"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Computer"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Aspetto delle email"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Vale per tutte le email agli ospiti e alla struttura. Testi e dettagli della prenotazione restano quelli di «Testi»."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Logo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessun logo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Accanto al nome della struttura, in alto a sinistra."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Foto in alto"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "La prima foto delle camere"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Una foto scelta da me"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessuna foto"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Foto"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Nessuna foto scelta"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Sottotitolo sotto il nome"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "es. B&B & Hotel"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Frase in alto"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "es. La tua ospitalità ci sta a cuore"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Saluto in fondo"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "es. Grazie per averci scelto!"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Colore principale"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Titoli, icone, pulsante e barra in fondo. Senza scelta: il colore del modulo di prenotazione."
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Sfondo dell'intestazione"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Sfondo della pagina"
+msgstr ""
+
+#: assets/build/admin.js:5
+msgid "Aspetto salvato."
+msgstr ""
+
+#: assets/build/admin.js:5
 msgid "Email di prova"
 msgstr ""
 
@@ -3528,467 +4133,6 @@ msgstr ""
 #: assets/build/admin.js:6
 #: assets/build/admin.js:7
 msgid "Nota"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Verde"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Blu notte"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Petrolio"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Terracotta"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Bordeaux"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Sabbia"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Antracite"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:18
-msgid "Nuova struttura"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Crea"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Tipo di struttura"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Dati della struttura salvati."
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
-msgid "Tipo"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Prenotazioni online"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Su richiesta (le confermi tu)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Conferma immediata"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
-msgid "Check-in dalle"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
-msgid "Check-in fino alle"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
-msgid "Check-out entro le"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Fuso orario"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Nel formato Europe/Rome"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Valuta"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Indirizzo e contatti"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
-msgid "Città"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "CAP"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Provincia"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Paese (sigla)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Ragione sociale"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Partita IVA"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:18
-msgid "Impostazioni salvate."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Regole generali"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Soggiorno minimo"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Soggiorno massimo"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:7
-msgid "Anticipo minimo (giorni)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Prenotabile fino a (giorni)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Arrivo in giornata fino alle"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Camere max per prenotazione"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Età massima bambini"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Durata opzione (ore)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Assegna la camera in automatico"
-msgstr ""
-
-#: assets/build/admin.js:6
-#: assets/build/admin.js:12
-msgid "Modulo online"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Inserisci il modulo in una pagina con questo shortcode:"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Prenotazioni online attive"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Mostra i prezzi"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Colore del modulo"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Pulsanti, prezzi e dettagli del modulo di prenotazione. Se non scegli un colore il modulo usa il colore principale del tema; se il tema non lo indica, il verde di Booking Manager."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "L'ospite può annullare dal link nell'email (secondo le condizioni della tariffa)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Chiedi il consenso alle comunicazioni promozionali"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Minuti di blocco della camera durante il pagamento"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Indirizzo dell'informativa privacy"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Imposta di soggiorno"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Un importo a persona a notte aggiunto al totale. Verifica le regole del tuo Comune: non è un calcolo fiscale."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Applica l'imposta di soggiorno"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "A persona a notte (€)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Fino a notti (0 = tutte)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Esenti sotto i … anni"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Invia email agli ospiti"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Avvisa lo staff delle prenotazioni online e degli annullamenti"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Email dello staff (vuoto = email della struttura)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Nome del mittente"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "QR di check-in nella conferma"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Giorni prima dell'arrivo"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Email di benvenuto al check-in"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Messaggi WhatsApp (richiede un servizio collegato)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Predisposto: senza un servizio WhatsApp collegato da un componente aggiuntivo i messaggi non partono e il registro lo indica."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Gestisci le pulizie delle camere"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Alla partenza la camera diventa «Da pulire»"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Impedisci il check-in in una camera non pronta"
-msgstr ""
-
-#. translators: 1: provider, 2: test or live.
-#: assets/build/admin.js:6
-msgid "%1$s · %2$s"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "reale"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Collega e verifica"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Account collegato e verificato."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Le chiavi sono cifrate nel database e non vengono più mostrate. I dati delle carte restano sulla pagina del gestore: il sito non li vede mai."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "facoltativo"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Lascia vuoto per non cambiarla"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Pagamento online"
-msgstr ""
-
-#. translators: 1: provider, 2: mode.
-#: assets/build/admin.js:6
-msgid "Attivo: %1$s in modalità %2$s."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Nessun pagamento online: gli ospiti pagano in struttura. Collega Stripe o Nexi qui sotto e poi sceglilo."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Consiglio: definisci BKNG_SECRET_KEY in wp-config.php per cifrare le chiavi con una chiave dedicata."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Cosa chiedere online"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Nulla"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "La caparra della tariffa"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "L'intero importo"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Saldo dovuto giorni prima dell'arrivo (0 = in struttura)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Non disponibile in questa versione."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Account reale"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Account di prova"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "in uso"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "collegato"
-msgstr ""
-
-#. translators: %s: date.
-#: assets/build/admin.js:6
-msgid "verificato il %s"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "webhook manuale"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Webhook:"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Aggiorna chiavi"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Collega"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Verifica completata."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Verifica"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Pagamento online attivato."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Usa questo"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Scollega"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Pagamento online disattivato."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Disattiva il pagamento online"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Scollega l'account"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Le chiavi vengono cancellate. I pagamenti già fatti restano registrati."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Account scollegato."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Canali di vendita (OTA)"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Booking Manager è predisposto per ricevere prenotazioni dai portali e inviare la disponibilità tramite un channel manager. Il collegamento richiede un connettore dedicato (componente aggiuntivo) con le credenziali ufficiali del canale: nessun canale è collegato in automatico."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Nessun connettore installato"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Quando un connettore è attivo, qui compaiono stato e abbinamenti delle tipologie."
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Pronto"
-msgstr ""
-
-#. translators: %d: mapped room types.
-#: assets/build/admin.js:6
-msgid "%d tipologie abbinate"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "Ultimi scambi"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "ricevuta"
-msgstr ""
-
-#: assets/build/admin.js:6
-msgid "inviata"
 msgstr ""
 
 #: assets/build/admin.js:6
@@ -5137,6 +5281,11 @@ msgid "Nessuna prenotazione corrisponde ai filtri."
 msgstr ""
 
 #: assets/build/admin.js:16
+#: assets/build/admin.js:17
+msgid "Codice"
+msgstr ""
+
+#: assets/build/admin.js:16
 msgid "Non puoi creare prenotazioni"
 msgstr ""
 
@@ -5217,8 +5366,7 @@ msgid "Motivo dell'annullamento: %s"
 msgstr ""
 
 #: assets/build/admin.js:17
-#: assets/build/public.js:25
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "Soggiorno"
 msgstr ""
 
@@ -5503,6 +5651,10 @@ msgid "Testi"
 msgstr ""
 
 #: assets/build/admin.js:18
+msgid "Aspetto"
+msgstr ""
+
+#: assets/build/admin.js:18
 msgid "Prova"
 msgstr ""
 
@@ -5691,7 +5843,7 @@ msgid "La verifica anti-robot non si è caricata. Disattiva eventuali blocchi de
 msgstr ""
 
 #: assets/build/public.js:8
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "Si è verificato un errore. Riprova tra poco."
 msgstr ""
 
@@ -5951,129 +6103,130 @@ msgstr ""
 msgid "Se non si apre, clicca qui."
 msgstr ""
 
-#: assets/build/public.js:23
-msgid "Richiesta inviata"
-msgstr ""
-
 #. translators: %s: guest's first name.
-#: assets/build/public.js:24
-msgid "Grazie %s, ti aspettiamo! Ti abbiamo inviato una email con i dettagli."
+#: assets/build/public.js:26
+msgid "Ciao %s,"
 msgstr ""
 
-#. translators: %s: guest's first name.
-#: assets/build/public.js:25
-msgid "Grazie %s! La struttura controlla la disponibilità e ti risponde via email."
+#. translators: 1: arrival date, 2: departure date.
+#: assets/build/public.js:27
+msgid "il tuo soggiorno dal %1$s al %2$s è confermato. Ti abbiamo inviato una email con tutti i dettagli: ti aspettiamo!"
 msgstr ""
 
-#: assets/build/public.js:25
+#. translators: 1: arrival date, 2: departure date.
+#: assets/build/public.js:28
+msgid "la tua richiesta per il soggiorno dal %1$s al %2$s è arrivata. La controlliamo e ti scriviamo appena è confermata."
+msgstr ""
+
+#: assets/build/public.js:28
 msgid "Il tempo per completare la prenotazione è scaduto: controlla di nuovo la disponibilità."
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Scegli le date e il numero di ospiti, poi cerca: vedrai le camere libere e potrai filtrarle."
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Nessuna camera disponibile per queste date."
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Prova a cambiare le date o il numero di ospiti."
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Le prenotazioni online non sono disponibili in questo momento."
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Contatti:"
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "In attesa di conferma"
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "In attesa del pagamento"
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Soggiorno in corso"
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Non presentato"
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Grazie! Stiamo ricevendo la conferma del pagamento: la pagina si aggiorna da sola."
 msgstr ""
 
-#: assets/build/public.js:25
+#: assets/build/public.js:28
 msgid "Il pagamento non è stato completato. Puoi riprovare qui sotto."
 msgstr ""
 
 #. translators: %s: booking code.
-#: assets/build/public.js:26
+#: assets/build/public.js:29
 msgid "Prenotazione %s"
 msgstr ""
 
 #. translators: %s: date and time.
-#: assets/build/public.js:27
+#: assets/build/public.js:30
 msgid "Le camere restano bloccate fino al %s: completa il pagamento per confermare."
 msgstr ""
 
 #. translators: %s: time.
-#: assets/build/public.js:28
+#: assets/build/public.js:31
 msgid "dalle %s"
 msgstr ""
 
 #. translators: %s: time.
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "entro le %s"
 msgstr ""
 
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "Pagato"
 msgstr ""
 
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "Paga online"
 msgstr ""
 
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "Annulla la prenotazione"
 msgstr ""
 
-#: assets/build/public.js:29
+#: assets/build/public.js:32
 msgid "Vuoi annullare la prenotazione?"
 msgstr ""
 
 #. translators: %s: amount kept by the property.
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "Secondo le condizioni della tariffa la struttura trattiene %s."
 msgstr ""
 
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "L’annullamento è gratuito."
 msgstr ""
 
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "Per i rimborsi di quanto pagato la struttura ti contatterà."
 msgstr ""
 
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "No, tienila"
 msgstr ""
 
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "Sì, annulla"
 msgstr ""
 
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "Per modifiche o annullamenti contatta la struttura."
 msgstr ""
 
-#: assets/build/public.js:30
+#: assets/build/public.js:33
 msgid "Connessione non riuscita. Controlla la rete e riprova."
 msgstr ""

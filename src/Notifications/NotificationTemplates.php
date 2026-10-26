@@ -194,7 +194,8 @@ class NotificationTemplates {
 	 * @param array{qr?: string|null, manage_url?: string|null, admin_url?: string|null} $links
 	 * @param array{subject?: ?string, body?: ?string}                              $typed texts being edited (preview)
 	 */
-	public function compose( string $key, string $audience, string $recipient, array $booking, array $property, array $links, array $typed = array() ): Message {
+	public function compose( string $key, string $audience, string $recipient, array $booking, array $property, array $links, array $typed = array(), ?EmailBrand $brand = null ): Message {
+		$brand  = $brand ?? $this->brand( $property );
 		$texts  = $this->texts( $key, $booking, $property, $typed );
 		$staff  = 'staff' === $audience;
 		$rows   = $this->rows( $key, $booking, $property, $staff );
@@ -234,13 +235,16 @@ class NotificationTemplates {
 				'title'  => $texts['title'],
 				'intro'  => $texts['intro'],
 				'rows'   => $rows,
+				'tick'   => ! in_array( $key, array( self::GUEST_CANCELLED, self::STAFF_CANCELLED ), true ),
 				'qr_cid' => $cid,
 				'code'   => (string) $booking['code'],
 				'button' => $button,
 				'note'   => $note,
 			),
-			$property
+			$property,
+			$brand
 		);
+		$inline = array_merge( $inline, $brand->inline() );
 		$text = $texts['title'] . "\n\n" . $texts['intro'] . "\n\n";
 		foreach ( $rows as $row ) {
 			$text .= $row[0] . ': ' . str_replace( "\n", ' · ', $row[1] ) . "\n";
@@ -256,11 +260,30 @@ class NotificationTemplates {
 	}
 
 	/**
-	 * Details of the stay shown in the e-mail.
+	 * The look of the property's e-mails; the header photo, when left automatic, is the
+	 * first photo of its rooms.
+	 *
+	 * @param array<string, mixed> $property
+	 * @param array<string, mixed> $design unsaved settings being edited (preview)
+	 */
+	public function brand( array $property, array $design = array() ): EmailBrand {
+		$photo = 0;
+		foreach ( $this->types->for_property( (int) $property['id'] ) as $type ) {
+			$ids = (array) ( $type['images'] ?? array() );
+			if ( $ids ) {
+				$photo = (int) $ids[0];
+				break;
+			}
+		}
+		return EmailBrand::for_property( $property, $design, $photo );
+	}
+
+	/**
+	 * Details of the stay shown in the e-mail (label, value, icon).
 	 *
 	 * @param array<string, mixed> $booking
 	 * @param array<string, mixed> $property
-	 * @return array<int, array{0: string, 1: string}>
+	 * @return array<int, array{0: string, 1: string, 2: string}>
 	 */
 	private function rows( string $key, array $booking, array $property, bool $staff ): array {
 		$v     = self::vars( $booking, $property );
@@ -273,30 +296,30 @@ class NotificationTemplates {
 		}
 		$room_text = implode( "\n", array_map( static fn( string $n, int $c ) => ( $c > 1 ? $c . ' × ' : '' ) . $n, array_keys( $names ), $names ) );
 		$rows      = array(
-			array( __( 'Codice', 'booking-manager' ), $v['{codice}'] ),
 			/* translators: %s: check-in time. */
-			array( __( 'Arrivo', 'booking-manager' ), $v['{arrivo}'] . "\n" . sprintf( __( 'check-in dalle %s', 'booking-manager' ), $v['{checkin_dalle}'] ) ),
+			array( __( 'Arrivo', 'booking-manager' ), $v['{arrivo}'] . "\n" . sprintf( __( 'check-in dalle %s', 'booking-manager' ), $v['{checkin_dalle}'] ), 'calendar' ),
 			/* translators: %s: check-out time. */
-			array( __( 'Partenza', 'booking-manager' ), $v['{partenza}'] . "\n" . sprintf( __( 'check-out entro le %s', 'booking-manager' ), $v['{checkout_entro}'] ) ),
-			array( __( 'Notti', 'booking-manager' ), $v['{notti}'] ),
-			array( __( 'Ospiti', 'booking-manager' ), $v['{ospiti}'] ),
+			array( __( 'Partenza', 'booking-manager' ), $v['{partenza}'] . "\n" . sprintf( __( 'check-out entro le %s', 'booking-manager' ), $v['{checkout_entro}'] ), 'calendar' ),
+			array( __( 'Notti', 'booking-manager' ), $v['{notti}'], 'moon' ),
+			array( __( 'Ospiti', 'booking-manager' ), $v['{ospiti}'], 'users' ),
 		);
 		if ( '' !== $room_text ) {
-			$rows[] = array( _n( 'Camera', 'Camere', max( 1, count( $rooms ) ), 'booking-manager' ), $room_text );
+			$rows[] = array( _n( 'Camera', 'Camere', max( 1, count( $rooms ) ), 'booking-manager' ), $room_text, 'bed' );
 		}
 		if ( $staff ) {
-			$rows[] = array( __( 'Ospite', 'booking-manager' ), trim( $booking['first_name'] . ' ' . $booking['last_name'] ) . "\n" . implode( ' · ', array_filter( array( (string) $booking['email'], (string) $booking['phone'] ) ) ) );
+			$rows[] = array( __( 'Ospite', 'booking-manager' ), trim( $booking['first_name'] . ' ' . $booking['last_name'] ) . "\n" . implode( ' · ', array_filter( array( (string) $booking['email'], (string) $booking['phone'] ) ) ), 'user' );
 		}
 		if ( self::GUEST_CANCELLED !== $key && self::STAFF_CANCELLED !== $key ) {
-			$rows[] = array( __( 'Totale', 'booking-manager' ), $v['{totale}'] );
+			$rows[] = array( __( 'Totale', 'booking-manager' ), $v['{totale}'], 'coins' );
 			if ( (int) $booking['paid'] - (int) $booking['refunded'] > 0 ) {
-				$rows[] = array( __( 'Già pagato', 'booking-manager' ), Money::format( (int) $booking['paid'] - (int) $booking['refunded'], (string) $booking['currency'] ) );
-				$rows[] = array( __( 'Saldo', 'booking-manager' ), $v['{saldo}'] );
+				$rows[] = array( __( 'Già pagato', 'booking-manager' ), Money::format( (int) $booking['paid'] - (int) $booking['refunded'], (string) $booking['currency'] ), 'card' );
+				$rows[] = array( __( 'Saldo', 'booking-manager' ), $v['{saldo}'], 'coins' );
 			}
 		}
+		$rows[]  = array( __( 'Codice prenotazione', 'booking-manager' ), $v['{codice}'], 'tag' );
 		$address = trim( implode( ', ', array_filter( array( (string) ( $property['address'] ?? '' ), (string) ( $property['city'] ?? '' ) ) ) ) );
 		if ( ! $staff && '' !== $address && in_array( $key, array( self::GUEST_CONFIRMED, self::GUEST_PRE_ARRIVAL ), true ) ) {
-			$rows[] = array( __( 'Indirizzo', 'booking-manager' ), $address );
+			$rows[] = array( __( 'Indirizzo', 'booking-manager' ), $address, 'pin' );
 		}
 		return $rows;
 	}

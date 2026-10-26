@@ -17,7 +17,10 @@ import {
 } from './format';
 import { Captcha } from './Captcha';
 import { Hero, Results, SearchBar } from './Results';
+import { Icon } from './icons';
 import { Check, ErrorBox, Field, Spinner } from './ui';
+
+const LONG = { day: 'numeric', month: 'long', year: 'numeric' };
 
 function newRequestId() {
 	if ( window.crypto?.randomUUID ) {
@@ -455,59 +458,181 @@ function Done( { property, result } ) {
 		);
 	}
 	const confirmed = b.status === 'confirmed';
+	const where = b.property || {};
+	const time = ( t ) => String( t || '' ).slice( 0, 5 );
+	const rooms = {};
+	( b.rooms || [] ).forEach( ( r ) => {
+		rooms[ r.room_type ] = ( rooms[ r.room_type ] || 0 ) + 1;
+	} );
+	const roomText = Object.entries( rooms )
+		.map( ( [ name, n ] ) => ( n > 1 ? n + ' × ' : '' ) + name )
+		.join( ', ' );
+	const items = [
+		[
+			'calendar',
+			__( 'Arrivo', 'booking-manager' ),
+			date( b.arrival, LONG ),
+			where.checkin_from &&
+				sprintf(
+					/* translators: %s: time. */
+					__( 'check-in dalle %s', 'booking-manager' ),
+					time( where.checkin_from )
+				),
+		],
+		[
+			'calendar',
+			__( 'Partenza', 'booking-manager' ),
+			date( b.departure, LONG ),
+			where.checkout_until &&
+				sprintf(
+					/* translators: %s: time. */
+					__( 'check-out entro le %s', 'booking-manager' ),
+					time( where.checkout_until )
+				),
+		],
+		[ 'moon', __( 'Notti', 'booking-manager' ), String( b.nights ) ],
+		[
+			'users',
+			__( 'Ospiti', 'booking-manager' ),
+			guestsLabel( b.adults, b.children ),
+		],
+		roomText && [
+			'bed',
+			( b.rooms || [] ).length > 1
+				? __( 'Camere', 'booking-manager' )
+				: __( 'Camera', 'booking-manager' ),
+			roomText,
+		],
+		b.total > 0 && [
+			'coins',
+			__( 'Totale', 'booking-manager' ),
+			money( b.total, b.currency ),
+		],
+		[ 'tag', __( 'Codice prenotazione', 'booking-manager' ), b.code ],
+	].filter( Boolean );
 	return (
 		<div className="bkng-p-card bkng-p-done" role="status" tabIndex="-1">
-			<h3>
-				{ confirmed
-					? __( 'Prenotazione confermata', 'booking-manager' )
-					: __( 'Richiesta inviata', 'booking-manager' ) }
-			</h3>
-			<p>
+			<div className="bkng-p-done__head">
+				<span className="bkng-p-done__tick" aria-hidden="true">
+					<Icon name="check" size={ 26 } />
+				</span>
+				<h3>
+					{ confirmed
+						? __( 'Prenotazione confermata', 'booking-manager' )
+						: __(
+								'Abbiamo ricevuto la tua richiesta',
+								'booking-manager'
+						  ) }
+				</h3>
+			</div>
+			<p className="bkng-p-done__text">
+				<strong>
+					{ sprintf(
+						/* translators: %s: guest's first name. */
+						__( 'Ciao %s,', 'booking-manager' ),
+						b.first_name
+					) }
+				</strong>
+				<br />
 				{ confirmed
 					? sprintf(
-							/* translators: %s: guest's first name. */
+							/* translators: 1: arrival date, 2: departure date. */
 							__(
-								'Grazie %s, ti aspettiamo! Ti abbiamo inviato una email con i dettagli.',
+								'il tuo soggiorno dal %1$s al %2$s è confermato. Ti abbiamo inviato una email con tutti i dettagli: ti aspettiamo!',
 								'booking-manager'
 							),
-							b.first_name
+							date( b.arrival, LONG ),
+							date( b.departure, LONG )
 					  )
 					: sprintf(
-							/* translators: %s: guest's first name. */
+							/* translators: 1: arrival date, 2: departure date. */
 							__(
-								'Grazie %s! La struttura controlla la disponibilità e ti risponde via email.',
+								'la tua richiesta per il soggiorno dal %1$s al %2$s è arrivata. La controlliamo e ti scriviamo appena è confermata.',
 								'booking-manager'
 							),
-							b.first_name
+							date( b.arrival, LONG ),
+							date( b.departure, LONG )
 					  ) }
 			</p>
-			<dl className="bkng-p-facts">
-				<dt>{ __( 'Codice', 'booking-manager' ) }</dt>
-				<dd>
-					<strong>{ b.code }</strong>
-				</dd>
-				<dt>{ __( 'Soggiorno', 'booking-manager' ) }</dt>
-				<dd>
-					{ date( b.arrival ) } → { date( b.departure ) }
-				</dd>
-				{ b.total > 0 && (
-					<>
-						<dt>{ __( 'Totale', 'booking-manager' ) }</dt>
-						<dd>{ money( b.total, b.currency ) }</dd>
-					</>
-				) }
-			</dl>
+			<section className="bkng-p-done__summary">
+				<h4>
+					<Icon name="calendar" size={ 22 } />
+					{ __( 'Riepilogo prenotazione', 'booking-manager' ) }
+				</h4>
+				<dl>
+					{ items.map( ( [ icon, label, value, extra ] ) => (
+						<div key={ label }>
+							<Icon name={ icon } size={ 24 } />
+							<span>
+								<dt>{ label }</dt>
+								<dd>
+									<strong>{ value }</strong>
+									{ extra && (
+										<span className="bkng-p-block">
+											{ extra }
+										</span>
+									) }
+								</dd>
+							</span>
+						</div>
+					) ) }
+				</dl>
+			</section>
 			{ result.manage_url && (
-				<p>
-					<a className="bkng-p-button" href={ result.manage_url }>
+				<p className="bkng-p-done__go">
+					<a
+						className="bkng-p-button is-primary"
+						href={ result.manage_url }
+					>
 						{ __(
 							'Vedi o gestisci la prenotazione',
 							'booking-manager'
 						) }
+						<Icon name="arrowRight" size={ 18 } />
 					</a>
 				</p>
 			) }
-			<p className="bkng-p-muted">{ property.name }</p>
+			<footer className="bkng-p-done__foot">
+				<div>
+					<Icon name="pin" />
+					<span>
+						<strong>{ property.name }</strong>
+						{ where.address && (
+							<span className="bkng-p-block">
+								{ where.address }
+							</span>
+						) }
+					</span>
+				</div>
+				{ ( where.phone || where.email ) && (
+					<div>
+						<span className="bkng-p-done__contacts">
+							{ where.phone && (
+								<a
+									href={
+										'tel:' +
+										where.phone.replace( /[^0-9+]/g, '' )
+									}
+								>
+									<Icon name="phone" />
+									{ where.phone }
+								</a>
+							) }
+							{ where.email && (
+								<a href={ 'mailto:' + where.email }>
+									<Icon name="mail" />
+									{ where.email }
+								</a>
+							) }
+						</span>
+					</div>
+				) }
+				{ property.signoff && (
+					<p className="bkng-p-done__signoff">
+						{ property.signoff } ♡
+					</p>
+				) }
+			</footer>
 		</div>
 	);
 }

@@ -1202,3 +1202,51 @@ html.wp-toolbar:has(body.bkng-operational) {
 .bkng-color-field {
 	max-width: 420px;
 }
+
+.bkng-columns--preview {
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+}
+
+.bkng-mail-frame {
+	overflow: hidden;
+	border: 1px solid #d6e0da;
+	border-radius: 8px;
+	background: #f4f6f4;
+
+	iframe {
+		display: block;
+		border: 0;
+		background: #fff;
+	}
+}
+
+.bkng-segmented {
+	display: flex;
+	gap: 6px;
+}
+
+.bkng-image-field {
+	&__row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	&__thumb {
+		display: grid;
+		place-items: center;
+		width: 72px;
+		height: 56px;
+		border: 1px solid #d6e0da;
+		border-radius: 6px;
+		overflow: hidden;
+		background: #f4f6f4;
+		text-align: center;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+}

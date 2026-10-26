@@ -9,7 +9,7 @@
  *   GET    /properties/{property_id}/templates                                     texts (bkng_manage_property_settings)
  *   PUT    /properties/{property_id}/templates/{key} { language, subject, body }
  *   DELETE /properties/{property_id}/templates/{key}?language=it                   back to the default text
- *   POST   /properties/{property_id}/templates/{key}/preview { subject, body }
+ *   POST   /properties/{property_id}/templates/{key}/preview { subject, body, design }
  *
  * @package BookingManager
  */
@@ -123,7 +123,9 @@ class NotificationsController extends RestController {
 				'callback'            => function ( \WP_REST_Request $r ) {
 					$subject = $r->get_param( 'subject' );
 					$body    = $r->get_param( 'body' );
-					return self::respond( $this->service->preview( (int) $r['property_id'], (string) $r['key'], null === $subject ? null : sanitize_text_field( (string) $subject ), null === $body ? null : sanitize_textarea_field( (string) $body ) ) );
+					// The look being edited in Messaggi → Aspetto, not saved: only the e-mail keys.
+					$design = array_filter( (array) $r->get_param( 'design' ), static fn( $k ) => is_string( $k ) && str_starts_with( $k, 'email_' ), ARRAY_FILTER_USE_KEY );
+					return self::respond( $this->service->preview( (int) $r['property_id'], (string) $r['key'], null === $subject ? null : sanitize_text_field( (string) $subject ), null === $body ? null : sanitize_textarea_field( (string) $body ), $design ) );
 				},
 				'permission_callback' => $settings,
 			)

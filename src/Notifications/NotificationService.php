@@ -431,6 +431,7 @@ class NotificationService {
 				'error' => __( 'Indirizzo o struttura non validi.', 'booking-manager' ),
 			);
 		}
+		$brand   = $this->templates->brand( $property );
 		$text    = __( 'Questa è una e-mail di prova di Booking Manager. Se la leggi, le e-mail della struttura partono correttamente.', 'booking-manager' );
 		$message = new Message(
 			'test',
@@ -446,9 +447,13 @@ class NotificationService {
 					'title' => __( 'E-mail di prova', 'booking-manager' ),
 					'intro' => $text,
 					'rows'  => array(),
+					'tick'  => true,
 				),
-				$property
-			)
+				$property,
+				$brand
+			),
+			array(),
+			$brand->inline()
 		);
 		$result = $this->email->send( $message );
 		return array(
@@ -461,9 +466,10 @@ class NotificationService {
 	 * Preview of a guest e-mail with the texts being edited (not saved), built on a real
 	 * booking of the property when there is one, or on example values never saved.
 	 *
+	 * @param array<string, mixed> $design look of the e-mails being edited (Messaggi → Aspetto), not saved
 	 * @return array{subject: string, html: string, defaults: array<string, string>, example: bool}|\WP_Error
 	 */
-	public function preview( int $property_id, string $key, ?string $subject = null, ?string $body = null ): array|\WP_Error {
+	public function preview( int $property_id, string $key, ?string $subject = null, ?string $body = null, array $design = array() ): array|\WP_Error {
 		$property = $this->properties->find( $property_id );
 		if ( ! $property || ! NotificationTemplates::editable( $key ) ) {
 			return new \WP_Error( 'bkng_invalid', __( 'Struttura o messaggio non validi.', 'booking-manager' ), array( 'status' => 400 ) );
@@ -475,11 +481,13 @@ class NotificationService {
 			'subject' => $subject,
 			'body'    => $body,
 		);
-		$message = $this->templates->compose( $key, 'guest', (string) ( $property['email'] ?? '' ), $booking, $property, array( 'manage_url' => home_url( '/' ) ), $typed );
+		$brand   = $this->templates->brand( $property, $design );
+		$message = $this->templates->compose( $key, 'guest', (string) ( $property['email'] ?? '' ), $booking, $property, array( 'manage_url' => home_url( '/' ) ), $typed, $brand );
 		$defaults = NotificationTemplates::defaults( $key );
 		return array(
 			'subject'  => $message->subject,
-			'html'     => $message->html,
+			// Embedded images as data: addresses, so the browser shows them.
+			'html'     => $brand->for_browser( $message->html ),
 			'defaults' => array(
 				'subject' => $defaults['subject'],
 				'body'    => $defaults['intro'],

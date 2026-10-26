@@ -48,7 +48,7 @@ const kindOptions = Object.entries( KINDS ).map( ( [ value, label ] ) => ( {
 } ) );
 
 // Suggestions for the colour of the public form; any other colour can be picked.
-const FORM_COLORS = [
+export const FORM_COLORS = [
 	{ name: __( 'Verde', 'booking-manager' ), color: '#1f5c43' },
 	{ name: __( 'Blu notte', 'booking-manager' ), color: '#1d3557' },
 	{ name: __( 'Petrolio', 'booking-manager' ), color: '#1f5f6b' },

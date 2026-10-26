@@ -62,6 +62,17 @@ final class PropertySettings {
 			'reminder_days'         => 2,
 			'send_pre_arrival'      => true,
 			'send_checkin_confirmation' => false,
+			// Look of the e-mails (Messaggi → Aspetto). Images are media library ids; the
+			// header photo 0 = the first photo of the rooms, -1 = none. Colours #rrggbb or
+			// empty for the defaults (the form's colour, then the green of Booking Manager).
+			'email_logo_id'         => 0,
+			'email_banner_id'       => 0,
+			'email_subtitle'        => '',
+			'email_tagline'         => '',
+			'email_signoff'         => __( 'Grazie per averci scelto!', 'booking-manager' ),
+			'email_color'           => '',
+			'email_header_bg'       => '',
+			'email_page_bg'         => '',
 			// Housekeeping.
 			'housekeeping_enabled'  => true,
 			'dirty_on_checkout'     => true,
@@ -90,7 +101,11 @@ final class PropertySettings {
 		'tourist_tax_max_nights' => array( 0, 365 ),
 		'tourist_tax_min_age'    => array( 0, 17 ),
 		'reminder_days'          => array( 0, 30 ),
+		'email_banner_id'        => array( -1, PHP_INT_MAX ),
 	);
+
+	/** Keys holding a colour (#rrggbb, or empty for the default). */
+	public const COLORS = array( 'form_color', 'email_color', 'email_header_bg', 'email_page_bg' );
 
 	/**
 	 * @param array<string, mixed> $base
@@ -146,7 +161,7 @@ final class PropertySettings {
 		if ( 'privacy_url' === $key ) {
 			return esc_url_raw( $value );
 		}
-		if ( 'form_color' === $key ) {
+		if ( in_array( $key, self::COLORS, true ) ) {
 			return preg_match( '/^#[0-9a-f]{6}$/i', $value ) ? strtolower( $value ) : '';
 		}
 		if ( 'notify_email' === $key ) {

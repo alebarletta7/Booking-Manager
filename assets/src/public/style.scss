@@ -330,6 +330,12 @@
 	container-name: bkng;
 }
 
+// Set by the script when the theme leaves the form touching the screen's edges.
+.bkng-public.has-gutter {
+	padding-left: 16px;
+	padding-right: 16px;
+}
+
 .bkng-p-icon {
 	flex: 0 0 auto;
 	vertical-align: middle;
@@ -1695,5 +1701,190 @@
 @media (max-width: 520px) {
 	.bkng-p-grid {
 		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+// After the booking: the same look as the e-mail (tick, summary with icons, contacts).
+.bkng-p-done {
+	padding: 28px;
+
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		margin-bottom: 14px;
+
+		.bkng-public & h3 {
+			margin: 0;
+			font-size: 1.6em;
+			line-height: 1.2;
+			color: var(--bkng-accent);
+		}
+	}
+
+	&__tick {
+		display: grid;
+		place-items: center;
+		flex: 0 0 auto;
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: var(--bkng-accent);
+		color: var(--bkng-on-accent);
+
+		.bkng-p-icon {
+			stroke-width: 2.6;
+		}
+	}
+
+	&__text {
+		font-size: 1.05em;
+		line-height: 1.6;
+	}
+
+	&__summary {
+		margin: 22px 0;
+		padding: 20px 22px 6px;
+		border: 1px solid color-mix(in srgb, var(--bkng-accent) 18%, transparent);
+		border-radius: 12px;
+		background: color-mix(in srgb, var(--bkng-accent) 5%, transparent);
+
+		.bkng-public & h4 {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin: 0 0 6px;
+			font-size: 1.2em;
+			color: var(--bkng-accent);
+		}
+
+		dl {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: 32px;
+			margin: 0;
+
+			> div {
+				display: flex;
+				gap: 14px;
+				padding: 14px 0;
+				border-bottom: 1px solid color-mix(in srgb, var(--bkng-accent) 15%, transparent);
+			}
+
+			> div:nth-last-child(1),
+			> div:nth-last-child(2):nth-child(odd) {
+				border-bottom: 0;
+			}
+
+			.bkng-p-icon {
+				color: var(--bkng-accent);
+				margin-top: 2px;
+			}
+		}
+
+		dt {
+			color: var(--bkng-muted);
+			font-size: 0.88em;
+		}
+
+		dd {
+			margin: 0;
+
+			strong {
+				font-size: 1.05em;
+			}
+
+			.bkng-p-block {
+				font-size: 0.9em;
+			}
+		}
+	}
+
+	&__go {
+		text-align: center;
+
+		.bkng-public & .bkng-p-button {
+			display: inline-flex;
+			padding: 0.8em 1.6em;
+			font-size: 1.05em;
+			text-decoration: none;
+		}
+	}
+
+	&__foot {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 16px;
+		align-items: start;
+		margin-top: 24px;
+		padding-top: 20px;
+		border-top: 1px solid var(--bkng-line);
+		font-size: 0.92em;
+
+		> div {
+			display: flex;
+			gap: 10px;
+		}
+
+		.bkng-p-icon {
+			color: var(--bkng-accent);
+			margin-top: 2px;
+		}
+
+		.bkng-p-block {
+			color: var(--bkng-muted);
+		}
+	}
+
+	&__contacts {
+		display: grid;
+		gap: 6px;
+
+		a {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			text-decoration: none;
+		}
+	}
+
+	.bkng-public &__signoff {
+		margin: 0;
+		text-align: right;
+		color: var(--bkng-accent);
+		font-family: Georgia, "Times New Roman", serif;
+		font-style: italic;
+		font-size: 1.25em;
+	}
+}
+
+@container bkng (max-width: 560px) {
+	.bkng-p-done {
+		padding: 20px 16px;
+
+		&__summary dl {
+			grid-template-columns: minmax(0, 1fr);
+
+			> div:nth-last-child(2):nth-child(odd) {
+				border-bottom: 1px solid color-mix(in srgb, var(--bkng-accent) 15%, transparent);
+			}
+		}
+
+		&__foot {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.bkng-public &__signoff {
+			text-align: left;
+		}
+
+		.bkng-public &__go .bkng-p-button {
+			display: flex;
+			width: 100%;
+			justify-content: center;
+			white-space: normal;
+			padding: 0.8em 1em;
+			font-size: 1em;
+		}
 	}
 }

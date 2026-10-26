@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.5] — 26 ottobre 2026
+
+### Novità
+
+- Nuova grafica delle email: intestazione con logo, nome, sottotitolo, frase e foto; titolo con spunta; riepilogo del soggiorno con icone (arrivo, partenza, notti, ospiti, camera, totale, codice); pulsante per gestire la prenotazione; piè di pagina con indirizzo, telefono, email e saluto. Su telefono le colonne vanno una sotto l'altra.
+- **Messaggi → Aspetto**: logo, foto in alto (la prima delle camere, una scelta o nessuna), sottotitolo, frase in alto, saluto in fondo, colore principale, sfondo dell'intestazione e della pagina, con anteprima dal vivo come su computer o su telefono. Immagini e icone viaggiano dentro l'email, senza collegamenti al sito.
+- La pagina che l'ospite vede dopo la prenotazione ha lo stesso stile dell'email.
+
+### Correzioni
+
+- Modulo sul sito: con i temi che stampano la pagina da bordo a bordo (frequente su telefono) il modulo prende margini laterali propri.
+
 ## [0.1.4] — 26 ottobre 2026
 
 ### Novità

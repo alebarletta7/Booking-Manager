@@ -127,6 +127,8 @@ class PublicBookingService {
 			'children_max_age'  => (int) $s['children_max_age'],
 			'show_prices'       => (bool) $s['show_prices'],
 			'color'             => (string) $s['form_color'],
+			// Closing sentence of the e-mails, also under the booking just sent.
+			'signoff'           => (string) $s['email_signoff'],
 			'request_only'      => 'direct' !== $property['booking_mode'],
 			'terms_text'        => (string) $s['terms_text'],
 			'privacy_url'       => $privacy,

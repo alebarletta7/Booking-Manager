@@ -144,7 +144,7 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | POST | `/properties/{property_id}/notifications/test` |
 | GET | `/properties/{property_id}/templates` |
 | PUT, DELETE | `/properties/{property_id}/templates/{key}` |
-| POST | `/properties/{property_id}/templates/{key}/preview` |
+| POST | `/properties/{property_id}/templates/{key}/preview` (`subject`, `body`, e `design` con le impostazioni `email_*` non ancora salvate) |
 
 ### Canali
 

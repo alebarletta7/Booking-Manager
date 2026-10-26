@@ -40,6 +40,7 @@ cp "$SLUG.php" uninstall.php LICENSE CHANGELOG.md "$DEST/"
 [[ -f readme.txt ]] && cp readme.txt "$DEST/"
 cp -R src "$DEST/src"
 cp -R assets/build "$DEST/assets/build"
+cp -R assets/email "$DEST/assets/email"
 [[ -d languages ]] && cp -R languages "$DEST/languages"
 
 # Nothing of the development environment may slip in.
