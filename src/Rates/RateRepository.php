@@ -18,7 +18,7 @@ class RateRepository {
 
 	public const PLAN_FIELDS       = array( 'name', 'description', 'room_type_ids', 'modifier_bp', 'meal_plan', 'cancellation_policy', 'deposit_policy', 'is_default', 'is_public', 'sort_order' );
 	public const PRICE_FIELDS      = array( 'rate_plan_id', 'room_type_id', 'label', 'date_from', 'date_to', 'weekdays', 'price_night', 'extra_adult_price', 'extra_child_price', 'priority' );
-	public const ADJUSTMENT_FIELDS = array( 'rate_plan_id', 'kind', 'name', 'description', 'amount', 'percent_bp', 'per', 'min_nights', 'max_nights', 'date_from', 'date_to', 'room_type_ids', 'is_optional', 'is_public', 'sort_order' );
+	public const ADJUSTMENT_FIELDS = array( 'rate_plan_id', 'kind', 'name', 'description', 'amount', 'percent_bp', 'per', 'min_nights', 'max_nights', 'date_from', 'date_to', 'room_type_ids', 'is_optional', 'is_public', 'free_cancel_days', 'sort_order' );
 
 	/* ------------------------------------------------------------------ Plans */
 
@@ -249,8 +249,8 @@ class RateRepository {
 		foreach ( array( 'id', 'property_id', 'sort_order' ) as $int ) {
 			$row[ $int ] = (int) $row[ $int ];
 		}
-		foreach ( array( 'rate_plan_id', 'amount', 'percent_bp', 'min_nights', 'max_nights' ) as $nullable ) {
-			$row[ $nullable ] = null !== $row[ $nullable ] ? (int) $row[ $nullable ] : null;
+		foreach ( array( 'rate_plan_id', 'amount', 'percent_bp', 'min_nights', 'max_nights', 'free_cancel_days' ) as $nullable ) {
+			$row[ $nullable ] = null !== ( $row[ $nullable ] ?? null ) ? (int) $row[ $nullable ] : null;
 		}
 		$row['is_optional']   = (bool) (int) $row['is_optional'];
 		$row['is_public']     = (bool) (int) $row['is_public'];

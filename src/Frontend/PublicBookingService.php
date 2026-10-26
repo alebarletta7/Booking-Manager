@@ -157,6 +157,8 @@ class PublicBookingService {
 				'amount'        => $show_prices ? $adj['amount'] : null,
 				'percent_bp'    => $show_prices ? $adj['percent_bp'] : null,
 				'per'           => (string) $adj['per'],
+				// Days of free cancellation it includes (null: a plain supplement).
+				'free_cancel_days' => $adj['free_cancel_days'] ?? null,
 				'rate_plan_id'  => $adj['rate_plan_id'],
 				'room_type_ids' => $adj['room_type_ids'],
 			);
@@ -204,6 +206,7 @@ class PublicBookingService {
 					// Cancelling today, for these dates, costs nothing (the "free cancellation" filter).
 					'free_cancel'  => is_array( $rate['cancellation'] ) && 0 === Policies::cancellation_penalty( $rate['cancellation'], $arrival, $today, 100, 100 ),
 					'deposit'      => $rate['deposit'],
+					'options'      => $show ? ( $rate['options'] ?? array() ) : array(),
 					'total'        => $show ? (int) $rate['quote']['total'] : null,
 					'tax'          => $show ? (int) $rate['quote']['tax'] : null,
 					'nights'       => count( $rate['quote']['nightly'] ),
@@ -600,8 +603,15 @@ class PublicBookingService {
 	public static function cancellation_terms( array $b, array $rooms, array $plans, string $today, bool $enabled ): array {
 		$penalty    = 0;
 		$refundable = true;
+		// Keyed by rate plan id; a list carries the id in each entry.
+		$by_plan = array();
+		foreach ( $plans as $key => $entry ) {
+			if ( is_array( $entry ) ) {
+				$by_plan[ (string) ( $entry['rate_plan_id'] ?? $key ) ] = $entry;
+			}
+		}
 		foreach ( $rooms as $room ) {
-			$terms  = $plans[ (string) $room['rate_plan_id'] ] ?? null;
+			$terms  = $by_plan[ (string) $room['rate_plan_id'] ] ?? null;
 			$policy = Policies::cancellation( is_array( $terms ) ? ( $terms['cancellation'] ?? null ) : null );
 			$nights = is_array( $room['nightly'] ) ? array_values( $room['nightly'] ) : array();
 			$first  = (int) ( is_array( $nights[0] ?? null ) ? ( $nights[0]['price'] ?? 0 ) : ( $nights[0] ?? 0 ) );

@@ -58,6 +58,43 @@ final class Policies {
 	}
 
 	/**
+	 * The cancellation terms of a stay once the optional supplements chosen are counted:
+	 * a chosen supplement that includes free cancellation (free_cancel_days) makes the
+	 * stay refundable for free up to that many days before arrival, the full price after
+	 * (the longest window wins when there are several).
+	 *
+	 * @param array<string, mixed>             $policy      the rate plan's terms (cancellation())
+	 * @param array<int, array<string, mixed>> $adjustments active adjustments of the property
+	 * @param int[]                            $chosen      optional adjustments chosen
+	 * @return array{refundable: bool, free_until_days: int, penalty: string, percent: int, text: string}
+	 */
+	public static function with_options( array $policy, array $adjustments, int $type_id, ?int $plan_id, string $arrival, int $nights, array $chosen ): array {
+		$policy = self::cancellation( $policy );
+		$days   = null;
+		foreach ( $adjustments as $adj ) {
+			if ( null === ( $adj['free_cancel_days'] ?? null ) || empty( $adj['is_optional'] ) ) {
+				continue;
+			}
+			if ( PricingEngine::adjustment_applies( $adj, $type_id, $plan_id, $arrival, $nights, $chosen ) ) {
+				$days = max( (int) $days, (int) $adj['free_cancel_days'] );
+			}
+		}
+		if ( null === $days ) {
+			return $policy;
+		}
+		if ( $policy['refundable'] && 'none' === $policy['penalty'] && 0 === $policy['free_until_days'] ) {
+			return $policy; // Already free at any time: nothing better to give.
+		}
+		return array(
+			'refundable'      => true,
+			'free_until_days' => $days,
+			'penalty'         => 'full',
+			'percent'         => 0,
+			'text'            => '',
+		);
+	}
+
+	/**
 	 * The deposit to ask for a stay (cents), never more than the total.
 	 *
 	 * @param array{type: string, value: int, due_days: int} $policy

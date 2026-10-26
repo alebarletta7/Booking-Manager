@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.4] — 26 ottobre 2026
+
+### Novità
+
+- Modulo sul sito: «Seleziona» apre la scheda della camera, con tutte le foto (a schermo intero con un clic), descrizione e servizi, le tariffe con colazione, cancellazione e caparra, i servizi aggiuntivi a pagamento e il totale aggiornato con quelli scelti. Le foto nella lista non si aprono più.
+- Cancellazione gratuita a pagamento: in **Tariffe → Supplementi e sconti**, un supplemento facoltativo può includere la cancellazione gratuita fino a N giorni prima dell'arrivo, a prezzo fisso o in percentuale; chi lo sceglie può cancellare gratis anche su una tariffa non rimborsabile. Colazione, parcheggio e altri servizi restano supplementi facoltativi (a soggiorno, a notte, a persona).
+- Riepilogo della prenotazione con i servizi aggiunti.
+
+### Correzioni
+
+- Annullamento online dalla pagina dell'ospite: le condizioni della tariffa non venivano ritrovate e una prenotazione non rimborsabile poteva essere annullata gratis. Ora valgono le condizioni della tariffa prenotata.
+
 ## [0.1.3] — 25 ottobre 2026
 
 ### Correzioni

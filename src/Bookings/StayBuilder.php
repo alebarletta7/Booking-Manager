@@ -289,10 +289,12 @@ class StayBuilder {
 				'manual'      => ! empty( $quote['manual'] ),
 			);
 			if ( $line['plan'] ) {
+				// Keyed by rate plan id: the guest's cancellation reads the terms of each room's plan.
 				$terms[ (string) $line['plan']['id'] ] = array(
+					'rate_plan_id' => (int) $line['plan']['id'],
 					'rate_plan'    => (string) $line['plan']['name'],
 					'meal_plan'    => (string) $line['plan']['meal_plan'],
-					'cancellation' => $line['plan']['cancellation_policy'],
+					'cancellation' => Policies::with_options( $line['plan']['cancellation_policy'], $adjustments, (int) $line['room_type_id'], (int) $line['plan']['id'], $line['arrival'], $quote['nights'], $extras ),
 					'deposit'      => $line['plan']['deposit_policy'],
 				);
 			}
@@ -311,7 +313,7 @@ class StayBuilder {
 				'taxes'    => $taxes,
 			),
 			'terms_snapshot'   => array(
-				'plans'      => array_values( $terms ),
+				'plans'      => $terms,
 				'terms_text' => (string) $property['settings']['terms_text'],
 				'checkin'    => array( (string) $property['checkin_from'], (string) $property['checkin_to'] ),
 				'checkout'   => (string) $property['checkout_until'],

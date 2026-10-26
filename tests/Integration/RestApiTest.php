@@ -242,6 +242,60 @@ final class RestApiTest extends TestCase {
 		$this->assertSame( 'cancelled', $cancel->get_data()['status'] );
 	}
 
+	/**
+	 * A non-refundable rate is never cancelled from the guest link; with the optional
+	 * supplement «Cancellazione gratuita» (paid on top) it is, up to N days before arrival.
+	 */
+	public function test_free_cancellation_sold_as_an_option(): void {
+		wp_set_current_user( 0 );
+		$p     = $this->property( array( 'booking_mode' => 'direct' ) );
+		$t     = $this->room_type( $p['id'], 2 );
+		$rates = $this->service( \BookingManager\Rates\RateService::class );
+		$plan  = $rates->create_plan( $p['id'], array( 'name' => 'Non rimborsabile', 'is_public' => true, 'cancellation_policy' => array( 'refundable' => false ) ) );
+		$this->assertIsArray( $plan );
+		$opt = $rates->save_adjustment( $p['id'], array( 'kind' => 'supplement', 'name' => 'Cancellazione gratuita', 'percent_bp' => 1000, 'per' => 'stay', 'is_optional' => true, 'is_public' => true, 'free_cancel_days' => 7 ) );
+		$this->assertIsArray( $opt, is_wp_error( $opt ) ? $opt->get_error_message() : '' );
+		$this->assertInstanceOf( \WP_Error::class, $rates->save_adjustment( $p['id'], array( 'kind' => 'supplement', 'name' => 'X', 'amount' => 100, 'per' => 'stay', 'is_optional' => false, 'free_cancel_days' => 7 ) ), 'only an option' );
+
+		$q      = array( 'arrival' => self::day( 30 ), 'departure' => self::day( 32 ), 'adults' => 2 );
+		$plain  = $this->call( 'GET', '/properties/' . $p['slug'] . '/search', array(), $q, true )->get_data()['offers'][0]['rates'][0];
+		$option = $this->call( 'GET', '/properties/' . $p['slug'] . '/search', array(), $q + array( 'extras' => array( $opt['id'] ) ), true )->get_data()['offers'][0]['rates'][0];
+		$this->assertFalse( $plain['free_cancel'] );
+		$this->assertSame( array( array( 'id' => $opt['id'], 'amount' => 2000 ) ), $plain['options'], 'the price of the option is shown before choosing it' );
+		$this->assertTrue( $option['free_cancel'] );
+		$this->assertSame( $plain['total'] + 2000, $option['total'] );
+
+		$book = function ( array $extras, string $request ) use ( $p, $t, $plan ) {
+			$hold = $this->call( 'POST', '/properties/' . $p['slug'] . '/holds', array( 'room_type_id' => $t['type']['id'], 'arrival' => self::day( 30 ), 'departure' => self::day( 32 ) ), array(), true );
+			$res  = $this->call(
+				'POST',
+				'/properties/' . $p['slug'] . '/bookings',
+				array(
+					'arrival'    => self::day( 30 ),
+					'departure'  => self::day( 32 ),
+					'rooms'      => array( array( 'room_type_id' => $t['type']['id'], 'rate_plan_id' => $plan['id'], 'adults' => 2 ) ),
+					'extras'     => $extras,
+					'guest'      => array( 'first_name' => 'Ada', 'last_name' => 'Riva', 'email' => 'ada@example.org', 'phone' => '+39 347 0000001' ),
+					'privacy'    => true,
+					'hold_token' => $hold->get_data()['token'],
+					'form_token' => FormToken::issue( time() - 60 ),
+					'request_id' => $request,
+				),
+				array(),
+				true
+			);
+			$this->assertSame( 201, $res->get_status(), wp_json_encode( $res->get_data() ) );
+			return $res->get_data();
+		};
+		$strict = $book( array(), 'nr-1' );
+		$this->assertFalse( $this->call( 'GET', '/manage/' . $strict['booking']['code'], array(), array( 'token' => $strict['token'] ), true )->get_data()['can_cancel'], 'non-refundable stays non-refundable' );
+
+		$flex = $book( array( $opt['id'] ), 'nr-2' );
+		$this->assertSame( 22000, $flex['booking']['total'] );
+		$this->assertTrue( $this->call( 'GET', '/manage/' . $flex['booking']['code'], array(), array( 'token' => $flex['token'] ), true )->get_data()['can_cancel'] );
+		$this->assertSame( 'cancelled', $this->call( 'POST', '/manage/' . $flex['booking']['code'] . '/cancel', array(), array( 'token' => $flex['token'] ), true )->get_data()['status'] );
+	}
+
 	public function test_public_form_refuses_a_closed_property_and_a_late_form(): void {
 		wp_set_current_user( 0 );
 		$p = $this->property( array( 'settings' => array( 'online_enabled' => false ) ) );

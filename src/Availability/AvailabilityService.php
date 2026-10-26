@@ -15,6 +15,7 @@ namespace BookingManager\Availability;
 use BookingManager\Core\Clock;
 use BookingManager\Core\Dates;
 use BookingManager\Inventory\RoomTypeRepository;
+use BookingManager\Rates\Policies;
 use BookingManager\Rates\PricingEngine;
 use BookingManager\Rates\RateRepository;
 
@@ -100,14 +101,17 @@ class AvailabilityService {
 					'name'         => (string) $plan['name'],
 					'description'  => (string) $plan['description'],
 					'meal_plan'    => (string) $plan['meal_plan'],
-					'cancellation' => $plan['cancellation_policy'],
+					// With the options chosen: one that includes free cancellation changes the terms.
+					'cancellation' => Policies::with_options( $plan['cancellation_policy'], $public_adj, (int) $type['id'], (int) $plan['id'], $arrival, $quote['nights'], $extras ),
 					'deposit'      => $plan['deposit_policy'],
 					'quote'        => $quote,
+					'options'      => self::option_prices( $type, (int) $plan['id'], $public_adj, $quote, $arrival, $adults + $children ),
 				);
 			}
 			if ( ! $plans ) {
 				$rules = RestrictionChecker::check( $property['settings'], $rows, $arrival, $departure, $today, (int) $type['id'], null, $time );
 				if ( ! $rules ) {
+					$quote   = PricingEngine::quote( $type, null, $prices, $adjustments, $arrival, $departure, $adults, $children, $extras, $property['settings'] );
 					$rates[] = array(
 						'rate_plan_id' => null,
 						'name'         => __( 'Tariffa base', 'booking-manager' ),
@@ -115,7 +119,8 @@ class AvailabilityService {
 						'meal_plan'    => 'room_only',
 						'cancellation' => null,
 						'deposit'      => null,
-						'quote'        => PricingEngine::quote( $type, null, $prices, $adjustments, $arrival, $departure, $adults, $children, $extras, $property['settings'] ),
+						'quote'        => $quote,
+						'options'      => self::option_prices( $type, null, $online ? array_filter( $adjustments, static fn( array $a ) => $a['is_public'] ) : $adjustments, $quote, $arrival, $adults + $children ),
 					);
 				}
 			}
@@ -138,5 +143,31 @@ class AvailabilityService {
 	public static function valid_range( string $from, string $to, int $max = 400 ): bool {
 		$n = Dates::count( $from, $to );
 		return $n >= 1 && $n <= $max;
+	}
+
+	/**
+	 * What each optional supplement would add to this stay at this rate (cents), so the
+	 * guest sees the price of breakfast or free cancellation before choosing it.
+	 *
+	 * @param array<string, mixed>             $type
+	 * @param array<int, array<string, mixed>> $adjustments
+	 * @param array<string, mixed>             $quote PricingEngine::quote()
+	 * @return array<int, array{id: int, amount: int}>
+	 */
+	private static function option_prices( array $type, ?int $plan_id, array $adjustments, array $quote, string $arrival, int $persons ): array {
+		$out = array();
+		foreach ( $adjustments as $adj ) {
+			if ( empty( $adj['is_optional'] ) || 'supplement' !== $adj['kind'] ) {
+				continue;
+			}
+			if ( ! PricingEngine::adjustment_applies( $adj, (int) $type['id'], $plan_id, $arrival, (int) $quote['nights'], array( (int) $adj['id'] ) ) ) {
+				continue;
+			}
+			$out[] = array(
+				'id'     => (int) $adj['id'],
+				'amount' => PricingEngine::adjustment_amount( $adj, max( 0, (int) $quote['room'] + (int) $quote['modifier'] ), (int) $quote['nights'], $persons ),
+			);
+		}
+		return $out;
 	}
 }

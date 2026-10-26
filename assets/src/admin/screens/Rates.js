@@ -767,12 +767,14 @@ function AdjustmentModal( { property, types, plans, adj, onClose, onDone } ) {
 			rate_plan_id: null,
 			is_optional: true,
 			is_public: true,
+			free_cancel_days: null,
 		}
 	);
 	const [ usePercent, setUsePercent ] = useState(
 		!! ( adj && adj.percent_bp )
 	);
 	const set = ( k ) => ( v ) => setForm( ( f ) => ( { ...f, [ k ]: v } ) );
+	const offersCancel = 'supplement' === form.kind && !! form.is_optional;
 	return (
 		<FormModal
 			wide
@@ -793,6 +795,9 @@ function AdjustmentModal( { property, types, plans, adj, onClose, onDone } ) {
 					date_to: form.date_to || null,
 					rate_plan_id: form.rate_plan_id
 						? Number( form.rate_plan_id )
+						: null,
+					free_cancel_days: offersCancel
+						? form.free_cancel_days || null
 						: null,
 				};
 				delete body.id;
@@ -921,6 +926,24 @@ function AdjustmentModal( { property, types, plans, adj, onClose, onDone } ) {
 					onChange={ set( 'is_public' ) }
 				/>
 			</div>
+			{ offersCancel && (
+				<Grid columns={ 2 }>
+					<NumberField
+						label={ __(
+							'Include la cancellazione gratuita fino a (giorni prima dell’arrivo)',
+							'booking-manager'
+						) }
+						min={ 1 }
+						max={ 365 }
+						value={ form.free_cancel_days }
+						onChange={ set( 'free_cancel_days' ) }
+						help={ __(
+							"Lascia vuoto per un servizio normale (es. colazione). Con i giorni, chi sceglie l'opzione può cancellare gratis fino a quel giorno, anche su una tariffa non rimborsabile.",
+							'booking-manager'
+						) }
+					/>
+				</Grid>
+			) }
 		</FormModal>
 	);
 }
@@ -977,6 +1000,17 @@ function Adjustments( { property, types, plans } ) {
 									  __( 'facoltativo', 'booking-manager' )
 									: ' · ' +
 									  __( 'automatico', 'booking-manager' ) }
+								{ a.free_cancel_days
+									? ' · ' +
+									  sprintf(
+											/* translators: %d: days before arrival */
+											__(
+												'cancellazione gratuita fino a %d giorni prima',
+												'booking-manager'
+											),
+											a.free_cancel_days
+									  )
+									: '' }
 							</div>
 						</div>
 						<Button

@@ -280,6 +280,15 @@ class RateService {
 		if ( null !== $from && null !== $to && $to < $from ) {
 			$errors['date_to'] = __( 'Periodo non valido.', 'booking-manager' );
 		}
+		// An optional supplement may include free cancellation up to N days before arrival
+		// (e.g. «Cancellazione gratuita» for 15 € or 10%); only a supplement the guest chooses.
+		$free_days = Validation::blank( $input['free_cancel_days'] ?? null ) ? null : Validation::int_between( $input['free_cancel_days'], 1, 365 );
+		if ( ! Validation::blank( $input['free_cancel_days'] ?? null ) && null === $free_days ) {
+			$errors['free_cancel_days'] = __( 'Giorni non validi (da 1 a 365).', 'booking-manager' );
+		}
+		if ( null !== $free_days && ( 'supplement' !== ( $input['kind'] ?? '' ) || ! rest_sanitize_boolean( $input['is_optional'] ?? false ) ) ) {
+			$errors['free_cancel_days'] = __( 'La cancellazione gratuita si offre solo come supplemento facoltativo.', 'booking-manager' );
+		}
 		if ( $errors ) {
 			return Validation::error( $errors );
 		}
@@ -298,6 +307,7 @@ class RateService {
 			'room_type_ids' => $types,
 			'is_optional'   => rest_sanitize_boolean( $input['is_optional'] ?? false ) ? 1 : 0,
 			'is_public'     => rest_sanitize_boolean( $input['is_public'] ?? true ) ? 1 : 0,
+			'free_cancel_days' => $free_days,
 			'sort_order'    => (int) ( $input['sort_order'] ?? 0 ),
 		);
 		if ( $id ) {

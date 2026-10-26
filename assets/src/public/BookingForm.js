@@ -3,14 +3,13 @@
  * confirmation (or the payment page). The rooms chosen are held while the guest fills
  * in the details; every price and rule is checked again by the server.
  */
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import {
 	addDays,
 	applyColor,
 	date,
-	extraPrice,
 	guestsLabel,
 	money,
 	nightsBetween,
@@ -25,45 +24,6 @@ function newRequestId() {
 		return window.crypto.randomUUID();
 	}
 	return String( Date.now() ) + Math.random().toString( 16 ).slice( 2 );
-}
-
-function Extras( { property, extras, chosen, setChosen } ) {
-	if ( ! extras.length ) {
-		return null;
-	}
-	return (
-		<fieldset className="bkng-p-card bkng-p-extras">
-			<legend>
-				{ __( 'Aggiungi al soggiorno', 'booking-manager' ) }
-			</legend>
-			{ extras.map( ( x ) => (
-				<Check
-					key={ x.id }
-					checked={ chosen.includes( x.id ) }
-					onChange={ ( on ) =>
-						setChosen(
-							on
-								? [ ...chosen, x.id ]
-								: chosen.filter( ( id ) => id !== x.id )
-						)
-					}
-				>
-					<strong>{ x.name }</strong>
-					{ extraPrice( x, property.currency ) && (
-						<span className="bkng-p-muted">
-							{ ' ' }
-							· { extraPrice( x, property.currency ) }
-						</span>
-					) }
-					{ x.description && (
-						<span className="bkng-p-muted bkng-p-block">
-							{ x.description }
-						</span>
-					) }
-				</Check>
-			) ) }
-		</fieldset>
-	);
 }
 
 /* ------------------------------------------------------------------ Details */
@@ -123,6 +83,15 @@ function Summary( { property, stay, choice } ) {
 				<br />
 				<span className="bkng-p-muted">{ choice.rate.name }</span>
 			</p>
+			{ choice.extras?.length > 0 && (
+				<ul className="bkng-p-summary__extras">
+					{ ( property.extras || [] )
+						.filter( ( x ) => choice.extras.includes( x.id ) )
+						.map( ( x ) => (
+							<li key={ x.id }>+ { x.name }</li>
+						) ) }
+				</ul>
+			) }
 			{ total !== null && (
 				<p className="bkng-p-summary__total">
 					<span>{ __( 'Totale', 'booking-manager' ) }</span>
@@ -596,7 +565,7 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 	const scrollTop = () =>
 		top.current?.scrollIntoView( { behavior: 'smooth', block: 'start' } );
 
-	const search = async ( chosenExtras = extras ) => {
+	const search = async () => {
 		setSearching( true );
 		setError( null );
 		setNotice( '' );
@@ -607,7 +576,6 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 					departure: stay.departure,
 					adults: stay.adults,
 					children: stay.children,
-					extras: chosenExtras,
 				} )
 			);
 		} catch ( err ) {
@@ -617,14 +585,20 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 		setSearching( false );
 	};
 
-	const changeExtras = ( next ) => {
-		setExtras( next );
-		if ( results ) {
-			search( next );
-		}
-	};
+	// The room sheet asks the price again with the options the guest ticks.
+	const quote = useCallback(
+		( chosen ) =>
+			api.get( 'properties/' + slug + '/search', {
+				arrival: results.arrival,
+				departure: results.departure,
+				adults: results.adults,
+				children: results.children,
+				extras: chosen,
+			} ),
+		[ api, slug, results ]
+	);
 
-	const choose = async ( type, rate, quantity ) => {
+	const choose = async ( type, rate, quantity, chosen = [] ) => {
 		setHolding( true );
 		setError( null );
 		try {
@@ -634,13 +608,17 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 				departure: stay.departure,
 				quantity,
 			} );
-			setChoice( { type, rate, quantity } );
+			setExtras( chosen );
+			setChoice( { type, rate, quantity, extras: chosen } );
 			setHold( h );
+			setHolding( false );
 			scrollTop();
+			return true;
 		} catch ( err ) {
 			setError( err );
 		}
 		setHolding( false );
+		return false;
 	};
 
 	const back = () => {
@@ -744,14 +722,7 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 							onChoose={ choose }
 							busy={ holding }
 							searching={ searching }
-							extras={
-								<Extras
-									property={ property }
-									extras={ property.extras || [] }
-									chosen={ extras }
-									setChosen={ changeExtras }
-								/>
-							}
+							quote={ quote }
 							empty={
 								<div className="bkng-p-card">
 									<p>

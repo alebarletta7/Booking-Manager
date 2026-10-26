@@ -48,6 +48,7 @@ Convenzioni:
 - date di soggiorno `Y-m-d` nel fuso della struttura; colonne `*_at` in **UTC**;
 - stati come `VARCHAR`, nessuna foreign key (come gli altri plugin della famiglia);
 - colonna `version` per il blocco ottimistico: una modifica con versione vecchia riceve **409**.
+- servizi a pagamento (colazione, parcheggio, cancellazione gratuita…) sono supplementi facoltativi in `rate_adjustments`; `free_cancel_days` (dalla migrazione `20261025_000001`) dice che il supplemento include la cancellazione gratuita fino a N giorni prima: se l'ospite lo sceglie, `Rates\Policies::with_options()` sostituisce le condizioni della tariffa, e la prenotazione le conserva in `terms_snapshot` (per piano tariffario).
 
 ## Nessuna doppia prenotazione
 

@@ -24,6 +24,7 @@ class Migrator {
 	public static function migrations(): array {
 		return array(
 			Migrations\Migration_20261023_000001_Initial::class,
+			Migrations\Migration_20261025_000001_CancellationOption::class,
 		);
 	}
 

@@ -15,9 +15,11 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 
 import {
 	addDays,
+	applyColor,
 	cancellationText,
 	date,
 	depositText,
+	extraPrice,
 	MEAL_PLANS,
 	money,
 	nightsBetween,
@@ -301,21 +303,16 @@ export function SearchBar( {
 
 /* ------------------------------------------------------------------ Photos */
 
-function Lightbox( { images, start, title, onClose } ) {
-	const [ index, setIndex ] = useState( start );
-	const closeRef = useRef( null );
-	const count = images.length;
-	const go = ( step ) => setIndex( ( i ) => ( i + step + count ) % count );
+/** Keyboard and page scroll of a dialog on the page body; Escape closes it. */
+function useDialog( focusRef, onClose, paused ) {
+	const close = useRef( onClose );
+	close.current = onClose;
 	useEffect( () => {
-		const before = closeRef.current?.ownerDocument.activeElement;
-		closeRef.current?.focus();
+		const before = focusRef.current?.ownerDocument.activeElement;
+		focusRef.current?.focus();
 		const key = ( e ) => {
-			if ( e.key === 'Escape' ) {
-				onClose();
-			} else if ( e.key === 'ArrowRight' ) {
-				setIndex( ( i ) => ( i + 1 ) % count );
-			} else if ( e.key === 'ArrowLeft' ) {
-				setIndex( ( i ) => ( i - 1 + count ) % count );
+			if ( e.key === 'Escape' && ! paused?.current ) {
+				close.current();
 			}
 		};
 		document.addEventListener( 'keydown', key );
@@ -326,7 +323,26 @@ function Lightbox( { images, start, title, onClose } ) {
 			document.body.style.overflow = overflow;
 			before?.focus?.();
 		};
-	}, [ count, onClose ] );
+	}, [ focusRef, paused ] );
+}
+
+function Lightbox( { images, start, title, onClose } ) {
+	const [ index, setIndex ] = useState( start );
+	const closeRef = useRef( null );
+	const count = images.length;
+	const go = ( step ) => setIndex( ( i ) => ( i + step + count ) % count );
+	useDialog( closeRef, onClose );
+	useEffect( () => {
+		const key = ( e ) => {
+			if ( e.key === 'ArrowRight' ) {
+				setIndex( ( i ) => ( i + 1 ) % count );
+			} else if ( e.key === 'ArrowLeft' ) {
+				setIndex( ( i ) => ( i - 1 + count ) % count );
+			}
+		};
+		document.addEventListener( 'keydown', key );
+		return () => document.removeEventListener( 'keydown', key );
+	}, [ count ] );
 	const image = images[ index ];
 	// On the page body: a card with container queries would trap a fixed element.
 	return createPortal(
@@ -391,10 +407,9 @@ function Lightbox( { images, start, title, onClose } ) {
 
 const THUMBS = 3;
 
+/** The photos on the card: a preview only, the room sheet shows them all. */
 function Photos( { type } ) {
 	const images = type.images || [];
-	const [ index, setIndex ] = useState( 0 );
-	const [ zoom, setZoom ] = useState( null );
 	if ( ! images.length ) {
 		return (
 			<div className="bkng-p-photos is-empty" aria-hidden="true">
@@ -402,7 +417,6 @@ function Photos( { type } ) {
 			</div>
 		);
 	}
-	const main = images[ index ] || images[ 0 ];
 	const thumbs = images.slice( 1, 1 + THUMBS );
 	const more = images.length - 1 - THUMBS;
 	return (
@@ -411,85 +425,118 @@ function Photos( { type } ) {
 				'bkng-p-photos' + ( thumbs.length ? ' has-thumbs' : '' )
 			}
 		>
-			<button
-				type="button"
-				className="bkng-p-photos__main"
-				onClick={ () => setZoom( index ) }
-				aria-label={ sprintf(
-					/* translators: %s: room type. */
-					__( 'Ingrandisci le foto di %s', 'booking-manager' ),
-					type.name
-				) }
-			>
+			<div className="bkng-p-photos__main">
 				<img
-					src={ main.url }
-					alt={ main.alt || type.name }
+					src={ images[ 0 ].url }
+					alt={ images[ 0 ].alt || type.name }
 					loading="lazy"
 				/>
-				{ images.length > 1 && (
-					<span className="bkng-p-photos__count">
-						{ index + 1 } / { images.length }
-					</span>
-				) }
-			</button>
+			</div>
 			{ thumbs.length > 0 && (
-				<div className="bkng-p-photos__thumbs">
-					{ thumbs.map( ( img, i ) => {
-						const at = i + 1;
-						const last = i === thumbs.length - 1 && more > 0;
-						return (
-							<button
-								type="button"
-								key={ img.id }
-								className={ at === index ? 'is-active' : '' }
-								onClick={ () =>
-									last ? setZoom( at ) : setIndex( at )
-								}
-								aria-label={
-									last
-										? sprintf(
-												/* translators: %d: number of other photos. */
-												_n(
-													'Vedi tutte le foto (altra %d)',
-													'Vedi tutte le foto (altre %d)',
-													more,
-													'booking-manager'
-												),
-												more
-										  )
-										: sprintf(
-												/* translators: 1: photo number, 2: total photos. */
-												__(
-													'Foto %1$d di %2$d',
-													'booking-manager'
-												),
-												at + 1,
-												images.length
-										  )
-								}
-							>
-								<img
-									src={ img.thumb || img.url }
-									alt=""
-									loading="lazy"
-								/>
-								{ last && (
-									<span className="bkng-p-photos__more">
-										+{ more }
-									</span>
-								) }
-							</button>
-						);
-					} ) }
+				<div className="bkng-p-photos__thumbs" aria-hidden="true">
+					{ thumbs.map( ( img, i ) => (
+						<div key={ img.id }>
+							<img
+								src={ img.thumb || img.url }
+								alt=""
+								loading="lazy"
+							/>
+							{ i === thumbs.length - 1 && more > 0 && (
+								<span className="bkng-p-photos__more">
+									+{ more }
+								</span>
+							) }
+						</div>
+					) ) }
 				</div>
 			) }
-			{ zoom !== null && (
-				<Lightbox
-					images={ images }
-					start={ zoom }
-					title={ type.name }
-					onClose={ () => setZoom( null ) }
-				/>
+		</div>
+	);
+}
+
+/** The photos in the room sheet: one large, the others below; a click shows it full screen. */
+function Gallery( { type, onZoom } ) {
+	const images = type.images || [];
+	const [ index, setIndex ] = useState( 0 );
+	if ( ! images.length ) {
+		return null;
+	}
+	const count = images.length;
+	const main = images[ index ] || images[ 0 ];
+	return (
+		<div className="bkng-p-gallery">
+			<div className="bkng-p-gallery__stage">
+				<button
+					type="button"
+					className="bkng-p-gallery__main"
+					onClick={ () => onZoom( index ) }
+					aria-label={ sprintf(
+						/* translators: %s: room type. */
+						__(
+							'Vedi le foto di %s a schermo intero',
+							'booking-manager'
+						),
+						type.name
+					) }
+				>
+					<img src={ main.url } alt={ main.alt || type.name } />
+					<span className="bkng-p-gallery__count">
+						{ index + 1 } / { count }
+					</span>
+				</button>
+				{ count > 1 && (
+					<>
+						<button
+							type="button"
+							className="bkng-p-gallery__prev"
+							onClick={ () =>
+								setIndex( ( index - 1 + count ) % count )
+							}
+							aria-label={ __(
+								'Foto precedente',
+								'booking-manager'
+							) }
+						>
+							<Icon name="chevronLeft" size={ 22 } />
+						</button>
+						<button
+							type="button"
+							className="bkng-p-gallery__next"
+							onClick={ () => setIndex( ( index + 1 ) % count ) }
+							aria-label={ __(
+								'Foto successiva',
+								'booking-manager'
+							) }
+						>
+							<Icon name="chevronRight" size={ 22 } />
+						</button>
+					</>
+				) }
+			</div>
+			{ count > 1 && (
+				<div className="bkng-p-gallery__thumbs">
+					{ images.map( ( img, i ) => (
+						<button
+							type="button"
+							key={ img.id }
+							className={ i === index ? 'is-active' : '' }
+							aria-pressed={ i === index }
+							onClick={ () => setIndex( i ) }
+							aria-label={ sprintf(
+								/* translators: 1: photo number, 2: total photos. */
+								__( 'Foto %1$d di %2$d', 'booking-manager' ),
+								i + 1,
+								count
+							) }
+						>
+							<img
+								src={ img.thumb || img.url }
+								alt=""
+								loading="lazy"
+							/>
+						</button>
+					) ) }
+				</div>
 			) }
 		</div>
 	);
@@ -547,102 +594,388 @@ function Amenities( { list } ) {
 	);
 }
 
-function Rates( { property, item, onChoose, busy } ) {
-	const [ quantity, setQuantity ] = useState( 1 );
-	const qtyId = 'bkng-p-q-' + useId();
-	const max = Math.max( 1, property.max_rooms || 1 );
+/** Cancelling costs nothing up to arrival: an option that adds free cancellation is useless. */
+function alwaysFree( policy ) {
 	return (
-		<div className="bkng-p-room__rates">
-			{ max > 1 && (
-				<div className="bkng-p-room__qty">
-					<label htmlFor={ qtyId }>
-						{ __( 'Camere', 'booking-manager' ) }
-					</label>
-					<select
-						id={ qtyId }
-						value={ quantity }
-						onChange={ ( e ) =>
-							setQuantity( Number( e.target.value ) )
-						}
-					>
-						{ Array.from( { length: max }, ( _, i ) => i + 1 ).map(
-							( n ) => (
-								<option key={ n } value={ n }>
-									{ n }
-								</option>
-							)
-						) }
-					</select>
-				</div>
-			) }
-			<ul>
-				{ item.rates.map( ( rate ) => (
-					<li key={ String( rate.rate_plan_id ) }>
-						<div className="bkng-p-room__rate-info">
-							<strong>{ rate.name }</strong>
-							<span className="bkng-p-muted">
-								{ [
-									MEAL_PLANS[ rate.meal_plan ],
-									cancellationText( rate.cancellation ),
-									depositText(
-										rate.deposit,
-										property.currency
-									),
-								]
-									.filter( Boolean )
-									.join( ' · ' ) }
-							</span>
-							{ rate.description && (
-								<span className="bkng-p-muted">
-									{ rate.description }
-								</span>
-							) }
-						</div>
-						<div className="bkng-p-room__rate-go">
-							{ rate.total !== null && (
-								<strong>
-									{ money(
-										rate.total * quantity,
-										property.currency
-									) }
-								</strong>
-							) }
-							<button
-								type="button"
-								className="bkng-p-button is-primary"
-								disabled={ busy }
-								onClick={ () =>
-									onChoose( item.type, rate, quantity )
-								}
-							>
-								{ __( 'Prenota', 'booking-manager' ) }
-							</button>
-						</div>
-					</li>
-				) ) }
-			</ul>
-		</div>
+		! policy ||
+		( policy.refundable !== false &&
+			! policy.text &&
+			! Number( policy.free_until_days || 0 ) &&
+			( ! policy.penalty || policy.penalty === 'none' ) )
 	);
 }
 
-function RoomCard( { property, stay, item, onChoose, busy } ) {
+function today() {
+	const d = new Date();
+	return [
+		d.getFullYear(),
+		String( d.getMonth() + 1 ).padStart( 2, '0' ),
+		String( d.getDate() ).padStart( 2, '0' ),
+	].join( '-' );
+}
+
+/**
+ * The paid options a guest can add to a rate (breakfast, parking, free cancellation…).
+ * With prices shown, the search says which apply to these dates and what they cost;
+ * otherwise the room type and the rate decide.
+ */
+function rateOptions( property, type, rate, arrival ) {
+	const extras = property.extras || [];
+	const priced = property.show_prices && Array.isArray( rate.options );
+	const found = priced
+		? rate.options
+				.map( ( o ) => {
+					const x = extras.find( ( e ) => e.id === o.id );
+					return x ? { ...x, price: o.amount } : null;
+				} )
+				.filter( Boolean )
+		: extras
+				.filter(
+					( x ) =>
+						( ! x.room_type_ids?.length ||
+							x.room_type_ids.includes( type.id ) ) &&
+						( ! x.rate_plan_id ||
+							x.rate_plan_id === rate.rate_plan_id )
+				)
+				.map( ( x ) => ( { ...x, price: null } ) );
+	const daysLeft = nightsBetween( today(), arrival );
+	return found.filter(
+		( x ) =>
+			! x.free_cancel_days ||
+			( ! alwaysFree( rate.cancellation ) &&
+				daysLeft >= x.free_cancel_days )
+	);
+}
+
+function OptionRow( { option, checked, onChange, currency } ) {
+	const id = 'bkng-p-o-' + useId();
+	const rule = extraPrice( option, currency );
+	return (
+		<li className={ checked ? 'is-checked' : '' }>
+			<input
+				id={ id }
+				type="checkbox"
+				checked={ checked }
+				onChange={ () => onChange( ! checked ) }
+			/>
+			<label htmlFor={ id }>
+				<strong>{ option.name }</strong>
+				{ option.free_cancel_days && (
+					<span className="bkng-p-sheet__note">
+						{ sprintf(
+							/* translators: %d: days before arrival. */
+							_n(
+								'Puoi cancellare gratis fino a %d giorno prima dell’arrivo',
+								'Puoi cancellare gratis fino a %d giorni prima dell’arrivo',
+								option.free_cancel_days,
+								'booking-manager'
+							),
+							option.free_cancel_days
+						) }
+					</span>
+				) }
+				{ option.description && (
+					<span className="bkng-p-muted">{ option.description }</span>
+				) }
+			</label>
+			<span className="bkng-p-sheet__price">
+				{ option.price !== null && option.price !== undefined ? (
+					<>
+						<strong>+{ money( option.price, currency ) }</strong>
+						{ rule && option.per !== 'stay' && (
+							<span className="bkng-p-muted">{ rule }</span>
+						) }
+					</>
+				) : (
+					rule && <strong>{ rule }</strong>
+				) }
+			</span>
+		</li>
+	);
+}
+
+/**
+ * The sheet of a room type, opened by «Seleziona»: all the photos (full screen on a
+ * click), the description and services, the rates with their terms, the paid options
+ * and the total of the stay with the options chosen, asked again to the server.
+ */
+function RoomSheet( { property, stay, item, quote, onChoose, busy, onClose } ) {
+	const { type } = item;
+	const box = useRef( null );
+	const closeRef = useRef( null );
+	const zoomOpen = useRef( false );
+	const titleId = 'bkng-p-t-' + useId();
+	const qtyId = 'bkng-p-q-' + useId();
+	const [ zoom, setZoom ] = useState( null );
+	const [ planId, setPlanId ] = useState(
+		String( item.rates[ 0 ]?.rate_plan_id )
+	);
+	const [ quantity, setQuantity ] = useState( 1 );
+	const [ chosen, setChosen ] = useState( [] );
+	const [ quoted, setQuoted ] = useState( null );
+	const [ quoting, setQuoting ] = useState( false );
+	const asked = useRef( 0 );
+	zoomOpen.current = zoom !== null;
+	useDialog( closeRef, onClose, zoomOpen );
+	useEffect( () => applyColor( box.current, property.color ), [ property ] );
+
+	// The options change the price and maybe the cancellation terms: ask the server.
+	useEffect( () => {
+		const ask = ++asked.current;
+		if ( ! chosen.length ) {
+			setQuoted( null );
+			setQuoting( false );
+			return;
+		}
+		setQuoting( true );
+		quote( chosen )
+			.then( ( res ) => {
+				if ( ask === asked.current ) {
+					const offer = res.offers.find(
+						( o ) => o.room_type_id === type.id
+					);
+					setQuoted( offer ? offer.rates : [] );
+				}
+			} )
+			.catch( () => ask === asked.current && setQuoted( null ) )
+			.finally( () => ask === asked.current && setQuoting( false ) );
+	}, [ chosen, quote, type.id ] );
+
+	const rates = item.rates.map(
+		( r ) => quoted?.find( ( q ) => q.rate_plan_id === r.rate_plan_id ) || r
+	);
+	const index = Math.max(
+		0,
+		item.rates.findIndex( ( r ) => String( r.rate_plan_id ) === planId )
+	);
+	const base = item.rates[ index ];
+	const rate = rates[ index ];
+	const options = rateOptions( property, type, base, stay.arrival );
+	const picked = chosen.filter( ( id ) =>
+		options.some( ( o ) => o.id === id )
+	);
+	const max = Math.max( 1, property.max_rooms || 1 );
+	const nights = nightsBetween( stay.arrival, stay.departure );
+	const total =
+		rate.total !== null && rate.total !== undefined
+			? rate.total * quantity
+			: null;
+
+	return createPortal(
+		<div
+			ref={ box }
+			className="bkng-public bkng-p-sheet"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby={ titleId }
+		>
+			<button
+				type="button"
+				className="bkng-p-sheet__backdrop"
+				tabIndex="-1"
+				aria-hidden="true"
+				onClick={ onClose }
+			/>
+			<div className="bkng-p-sheet__panel">
+				<header className="bkng-p-sheet__head">
+					<h3 id={ titleId }>{ type.name }</h3>
+					<button
+						ref={ closeRef }
+						type="button"
+						className="bkng-p-sheet__close"
+						onClick={ onClose }
+						aria-label={ __( 'Chiudi', 'booking-manager' ) }
+					>
+						<Icon name="close" size={ 22 } />
+					</button>
+				</header>
+				<div className="bkng-p-sheet__body">
+					<Gallery type={ type } onZoom={ setZoom } />
+					<section className="bkng-p-sheet__section">
+						<Facts type={ type } />
+						{ type.description && (
+							<p className="bkng-p-sheet__text">
+								{ type.description }
+							</p>
+						) }
+						<Amenities list={ type.amenities } />
+					</section>
+					<section className="bkng-p-sheet__section">
+						<h4>{ __( 'Tariffa', 'booking-manager' ) }</h4>
+						<ul className="bkng-p-sheet__choices">
+							{ rates.map( ( r ) => (
+								<RateRow
+									key={ String( r.rate_plan_id ) }
+									rate={ r }
+									name={ 'rate-' + titleId }
+									checked={
+										String( r.rate_plan_id ) === planId
+									}
+									onChange={ () =>
+										setPlanId( String( r.rate_plan_id ) )
+									}
+									property={ property }
+									quantity={ quantity }
+								/>
+							) ) }
+						</ul>
+					</section>
+					{ options.length > 0 && (
+						<section className="bkng-p-sheet__section">
+							<h4>
+								{ __(
+									'Servizi aggiuntivi',
+									'booking-manager'
+								) }
+							</h4>
+							<ul className="bkng-p-sheet__choices">
+								{ options.map( ( o ) => (
+									<OptionRow
+										key={ o.id }
+										option={ o }
+										currency={ property.currency }
+										checked={ chosen.includes( o.id ) }
+										onChange={ ( on ) =>
+											setChosen(
+												on
+													? [ ...chosen, o.id ]
+													: chosen.filter(
+															( id ) =>
+																id !== o.id
+													  )
+											)
+										}
+									/>
+								) ) }
+							</ul>
+						</section>
+					) }
+				</div>
+				<footer className="bkng-p-sheet__foot">
+					{ max > 1 && (
+						<div className="bkng-p-sheet__qty">
+							<label htmlFor={ qtyId }>
+								{ __( 'Camere', 'booking-manager' ) }
+							</label>
+							<select
+								id={ qtyId }
+								value={ quantity }
+								onChange={ ( e ) =>
+									setQuantity( Number( e.target.value ) )
+								}
+							>
+								{ Array.from(
+									{ length: max },
+									( _, i ) => i + 1
+								).map( ( n ) => (
+									<option key={ n } value={ n }>
+										{ n }
+									</option>
+								) ) }
+							</select>
+						</div>
+					) }
+					<div className="bkng-p-sheet__total" aria-live="polite">
+						{ total !== null && (
+							<strong>
+								{ quoting ? (
+									<Spinner />
+								) : (
+									money( total, property.currency )
+								) }
+							</strong>
+						) }
+						<span className="bkng-p-muted">
+							{ nightsLabel( nights ) } ·{ ' ' }
+							{ date( stay.arrival, SHORT ) } –{ ' ' }
+							{ date( stay.departure, SHORT ) }
+						</span>
+					</div>
+					<button
+						type="button"
+						className="bkng-p-button is-primary"
+						disabled={ busy || quoting }
+						onClick={ async () => {
+							const ok = await onChoose(
+								type,
+								rate,
+								quantity,
+								picked
+							);
+							if ( ! ok ) {
+								onClose();
+							}
+						} }
+					>
+						{ busy && <Spinner /> }
+						{ __( 'Prenota', 'booking-manager' ) }
+					</button>
+				</footer>
+			</div>
+			{ zoom !== null && (
+				<Lightbox
+					images={ type.images }
+					start={ zoom }
+					title={ type.name }
+					onClose={ () => setZoom( null ) }
+				/>
+			) }
+		</div>,
+		document.body
+	);
+}
+
+function RateRow( { rate, name, checked, onChange, property, quantity } ) {
+	const id = 'bkng-p-r-' + useId();
+	return (
+		<li className={ checked ? 'is-checked' : '' }>
+			<input
+				id={ id }
+				type="radio"
+				name={ name }
+				checked={ checked }
+				onChange={ onChange }
+			/>
+			<label htmlFor={ id }>
+				<strong>{ rate.name }</strong>
+				<span className="bkng-p-sheet__terms">
+					{ [
+						MEAL_PLANS[ rate.meal_plan ],
+						cancellationText( rate.cancellation ) ||
+							__( 'Cancellazione gratuita', 'booking-manager' ),
+						depositText( rate.deposit, property.currency ),
+					]
+						.filter( Boolean )
+						.map( ( t ) => (
+							<span key={ t }>
+								<Icon name="check" size={ 14 } />
+								{ t }
+							</span>
+						) ) }
+				</span>
+				{ rate.description && (
+					<span className="bkng-p-muted">{ rate.description }</span>
+				) }
+			</label>
+			{ rate.total !== null && rate.total !== undefined && (
+				<span className="bkng-p-sheet__price">
+					<strong>
+						{ money( rate.total * quantity, property.currency ) }
+					</strong>
+				</span>
+			) }
+		</li>
+	);
+}
+
+function RoomCard( { property, stay, item, quote, onChoose, busy } ) {
 	const [ open, setOpen ] = useState( false );
 	const { type } = item;
 	const nights = nightsBetween( stay.arrival, stay.departure );
-	const direct = item.rates.length === 1 && ( property.max_rooms || 1 ) <= 1;
-	const select = () => {
-		if ( direct ) {
-			onChoose( type, item.rates[ 0 ], 1 );
-		} else {
-			setOpen( ! open );
-		}
-	};
 	return (
 		<article
 			className={
-				'bkng-p-room' +
-				( item.available ? '' : ' is-unavailable' ) +
-				( open ? ' is-open' : '' )
+				'bkng-p-room' + ( item.available ? '' : ' is-unavailable' )
 			}
 		>
 			<div className="bkng-p-room__grid">
@@ -722,20 +1055,11 @@ function RoomCard( { property, stay, item, onChoose, busy } ) {
 							<button
 								type="button"
 								className="bkng-p-button is-primary"
-								aria-expanded={ direct ? undefined : open }
-								disabled={ busy }
-								onClick={ select }
+								aria-haspopup="dialog"
+								onClick={ () => setOpen( true ) }
 							>
-								{ busy && direct ? <Spinner /> : null }
-								{ open
-									? __( 'Chiudi', 'booking-manager' )
-									: __( 'Seleziona', 'booking-manager' ) }
-								<Icon
-									name={
-										open ? 'chevronDown' : 'chevronRight'
-									}
-									size={ 16 }
-								/>
+								{ __( 'Seleziona', 'booking-manager' ) }
+								<Icon name="chevronRight" size={ 16 } />
 							</button>
 						</>
 					) : (
@@ -749,11 +1073,14 @@ function RoomCard( { property, stay, item, onChoose, busy } ) {
 				</div>
 			</div>
 			{ open && item.available && (
-				<Rates
+				<RoomSheet
 					property={ property }
+					stay={ stay }
 					item={ item }
+					quote={ quote }
 					onChoose={ onChoose }
 					busy={ busy }
+					onClose={ () => setOpen( false ) }
 				/>
 			) }
 		</article>
@@ -1021,10 +1348,10 @@ export function Results( {
 	property,
 	stay,
 	results,
+	quote,
 	onChoose,
 	busy,
 	searching,
-	extras,
 	empty,
 } ) {
 	const [ filters, setFilters ] = useState( NO_FILTERS );
@@ -1214,7 +1541,6 @@ export function Results( {
 						</select>
 					</div>
 				</div>
-				{ extras }
 				{ shown.length === 0 ? (
 					<div className="bkng-p-card">
 						<p>
@@ -1238,6 +1564,7 @@ export function Results( {
 							property={ property }
 							stay={ stay }
 							item={ item }
+							quote={ quote }
 							onChoose={ onChoose }
 							busy={ busy }
 						/>

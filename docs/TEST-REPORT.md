@@ -1,6 +1,6 @@
-# Report dei test — Booking Manager 0.1.3 (Fase 2)
+# Report dei test — Booking Manager 0.1.4 (Fase 2)
 
-Data: 24 ottobre 2026 · ramo `fase-2/sviluppo`
+Data: 26 ottobre 2026 · ramo `fase-2/sviluppo`
 
 Legenda: **SUPERATO** = eseguito e riuscito · **NON ESEGUITO** = non provato, con il motivo. Nessuna prova non eseguita è indicata come superata.
 
@@ -18,7 +18,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 82 test, 894 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 83 test, 911 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|
@@ -33,7 +33,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Integrazione — check-in | 9 | QR firmato senza dati personali, check-in una volta sola anche da due telefoni, codici errati o di altre strutture, check-out e camera da pulire, camere non pulite, camere separate, annullamento del check-in, housekeeping, permessi |
 | Integrazione — messaggi | 7 | richiesta all'ospite e alla struttura, conferma con QR, messaggi non più veri non inviati, promemoria una volta, testi della struttura, server di posta in errore riprovato e segnalato, **WhatsApp predisposto che non finge invii** |
 | Integrazione — pagamenti (fornitore finto) | 5 | incassi alla reception, prenotazione online confermata solo dal fornitore, pagina che non si apre libera le camere, pagamento tardivo rimborsato, ritorno dell'ospite che legge lo stato dal fornitore |
-| Integrazione — API REST | 10 | 401 senza login, 403/404 per ruolo e struttura, housekeeping senza importi né contatti, reception senza conferme e cancellazioni, modulo pubblico e cancellazione dal link, modulo chiuso e modulo troppo vecchio, **ogni rotta di scrittura classificata dalla licenza**, blocco totale |
+| Integrazione — API REST | 11 | 401 senza login, 403/404 per ruolo e struttura, housekeeping senza importi né contatti, reception senza conferme e cancellazioni, modulo pubblico e cancellazione dal link, **cancellazione gratuita venduta come opzione (senza l'opzione una tariffa non rimborsabile non si annulla online, con l'opzione sì; prezzo dell'opzione e totale)**, modulo chiuso e modulo troppo vecchio, **ogni rotta di scrittura classificata dalla licenza**, blocco totale |
 | Integrazione — base | 2 | tutte le tabelle, ruoli creati |
 
 ## 2. Controlli di qualità
@@ -43,7 +43,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | `php -l` su tutti i file PHP del pacchetto | SUPERATO |
 | ESLint (`@wordpress/eslint-plugin`) su `assets/src` | SUPERATO (0 errori) |
 | Build `npm run build` | SUPERATO (admin ~316 KB, modulo pubblico ~48 KB con sole dipendenze `wp-element` e `wp-i18n`) |
-| Generazione `languages/booking-manager.pot` | SUPERATO (1.383 testi) |
+| Generazione `languages/booking-manager.pot` | SUPERATO (1.410 testi) |
 
 ## 3. Prove manuali su WordPress (browser)
 
@@ -58,13 +58,15 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Modulo pubblico con i font del tema e il colore scelto (verde predefinito, terracotta scelto in Struttura) | SUPERATO (Twenty Twenty-Four) |
 | Modulo pubblico con le regole globali di Astra per `button` e `input` (riprodotte in locale: il tema non si scarica da questo ambiente): pulsanti centrati e non deformati, nessun blu del tema | SUPERATO; prova con Astra vero NON ESEGUITA |
 | Nuova pagina di ricerca (1400 px e 390 px): banner, date dal 28 al 30, ospiti con +/−, 4 tipologie con foto, filtri per servizio e cancellazione gratuita, prezzo a notte e totale, foto ingrandite con frecce ed Esc, tariffe aperte da «Seleziona», «Prenota» porta ai dati dell'ospite | SUPERATO |
+| Scheda della camera (1400 px e 390 px, anche con le regole di Astra): le foto della lista non si aprono; «Seleziona» apre la scheda con galleria, foto a schermo intero (Esc chiude solo le foto), servizi, tariffe con colazione, cancellazione e caparra; servizi aggiuntivi per tariffa (colazione 12 € a persona a notte solo sulla non rimborsabile, cancellazione gratuita 10% fino a 7 giorni prima); totale ricalcolato dal server: 256,50 € + 25,65 € = 282,15 €, + colazione 72 € = 354,15 €; condizioni della tariffa che diventano «cancellazione gratuita fino a 7 giorni prima»; «Prenota» porta al riepilogo con i servizi scelti | SUPERATO |
+| Tariffe → Supplementi e sconti: campo dei giorni di cancellazione gratuita, salvataggio e lista | SUPERATO |
 | Pagina «gestisci prenotazione» dal link: stato, importi, cancellazione | SUPERATO; un token errato risponde «Prenotazione non trovata» (404) |
 | Licenza non valida: modulo pubblico «prenotazioni non disponibili», banner nel gestionale | SUPERATO |
 | Tentativo di attivazione con server licenze irraggiungibile | SUPERATO — messaggio «Il server delle licenze non risponde», il plugin resta bloccato (nessun successo finto) |
 
 ## 4. Pacchetto ZIP
 
-`bin/build-zip.sh` → `dist/booking-manager-0.1.3.zip` (464 KB, 159 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
+`bin/build-zip.sh` → `dist/booking-manager-0.1.4.zip` (488 KB, 160 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
 
 | Prova su WordPress 6.6 pulito (WP-CLI) | Esito |
 |---|---|

@@ -68,6 +68,8 @@ Richiede un utente collegato con le capability del ruolo (vedi [ARCHITETTURA.md]
 | GET, POST | `/properties/{property_id}/restrictions` |
 | POST, PUT, PATCH, DELETE | `/restrictions/{id}` |
 
+Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è facoltativo: chi lo sceglie può cancellare gratis fino a quel numero di giorni prima dell'arrivo.
+
 ### Disponibilità, planning, dashboard
 
 | Metodi | Rotta |
@@ -176,7 +178,7 @@ Nessun login. Indirizzo usato dal modulo: `index.php?rest_route=/booking-manager
 | GET | `/` | indice |
 | GET | `/properties` | strutture che accettano prenotazioni online |
 | GET | `/properties/{slug}` | regole, tipologie, servizi aggiuntivi, token del modulo, Turnstile |
-| GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`); ogni tariffa dice anche se oggi la cancellazione è gratuita (`free_cancel`) |
+| GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`); ogni tariffa dice anche se oggi la cancellazione è gratuita (`free_cancel`) e quanto costerebbe ogni servizio facoltativo per questo soggiorno (`options[]`: `id`, `amount` in centesimi); con `extras[]` il totale e le condizioni di cancellazione tengono conto dei servizi scelti |
 | POST | `/properties/{slug}/holds` | blocca le camere scelte per N minuti |
 | POST | `/holds/release` | libera il blocco |
 | POST | `/properties/{slug}/bookings` | crea la prenotazione (con `form_token`, campo trappola `website`, `captcha_token`, `hold_token`, `privacy`) |

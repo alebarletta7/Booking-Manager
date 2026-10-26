@@ -899,60 +899,6 @@
 		font-size: 0.9em;
 		margin: 0;
 	}
-
-	&__rates {
-		border-top: 1px solid var(--bkng-line);
-		padding: 8px 16px 12px;
-		background: var(--bkng-soft);
-
-		ul {
-			list-style: none;
-			margin: 0;
-			padding: 0;
-		}
-
-		li {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			gap: 16px;
-			padding: 12px 0;
-
-			& + li {
-				border-top: 1px solid var(--bkng-line);
-			}
-		}
-	}
-
-	&__qty {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 0;
-		font-size: 0.9em;
-
-		.bkng-public & select {
-			width: auto;
-		}
-	}
-
-	&__rate-info {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		min-width: 0;
-	}
-
-	&__rate-go {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		flex: 0 0 auto;
-
-		strong {
-			font-size: 1.15em;
-		}
-	}
 }
 
 // Medium cards: photos beside the text, price below the text.
@@ -1030,26 +976,12 @@
 		color: var(--bkng-muted);
 	}
 
-	.bkng-public & button {
-		@include bare-button;
+	&__main,
+	&__thumbs > div {
 		position: relative;
-		display: block;
-		width: 100%;
-		height: 100%;
+		min-height: 0;
 		background: var(--bkng-soft);
-		cursor: zoom-in;
 		overflow: hidden;
-		border-radius: 0;
-
-		&:hover,
-		&:focus {
-			background: var(--bkng-soft);
-		}
-
-		&:focus-visible {
-			outline: 2px solid var(--bkng-accent);
-			outline-offset: -2px;
-		}
 	}
 
 	img {
@@ -1065,34 +997,12 @@
 		grid-auto-rows: minmax(0, 1fr);
 		gap: 4px;
 		min-height: 0;
-
-		.bkng-public & button {
-			cursor: pointer;
-
-			&.is-active {
-				outline: 2px solid var(--bkng-accent);
-				outline-offset: -2px;
-			}
-		}
 	}
 
-	&__count,
 	&__more {
 		position: absolute;
 		color: #fff;
-		font-size: 0.8em;
 		font-weight: 600;
-	}
-
-	&__count {
-		left: 8px;
-		bottom: 8px;
-		padding: 2px 8px;
-		border-radius: 6px;
-		background: rgba(0, 0, 0, 0.55);
-	}
-
-	&__more {
 		inset: 0;
 		display: grid;
 		place-items: center;
@@ -1198,14 +1108,378 @@
 	}
 }
 
-.bkng-p-extras {
-	margin: 0;
-	background: var(--bkng-surface);
+// The sheet of a room: a panel over the page (full screen on phones).
+.bkng-public.bkng-p-sheet {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	display: grid;
+	place-items: center;
+	padding: 24px;
+	max-width: none;
+	container-type: normal;
+}
 
-	legend {
-		font-weight: 600;
-		padding: 0 6px;
+.bkng-p-sheet {
+	& &__backdrop {
+		@include bare-button;
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.6);
+		cursor: default;
+
+		&:hover,
+		&:focus {
+			background: rgba(0, 0, 0, 0.6);
+		}
 	}
+
+	&__panel {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		width: min(860px, 100%);
+		max-height: calc(100vh - 48px);
+		max-height: calc(100dvh - 48px);
+		background: var(--bkng-surface);
+		border-radius: calc(var(--bkng-radius) + 4px);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		overflow: hidden;
+		container-type: inline-size;
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 14px 16px 14px 20px;
+		border-bottom: 1px solid var(--bkng-line);
+
+		.bkng-public & h3 {
+			margin: 0;
+			font-size: 1.3em;
+		}
+	}
+
+	& &__close {
+		@include bare-button;
+		display: grid;
+		place-items: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		flex: 0 0 auto;
+
+		&:hover,
+		&:focus {
+			background: var(--bkng-soft);
+		}
+	}
+
+	&__body {
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		padding: 16px 20px 8px;
+		flex: 1 1 auto;
+	}
+
+	&__section {
+		padding: 16px 0;
+		border-top: 1px solid var(--bkng-line);
+
+		.bkng-public & h4 {
+			margin: 0 0 10px;
+			font-size: 1.05em;
+			line-height: 1.3;
+		}
+	}
+
+	.bkng-p-gallery + &__section {
+		border-top: 0;
+	}
+
+	&__text {
+		white-space: pre-line;
+		font-size: 0.95em;
+	}
+
+	&__choices {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 8px;
+
+		li {
+			display: flex;
+			align-items: flex-start;
+			gap: 12px;
+			padding: 12px 14px;
+			border: 1px solid var(--bkng-line);
+			border-radius: var(--bkng-radius);
+
+			&.is-checked {
+				border-color: var(--bkng-accent);
+				box-shadow: inset 0 0 0 1px var(--bkng-accent);
+			}
+		}
+
+		.bkng-public & input[type="radio"] {
+			width: 1.1em;
+			height: 1.1em;
+			margin: 0.2em 0 0;
+			flex: 0 0 auto;
+			accent-color: var(--bkng-accent);
+		}
+
+		label {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			flex: 1 1 0%;
+			min-width: 0;
+			cursor: pointer;
+		}
+
+		.bkng-p-muted {
+			font-size: 0.88em;
+		}
+	}
+
+	&__terms {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px 14px;
+		font-size: 0.88em;
+
+		> span {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.bkng-p-icon {
+			color: var(--bkng-accent);
+		}
+	}
+
+	&__note {
+		font-size: 0.88em;
+		color: var(--bkng-accent);
+		font-weight: 600;
+	}
+
+	&__price {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		text-align: right;
+		flex: 0 0 auto;
+		white-space: nowrap;
+
+		.bkng-p-muted {
+			font-size: 0.8em;
+		}
+	}
+
+	&__foot {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 12px 20px;
+		border-top: 1px solid var(--bkng-line);
+		background: var(--bkng-surface);
+
+		> .bkng-p-button {
+			flex: 0 0 auto;
+			min-width: 9em;
+		}
+	}
+
+	&__qty {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.9em;
+
+		.bkng-public & select {
+			width: auto;
+			min-height: 2.4em;
+			padding: 0.3em 0.6em;
+		}
+	}
+
+	&__total {
+		display: flex;
+		flex-direction: column;
+		margin-left: auto;
+		text-align: right;
+
+		strong {
+			font-size: 1.35em;
+			line-height: 1.2;
+		}
+
+		.bkng-p-muted {
+			font-size: 0.85em;
+		}
+	}
+}
+
+// Photos of the sheet: one large with arrows, all the others in a strip below.
+.bkng-p-gallery {
+	&__stage {
+		position: relative;
+		border-radius: var(--bkng-radius);
+		overflow: hidden;
+		background: var(--bkng-soft);
+		aspect-ratio: 16 / 9;
+		max-height: 420px;
+		width: 100%;
+	}
+
+	.bkng-public & &__main {
+		@include bare-button;
+		display: block;
+		width: 100%;
+		height: 100%;
+		cursor: zoom-in;
+
+		&:focus-visible {
+			outline-offset: -2px;
+		}
+	}
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		max-width: none;
+	}
+
+	&__count {
+		position: absolute;
+		left: 10px;
+		bottom: 10px;
+		padding: 2px 8px;
+		border-radius: 6px;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		font-size: 0.8em;
+		font-weight: 600;
+	}
+
+	.bkng-public & &__prev,
+	.bkng-public & &__next {
+		@include bare-button;
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		display: grid;
+		place-items: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.85);
+		color: #1e1e1e;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+
+		&:hover,
+		&:focus {
+			background: #fff;
+			color: #1e1e1e;
+		}
+	}
+
+	.bkng-public & &__prev {
+		left: 10px;
+	}
+
+	.bkng-public & &__next {
+		right: 10px;
+	}
+
+	&__thumbs {
+		display: flex;
+		gap: 6px;
+		margin-top: 8px;
+		overflow-x: auto;
+		padding-bottom: 2px;
+
+		.bkng-public & button {
+			@include bare-button;
+			flex: 0 0 72px;
+			width: 72px;
+			height: 52px;
+			border-radius: 6px;
+			overflow: hidden;
+			opacity: 0.7;
+
+			&:hover,
+			&:focus {
+				opacity: 1;
+			}
+
+			&.is-active {
+				opacity: 1;
+				outline: 2px solid var(--bkng-accent);
+				outline-offset: -2px;
+			}
+		}
+	}
+}
+
+// Phones: the sheet takes the whole screen, the button stays at the bottom.
+@media (max-width: 600px) {
+	.bkng-public.bkng-p-sheet {
+		padding: 0;
+	}
+
+	.bkng-p-sheet__panel {
+		width: 100%;
+		height: 100%;
+		max-height: none;
+		border-radius: 0;
+	}
+}
+
+@container (max-width: 480px) {
+	.bkng-p-sheet__body {
+		padding: 12px 14px 4px;
+	}
+
+	.bkng-p-sheet__choices li {
+		flex-wrap: wrap;
+	}
+
+	.bkng-p-sheet__choices .bkng-p-sheet__price {
+		flex-basis: 100%;
+		flex-direction: row;
+		gap: 6px;
+		align-items: baseline;
+		margin-left: calc(1.1em + 12px);
+	}
+
+	.bkng-p-sheet__foot {
+		flex-wrap: wrap;
+		padding: 10px 14px;
+
+		> .bkng-p-button {
+			width: 100%;
+		}
+	}
+}
+
+.bkng-p-summary__extras {
+	list-style: none;
+	margin: -0.5em 0 0.75em;
+	padding: 0;
+	font-size: 0.9em;
+	color: var(--bkng-muted);
 }
 
 // Narrow forms (a theme's text column, phones): filters behind a button.
@@ -1270,14 +1544,6 @@
 		margin-left: auto;
 	}
 
-	.bkng-p-room__rates li {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.bkng-p-room__rate-go {
-		justify-content: space-between;
-	}
 }
 
 // Details.
