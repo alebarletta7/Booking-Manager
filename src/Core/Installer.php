@@ -39,6 +39,9 @@ final class Installer {
 	/** Every 15 minutes: online payments left without an answer. */
 	public const PAYMENTS_HOOK = 'bkng_payments_reconcile';
 
+	/** Reads the portals' iCal calendars (Booking.com, Airbnb…). */
+	public const ICAL_HOOK = 'bkng_ical_sync';
+
 	public const MINUTE_SCHEDULE  = 'bkng_every_minute';
 	public const QUARTER_SCHEDULE = 'bkng_every_15_minutes';
 
@@ -115,6 +118,7 @@ final class Installer {
 			self::NOTIFICATIONS_HOOK => array( MINUTE_IN_SECONDS, self::MINUTE_SCHEDULE ),
 			self::REMINDERS_HOOK     => array( 10 * MINUTE_IN_SECONDS, 'hourly' ),
 			self::PAYMENTS_HOOK      => array( 15 * MINUTE_IN_SECONDS, self::QUARTER_SCHEDULE ),
+			self::ICAL_HOOK          => array( 2 * MINUTE_IN_SECONDS, self::QUARTER_SCHEDULE ),
 			LicenseScheduler::HOOK   => array( 15 * MINUTE_IN_SECONDS, 'hourly' ),
 		);
 		foreach ( $tasks as $hook => [ $delay, $recurrence ] ) {
@@ -149,7 +153,7 @@ final class Installer {
 	}
 
 	private static function deactivate_site(): void {
-		foreach ( array( self::DAILY_HOOK, self::HOURLY_HOOK, self::NOTIFICATIONS_HOOK, self::REMINDERS_HOOK, self::PAYMENTS_HOOK ) as $hook ) {
+		foreach ( array( self::DAILY_HOOK, self::HOURLY_HOOK, self::NOTIFICATIONS_HOOK, self::REMINDERS_HOOK, self::PAYMENTS_HOOK, self::ICAL_HOOK ) as $hook ) {
 			wp_clear_scheduled_hook( $hook );
 		}
 		LicenseScheduler::clear();

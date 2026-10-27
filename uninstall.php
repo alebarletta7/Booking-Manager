@@ -23,7 +23,7 @@ require_once __DIR__ . '/src/Autoloader.php';
 function bkng_uninstall_site() {
 	global $wpdb;
 
-	foreach ( array( 'bkng_daily', 'bkng_hourly', 'bkng_notifications', 'bkng_reminders', 'bkng_payments_reconcile', 'bkng_license_check', 'bkng_license_retry' ) as $hook ) {
+	foreach ( array( 'bkng_daily', 'bkng_hourly', 'bkng_notifications', 'bkng_reminders', 'bkng_payments_reconcile', 'bkng_ical_sync', 'bkng_license_check', 'bkng_license_retry' ) as $hook ) {
 		wp_clear_scheduled_hook( $hook );
 	}
 

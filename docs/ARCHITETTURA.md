@@ -86,9 +86,18 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 
 - ogni ora (`bkng_hourly`): scadenza delle opzioni in attesa di pagamento; stato delle approvazioni dei testi WhatsApp;
 - controllo dei pagamenti online rimasti aperti (`bkng_payments_reconcile`);
+- ogni 15 minuti (`bkng_ical_sync`): lettura dei calendari iCal di Booking.com, Airbnb e degli altri portali;
 - coda messaggi (`bkng_notifications`) e promemoria prima dell'arrivo (`bkng_reminders`);
 - ogni giorno (`bkng_daily`): chiusura automatica dei soggiorni finiti, pulizia degli holds scaduti, conservazione dei dati secondo **Impostazioni → Conservazione dei dati** (anonimizzazione degli ospiti senza soggiorni, pulizia di registro attività, messaggi, sincronizzazioni e check-in).
 - Licenza: controllo periodico con il server (`LicenseScheduler`).
+
+## Booking.com e Airbnb (iCal)
+
+`Channels\Ical\IcalService` collega ogni camera ai portali con i calendari iCal, l'unico collegamento che Booking.com e Airbnb offrono senza contratto da partner.
+
+- **Uscita**: `/?bkng_ical=ID.CHIAVE` (chiave HMAC con l'opzione `bkng_ical_key`) restituisce le notti in cui la camera non si può vendere, da 30 giorni fa a due anni avanti: i suoi soggiorni e blocchi, e le notti in cui la tipologia ha meno camere libere che camere vuote (soggiorni non ancora assegnati, holds), che chiudono le camere vuote dall'ultima in ordine. Solo date, mai dati dell'ospite.
+- **Entrata**: `bkng_ical_feeds` tiene i calendari dei portali per camera. Ogni lettura (`wp_safe_remote_get`, 15 s, massimo 2 MB) trasforma gli eventi futuri in blocchi `kind = 'channel'` di `bkng_unit_blocks` (`feed_id`, `external_uid`), dentro una transazione con le tipologie bloccate: il Ledger li conta come camere chiuse, quindi modulo pubblico e gestionale non vendono quelle notti. Un evento tolto dal portale libera le sue notti; un calendario che non si legge lascia i blocchi come sono. Le notti già occupate qui vengono saltate (sono quasi sempre le nostre date che tornano indietro dal portale); un «Reserved» di Airbnb su notti occupate finisce in `bkng_sync_log` come possibile doppia prenotazione, una sola volta.
+- Il planning mostra questi blocchi in blu con il nome del portale e non li fa rimuovere (tornerebbero alla lettura successiva); la dashboard li conta come camere occupate.
 
 ## WhatsApp
 

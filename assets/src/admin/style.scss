@@ -893,6 +893,11 @@ html.wp-toolbar:has(body.bkng-operational) {
 		cursor: pointer;
 	}
 
+	&.is-portal {
+		background: repeating-linear-gradient(135deg, #2f6690, #2f6690 6px, #3a7ca5 6px, #3a7ca5 12px);
+		cursor: default;
+	}
+
 	&.is-dragging {
 		opacity: 0.5;
 	}
@@ -1710,5 +1715,73 @@ html.wp-toolbar:has(body.bkng-operational) {
 		a {
 			color: $primary;
 		}
+	}
+}
+
+/* Booking.com e Airbnb (iCal) */
+.bkng-portals__steps {
+	margin: 0 0 12px 20px;
+
+	li {
+		margin-bottom: 6px;
+	}
+}
+
+.bkng-portals__export {
+	margin-bottom: 12px;
+}
+
+.bkng-portals__label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.bkng-portals__copy {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+
+	input {
+		flex: 1;
+		min-width: 0;
+		font-family: monospace;
+		font-size: 12px;
+	}
+}
+
+.bkng-portals__feeds,
+.bkng-portals__log {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.bkng-portals__feed {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	justify-content: space-between;
+	align-items: flex-start;
+	padding: 10px 0;
+	border-top: 1px solid #e2e4e7;
+}
+
+.bkng-portals__feed-main {
+	flex: 1 1 260px;
+	min-width: 0;
+}
+
+.bkng-portals__feed-actions {
+	display: flex;
+	gap: 6px;
+}
+
+.bkng-portals__log li {
+	padding: 6px 0;
+	border-top: 1px solid #e2e4e7;
+
+	&.is-warn {
+		color: $warn;
 	}
 }

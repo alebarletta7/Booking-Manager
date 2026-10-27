@@ -52,6 +52,12 @@ const BLOCK_KINDS = {
 	owner_use: __( 'Uso del proprietario', 'booking-manager' ),
 };
 
+// Blocks written by the portals' calendars (Booking.com, Airbnb…): shown, never chosen here.
+const KIND_LABELS = {
+	...BLOCK_KINDS,
+	channel: __( 'Portale', 'booking-manager' ),
+};
+
 function MoveModal( { move, onClose, onDone } ) {
 	const action = useAction();
 	const sameDates = move.arrival === move.stay.arrival;
@@ -351,14 +357,29 @@ export default function Planning( { query } ) {
 						const b = bar(
 							bl.date_from,
 							bl.date_to,
-							BLOCK_KINDS[ bl.kind ] || bl.kind,
+							'channel' === bl.kind && bl.reason
+								? bl.reason
+								: KIND_LABELS[ bl.kind ] || bl.kind,
 							{
-								className: 'bkng-bar is-block',
+								className:
+									'bkng-bar is-block' +
+									( 'channel' === bl.kind
+										? ' is-portal'
+										: '' ),
 								title:
-									( BLOCK_KINDS[ bl.kind ] || '' ) +
-									( bl.reason ? ' · ' + bl.reason : '' ),
+									( KIND_LABELS[ bl.kind ] || '' ) +
+									( bl.reason ? ' · ' + bl.reason : '' ) +
+									( 'channel' === bl.kind
+										? ' · ' +
+										  __(
+												'chiusa dal calendario del portale: si libera quando il portale la toglie',
+												'booking-manager'
+										  )
+										: '' ),
+								// A portal's closure comes back at the next reading: it is removed on the portal.
 								onClick: () =>
 									canBlock &&
+									'channel' !== bl.kind &&
 									setModal( { kind: 'unblock', block: bl } ),
 							}
 						);

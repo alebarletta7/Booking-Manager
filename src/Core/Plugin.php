@@ -98,6 +98,9 @@ use BookingManager\Rest\ChannelsController;
 use BookingManager\Channels\ChannelRefRepository;
 use BookingManager\Channels\ChannelService;
 use BookingManager\Channels\SyncLogRepository;
+use BookingManager\Channels\Ical\IcalFeedRepository;
+use BookingManager\Channels\Ical\IcalService;
+use BookingManager\Rest\IcalController;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
@@ -338,6 +341,9 @@ final class Plugin {
 		$c->set( SyncLogRepository::class, fn() => new SyncLogRepository() );
 		$c->set( ChannelService::class, fn( Container $c ) => new ChannelService( $c->get( ChannelRefRepository::class ), $c->get( SyncLogRepository::class ), $c->get( BookingService::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ) ) );
 
+		$c->set( IcalFeedRepository::class, fn() => new IcalFeedRepository() );
+		$c->set( IcalService::class, fn( Container $c ) => new IcalService( $c->get( IcalFeedRepository::class ), $c->get( UnitRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( PropertyRepository::class ), $c->get( Ledger::class ), $c->get( SyncLogRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
+
 		// REST controllers.
 		$p = fn( Container $c ) => $c->get( Policy::class );
 		$c->set( MeController::class, fn( Container $c ) => new MeController( $p( $c ), $c->get( PropertyScope::class ), $c->get( PropertyRepository::class ), $c->get( Clock::class ) ) );
@@ -358,6 +364,7 @@ final class Plugin {
 		$c->set( HousekeepingController::class, fn( Container $c ) => new HousekeepingController( $p( $c ), $c->get( HousekeepingService::class ), $c->get( UnitRepository::class ) ) );
 		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ) ) );
 		$c->set( WhatsAppController::class, fn( Container $c ) => new WhatsAppController( $p( $c ), $c->get( WhatsAppService::class ) ) );
+		$c->set( IcalController::class, fn( Container $c ) => new IcalController( $p( $c ), $c->get( IcalService::class ), $c->get( IcalFeedRepository::class ) ) );
 		$c->set( ChannelsController::class, fn( Container $c ) => new ChannelsController( $p( $c ), $c->get( ChannelService::class ), $c->get( RoomTypeRepository::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
@@ -420,6 +427,7 @@ final class Plugin {
 			HousekeepingController::class,
 			NotificationsController::class,
 			WhatsAppController::class,
+			IcalController::class,
 			ChannelsController::class,
 			PublicController::class,
 		);
@@ -444,6 +452,8 @@ final class Plugin {
 		$c->get( NotificationService::class )->hooks();
 		$c->get( WhatsAppService::class )->hooks();
 		$c->get( ChannelService::class )->hooks();
+		$c->get( IcalService::class )->hooks();
+		add_action( Installer::ICAL_HOOK, fn() => $c->get( IcalService::class )->sync_all() );
 		add_action( Installer::NOTIFICATIONS_HOOK, fn() => $c->get( NotificationService::class )->run() );
 		add_action( Installer::REMINDERS_HOOK, fn() => $c->get( NotificationService::class )->queue_reminders() );
 

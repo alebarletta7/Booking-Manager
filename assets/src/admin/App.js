@@ -22,6 +22,7 @@ import {
 	shield as shieldIcon,
 	store as storeIcon,
 	commentContent as whatsappIcon,
+	globe as portalsIcon,
 	Icon,
 } from '@wordpress/icons';
 
@@ -50,6 +51,7 @@ import Settings from './screens/Settings';
 import Setup from './screens/Setup';
 import Staff from './screens/Staff';
 import WhatsApp from './screens/WhatsApp';
+import Portals from './screens/Portals';
 
 // Grouped like the menus of the other plugins of the family.
 const NAV = [
@@ -122,6 +124,12 @@ const NAV = [
 				cap: 'bkng_manage_settings',
 				icon: whatsappIcon,
 			},
+			{
+				path: '/portals',
+				label: __( 'Booking e Airbnb', 'booking-manager' ),
+				cap: 'bkng_manage_integrations',
+				icon: portalsIcon,
+			},
 		],
 	},
 	{
@@ -170,6 +178,7 @@ const ROUTES = [
 	[ '/property', PropertySettings ],
 	[ '/messages', Messages ],
 	[ '/whatsapp', WhatsApp ],
+	[ '/portals', Portals ],
 	[ '/staff', Staff ],
 	[ '/audit', Audit ],
 	[ '/settings', Settings ],

@@ -169,6 +169,18 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | GET | `/properties/{property_id}/channels` |
 | PUT | `/properties/{property_id}/channels/{channel}/mappings` |
 
+### Booking.com e Airbnb: calendari iCal (`bkng_manage_integrations`)
+
+| Metodi | Rotta |
+|---|---|
+| GET | `/properties/{property_id}/ical` (camere con il link per i portali, calendari collegati, registro) |
+| POST | `/properties/{property_id}/ical/feeds` (`unit_id`, `channel` booking/airbnb/vrbo/expedia/other, `url`): collega e legge subito |
+| POST | `/properties/{property_id}/ical/sync` (legge tutti i calendari della struttura) |
+| POST | `/ical/feeds/{id}/sync` |
+| DELETE | `/ical/feeds/{id}` (libera le notti chiuse da quel calendario) |
+
+Il calendario di una camera per i portali è `/?bkng_ical=ID.CHIAVE` (`text/calendar`, solo date «Non disponibile», nessun dato dell'ospite; chiave sbagliata → 404).
+
 ### Staff, ruoli, registro, Cloudflare
 
 | Metodi | Rotta |
