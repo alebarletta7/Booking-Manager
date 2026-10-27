@@ -84,11 +84,15 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 
 ## Attività pianificate
 
-- ogni ora (`bkng_hourly`): scadenza delle opzioni in attesa di pagamento;
+- ogni ora (`bkng_hourly`): scadenza delle opzioni in attesa di pagamento; stato delle approvazioni dei testi WhatsApp;
 - controllo dei pagamenti online rimasti aperti (`bkng_payments_reconcile`);
 - coda messaggi (`bkng_notifications`) e promemoria prima dell'arrivo (`bkng_reminders`);
 - ogni giorno (`bkng_daily`): chiusura automatica dei soggiorni finiti, pulizia degli holds scaduti, conservazione dei dati secondo **Impostazioni → Conservazione dei dati** (anonimizzazione degli ospiti senza soggiorni, pulizia di registro attività, messaggi, sincronizzazioni e check-in).
 - Licenza: controllo periodico con il server (`LicenseScheduler`).
+
+## WhatsApp
+
+`Notifications\Channels\WhatsAppChannel` è un canale della coda come l'email: prende il testo approvato da `WhatsApp\WhatsAppSettings` (opzione `bkng_whatsapp`, una per il sito), lo riempie con `WhatsApp\WhatsAppVariables` e lo invia con il servizio scelto (`WhatsApp\MetaCloudProvider`). `WhatsApp\WhatsAppService` gestisce la schermata (collegamento, testi e approvazioni, prova, registro, webhook di Meta). Le colonne `delivery_status` e `delivery_at` di `bkng_notifications` tengono «consegnato» e «letto».
 
 ## Email
 

@@ -159,6 +159,20 @@ class GuestService {
 			$data['notes'] = sanitize_textarea_field( (string) $input['notes'] );
 		}
 		$this->repo->update( $id, $data );
+		$opt_out = array_key_exists( 'whatsapp_opt_out', $input ) ? (bool) rest_sanitize_boolean( $input['whatsapp_opt_out'] ) : null;
+		if ( null !== $opt_out && $opt_out === ( false !== $this->repo->latest_consent( $id, 'whatsapp' ) ) ) {
+			// «Non vuole ricevere messaggi WhatsApp» changed by the staff.
+			$this->repo->add_consent(
+				array(
+					'guest_id'   => $id,
+					'purpose'    => 'whatsapp',
+					'granted'    => ! $opt_out,
+					'source'     => 'staff',
+					'created_by' => get_current_user_id() ?: null,
+				)
+			);
+			$data['whatsapp'] = ! $opt_out;
+		}
 		$this->audit->log(
 			array(
 				'action'      => 'guest.updated',

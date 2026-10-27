@@ -61,7 +61,7 @@ class BookingService {
 	/**
 	 * Creates a booking.
 	 *
-	 * @param array<string, mixed> $input property_id, rooms[], guest{}, guests[], status, extras[], customer_notes, internal_notes, arrival_time, idempotency_key, hold_token, override_restrictions, external_source, external_ref, privacy_accepted, marketing_consent, notify_guest (false: no e-mail to the guest)
+	 * @param array<string, mixed> $input property_id, rooms[], guest{}, guests[], status, extras[], customer_notes, internal_notes, arrival_time, idempotency_key, hold_token, override_restrictions, external_source, external_ref, privacy_accepted, marketing_consent, whatsapp_opt_out, notify_guest (false: no e-mail to the guest)
 	 * @param array{channel?: string, user_id?: int, can_override?: bool, can_price?: bool, awaiting_payment_minutes?: int} $ctx channel: staff | online | import; awaiting_payment_minutes: online booking kept as an option until paid
 	 * @return array<string, mixed>|\WP_Error the booking payload
 	 */
@@ -232,6 +232,19 @@ class BookingService {
 							'property_id' => (int) $property['id'],
 							'purpose'     => 'marketing',
 							'granted'     => ! empty( $input['marketing_consent'] ),
+							'source'      => $online ? 'online' : 'staff',
+							'booking_id'  => $id,
+						)
+					);
+				}
+				// «Non voglio ricevere messaggi WhatsApp»: the guest's choice, kept like a consent.
+				if ( array_key_exists( 'whatsapp_opt_out', $input ) ) {
+					$this->guest_repo->add_consent(
+						array(
+							'guest_id'    => $guest_id,
+							'property_id' => (int) $property['id'],
+							'purpose'     => 'whatsapp',
+							'granted'     => empty( $input['whatsapp_opt_out'] ),
 							'source'      => $online ? 'online' : 'staff',
 							'booking_id'  => $id,
 						)

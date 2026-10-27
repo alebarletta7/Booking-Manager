@@ -146,6 +146,22 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | PUT, DELETE | `/properties/{property_id}/templates/{key}` |
 | POST | `/properties/{property_id}/templates/{key}/preview` (`subject`, `body`, e `design` con le impostazioni `email_*` non ancora salvate) |
 
+### WhatsApp (`bkng_manage_settings`)
+
+| Metodi | Rotta |
+|---|---|
+| GET | `/whatsapp` (impostazioni senza segreti, messaggi con approvazione, variabili) |
+| PUT | `/whatsapp/settings` (`active`, `country_code`) |
+| PUT, DELETE | `/whatsapp/connection` (`provider` e i suoi campi; i segreti lasciati vuoti restano quelli salvati) |
+| PUT | `/whatsapp/templates/{key}` (`body`, `button`, `is_active`, `reset`) |
+| POST | `/whatsapp/templates/{key}/preview` (`body`, `button`: testo con la prenotazione di esempio) |
+| POST | `/whatsapp/templates/{key}/test` (`to`: la versione approvata con la prenotazione di esempio) |
+| POST | `/whatsapp/templates/refresh` |
+| GET | `/whatsapp/messages` (`status`, `page`, `per_page`) |
+| POST | `/whatsapp/messages/{id}/resend` |
+
+`GET/POST /booking-manager/public/v1/whatsapp/webhook` è chiamata da Meta: verifica con il token, aggiornamenti firmati con la chiave segreta dell'app.
+
 ### Canali
 
 | Metodi | Rotta |
@@ -181,7 +197,7 @@ Nessun login. Indirizzo usato dal modulo: `index.php?rest_route=/booking-manager
 | GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`); ogni tariffa dice anche se oggi la cancellazione è gratuita (`free_cancel`) e quanto costerebbe ogni servizio facoltativo per questo soggiorno (`options[]`: `id`, `amount` in centesimi); con `extras[]` il totale e le condizioni di cancellazione tengono conto dei servizi scelti |
 | POST | `/properties/{slug}/holds` | blocca le camere scelte per N minuti |
 | POST | `/holds/release` | libera il blocco |
-| POST | `/properties/{slug}/bookings` | crea la prenotazione (con `form_token`, campo trappola `website`, `captcha_token`, `hold_token`, `privacy`) |
+| POST | `/properties/{slug}/bookings` | crea la prenotazione (con `form_token`, campo trappola `website`, `captcha_token`, `hold_token`, `privacy`; con WhatsApp acceso il telefono è obbligatorio e `whatsapp_opt_out` registra la rinuncia) |
 | GET | `/manage/{code}` | la prenotazione dell'ospite (`?token=` dal link dell'email) |
 | POST | `/manage/{code}/pay` | pagina di pagamento per quanto dovuto |
 | POST | `/manage/{code}/cancel` | cancellazione da parte dell'ospite, se la tariffa lo consente |

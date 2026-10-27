@@ -1,4 +1,4 @@
-# Report dei test — Booking Manager 0.1.8 (Fase 2)
+# Report dei test — Booking Manager 0.1.9 (Fase 2)
 
 Data: 27 ottobre 2026 · ramo `fase-2/sviluppo`
 
@@ -14,11 +14,11 @@ Legenda: **SUPERATO** = eseguito e riuscito · **NON ESEGUITO** = non provato, c
 | Browser per le prove visive | Chromium (Playwright) |
 | Tema delle prove del modulo pubblico | Twenty Twenty-Four |
 
-Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.nexigroup.com`, `licenze.alessandrobarletta.it`, `api.cloudflare.com` e `challenges.cloudflare.com`. Le prove che li richiedono sono **NON ESEGUITE**.
+Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.nexigroup.com`, `licenze.alessandrobarletta.it`, `api.cloudflare.com`, `challenges.cloudflare.com` e `graph.facebook.com` (WhatsApp). Le prove che li richiedono sono **NON ESEGUITE**.
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 87 test, 1.031 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 95 test, 1.155 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|
@@ -32,7 +32,8 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Integrazione — **concorrenza reale** | 1 | 8 processi PHP separati, ognuno con la sua connessione, prenotano l'ultima camera nello stesso istante: **ne riesce uno solo**, gli altri ricevono «non disponibile» (ripetuto 4 volte di fila, sempre superato) |
 | Integrazione — canali | 4 | importazione una sola volta e senza email, ciò che non entra viene registrato e riprovato, i connettori ricevono i cambi di disponibilità, anonimizzazione |
 | Integrazione — check-in | 9 | QR firmato senza dati personali, check-in una volta sola anche da due telefoni, codici errati o di altre strutture, check-out e camera da pulire, camere non pulite, camere separate, annullamento del check-in, housekeeping, permessi |
-| Integrazione — messaggi | 8 | richiesta all'ospite e alla struttura, conferma con QR (tutte le immagini dentro l'email, nessuna remota), **aspetto della struttura (sottotitolo, frasi, colori; anteprima con le scelte non salvate)**, messaggi non più veri non inviati, promemoria una volta, testi della struttura, server di posta in errore riprovato e segnalato, **WhatsApp predisposto che non finge invii** |
+| Integrazione — messaggi | 7 | richiesta all'ospite e alla struttura, conferma con QR (tutte le immagini dentro l'email, nessuna remota), aspetto della struttura (sottotitolo, frasi, colori; anteprima con le scelte non salvate), messaggi non più veri non inviati, promemoria una volta, testi della struttura, server di posta in errore riprovato e segnalato |
+| Integrazione — **WhatsApp** (servizio di prova, nessun messaggio parte) | 9 | nulla in coda finché WhatsApp non è collegato e acceso (e non si accende senza collegamento); testo approvato inviato all'ospite con numero normalizzato (`+39`), ID e stato «inviato»; testo riempito con nome, struttura e codice, nessun parametro vuoto; pulsante con codice e chiave della prenotazione giusti; messaggio spento non accodato; rinuncia dal modulo o dallo staff rispettata anche per un messaggio già in coda; modulo pubblico che chiede il cellulare; testo nuovo in approvazione con il vecchio ancora in uso, rifiutato, in pausa; controlli dei testi come Meta; webhook con firma sbagliata rifiutato, «letto» che non torna «consegnato»; registro e «Invia di nuovo»; segreti mai restituiti e cifrati nel database; schermata solo per amministratori |
 | Integrazione — pagamenti (fornitore finto) | 6 | incassi alla reception, prenotazione online confermata solo dal fornitore, **richiesta accettata → opzione + email «completa il pagamento» (senza calendario) → pagamento → conferma con il file .ics; accettare senza pagamento resta possibile**, pagina che non si apre libera le camere, pagamento tardivo rimborsato, ritorno dell'ospite che legge lo stato dal fornitore |
 | Integrazione — API REST | 12 | 401 senza login, 403/404 per ruolo e struttura, housekeeping senza importi né contatti, reception senza conferme e cancellazioni, modulo pubblico e cancellazione dal link, **primo giorno libero proposto dal modulo**, **cancellazione gratuita venduta come opzione (senza l'opzione una tariffa non rimborsabile non si annulla online, con l'opzione sì; prezzo dell'opzione e totale)**, modulo chiuso e modulo troppo vecchio, **ogni rotta di scrittura classificata dalla licenza**, blocco totale |
 | Integrazione — base | 2 | tutte le tabelle, ruoli creati |
@@ -43,8 +44,8 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 |---|---|
 | `php -l` su tutti i file PHP del pacchetto | SUPERATO |
 | ESLint (`@wordpress/eslint-plugin`) su `assets/src` | SUPERATO (0 errori) |
-| Build `npm run build` | SUPERATO (admin ~338 KB, modulo pubblico ~56 KB con sole dipendenze `wp-element` e `wp-i18n`) |
-| Generazione `languages/booking-manager.pot` | SUPERATO (1.448 testi) |
+| Build `npm run build` | SUPERATO (admin ~361 KB, modulo pubblico ~57 KB con sole dipendenze `wp-element` e `wp-i18n`) |
+| Generazione `languages/booking-manager.pot` | SUPERATO (1.610 testi) |
 
 ## 3. Prove manuali su WordPress (browser)
 
@@ -72,16 +73,20 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Pagamento di una richiesta accettata con Stripe/Nexi sandbox | NON ESEGUITO (fornitori non raggiungibili da questo ambiente; provato con il fornitore finto nei test automatici) |
 | Email su telefono (390 px): senza margini esterni, riepilogo su due colonne, foto sfumata in alto; su computer foto sfumata a sinistra | SUPERATO (resa in Gmail e Outlook reali NON ESEGUITA) |
 | Pagina «gestisci prenotazione» dal link: stato, importi, cancellazione | SUPERATO; un token errato risponde «Prenotazione non trovata» (404) |
+| **WhatsApp** (1280 px e 400 px) con il servizio «Prova»: Collegamento → «Salva e verifica», interruttore acceso, 8 messaggi «Approvato», «Modifica» con variabili, anteprima a fumetto con il pulsante «Completa il pagamento», campi di Meta (ID numero, ID account, token, chiave segreta) | SUPERATO |
+| WhatsApp: prenotazione con cellulare «347 555 1234» → riga nel Registro «Prenotazione confermata · Inviato · +393475551234 · Giulia Bianchi · codice», «Invia di nuovo» | SUPERATO (con il servizio di prova: nessun messaggio è arrivato a un telefono) |
+| Pulsante WhatsApp: `/?bkng_wa=CODICE.CHIAVE` porta alla pagina della prenotazione; una chiave sbagliata porta alla pagina che dice «Prenotazione non trovata» | SUPERATO |
+| Modulo pubblico con WhatsApp acceso: campo «Cellulare» obbligatorio e casella «Non voglio ricevere messaggi WhatsApp sulla prenotazione» | SUPERATO |
 | Licenza non valida: modulo pubblico «prenotazioni non disponibili», banner nel gestionale | SUPERATO |
 | Tentativo di attivazione con server licenze irraggiungibile | SUPERATO — messaggio «Il server delle licenze non risponde», il plugin resta bloccato (nessun successo finto) |
 
 ## 4. Pacchetto ZIP
 
-`bin/build-zip.sh` → `dist/booking-manager-0.1.8.zip` (527 KB, 175 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
+`bin/build-zip.sh` → `dist/booking-manager-0.1.9.zip` (568 KB, 183 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
 
 | Prova su WordPress 6.6 pulito (WP-CLI) | Esito |
 |---|---|
-| Installazione e attivazione dallo ZIP | SUPERATO: 28 tabelle, 5 ruoli |
+| Installazione e attivazione dallo ZIP | SUPERATO: 28 tabelle, 5 ruoli (0.1.9: colonne `delivery_status` e `delivery_at` presenti) |
 | Disinstallazione con impostazione predefinita | SUPERATO: tabelle, opzioni e ruoli **conservati** |
 | Disinstallazione con «Cancella tutti i dati» attivo | SUPERATO: 0 tabelle, 0 opzioni, 0 ruoli |
 
@@ -95,6 +100,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Collegamento a una zona Cloudflare reale e applicazione delle regole | `api.cloudflare.com` non raggiungibile, nessuna zona di prova | Token con i permessi di [CLOUDFLARE.md](CLOUDFLARE.md), **Verifica** e **Applica le regole** |
 | Cloudflare Turnstile con chiavi vere | `challenges.cloudflare.com` non raggiungibile | Inserire le chiavi in **Impostazioni → Generali** e inviare una prenotazione |
 | Consegna reale delle email (SMTP) | nessun server di posta; la coda, i tentativi e gli errori sono coperti dai test | Sito con SMTP configurato, prenotazione di prova |
+| **WhatsApp con Meta reale** (collegamento con il numero di prova di Meta, approvazione dei testi, invio a un cellulare vero, pulsante, «consegnato» e «letto» dal webhook) | `graph.facebook.com` non raggiungibile da questo ambiente; tutto è provato con il servizio «Prova», che non invia nulla | Sito online, **WhatsApp → Collegamento** con ID numero, ID account Business e token permanente; cellulare tra i destinatari autorizzati del numero di prova; **Invia prova**; per il webhook incollare URL e token in Meta → WhatsApp → Configurazione |
 | Fotocamera reale per il QR in reception | nessuna fotocamera nel browser automatico; la lettura per codice è provata | Da tablet o telefono, **Reception → Attiva la fotocamera** |
 | WordPress multisito, PHP 8.1 reale, temi classici | non disponibili in questo ambiente | Installazione di prova dedicata |
 | Prova con utenti reali dei ruoli Reception e Housekeeping nel browser | i permessi sono provati dai test dell'API, non a schermo | Creare due utenti da **Staff** e accedere |

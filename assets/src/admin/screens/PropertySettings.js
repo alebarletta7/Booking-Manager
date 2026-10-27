@@ -621,18 +621,17 @@ function MessagesTab( { data, onSaved } ) {
 							checked={ !! s.send_checkin_confirmation }
 							onChange={ set( 'send_checkin_confirmation' ) }
 						/>
-						<Toggle
-							label={ __(
-								'Messaggi WhatsApp (richiede un servizio collegato)',
+						<p className="bkng-help">
+							{ __(
+								'Gli stessi messaggi possono partire anche su WhatsApp: si collegano e si attivano in WhatsApp, nel menu a sinistra.',
 								'booking-manager'
+							) }{ ' ' }
+							{ can( 'bkng_manage_settings' ) && (
+								<a href="#/whatsapp">
+									{ __( 'Apri WhatsApp', 'booking-manager' ) }
+								</a>
 							) }
-							help={ __(
-								'Predisposto: senza un servizio WhatsApp collegato da un componente aggiuntivo i messaggi non partono e il registro lo indica.',
-								'booking-manager'
-							) }
-							checked={ !! s.whatsapp_enabled }
-							onChange={ set( 'whatsapp_enabled' ) }
-						/>
+						</p>
 					</div>
 				</Card>
 			) }

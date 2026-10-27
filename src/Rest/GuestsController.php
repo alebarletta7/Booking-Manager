@@ -113,6 +113,8 @@ class GuestsController extends RestController {
 				'bookings'   => $history,
 				'duplicates' => $duplicates,
 				'consents'   => $this->repo->consents( $id ),
+				// WhatsApp messages unless the guest said no.
+				'whatsapp'   => false !== $this->repo->latest_consent( $id, 'whatsapp' ),
 			)
 		);
 	}

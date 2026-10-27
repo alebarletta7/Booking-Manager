@@ -10,7 +10,7 @@
  *   is skipped.
  * - Passing errors are retried after 1, 5, 15 and 60 minutes (5 attempts), then the row
  *   is "failed" with the error, visible in the log, and can be sent again by hand.
- * - A channel that cannot send (WhatsApp without provider) records "skipped" with the
+ * - A channel that cannot send (WhatsApp not connected) records "skipped" with the
  *   reason: never "sent".
  * - The log keeps the recipient and the outcome, never the text of the message.
  *
@@ -233,7 +233,8 @@ class NotificationService {
 			if ( 'email' === $channel->key() && empty( $property['settings']['email_enabled'] ) ) {
 				continue;
 			}
-			if ( 'whatsapp' === $channel->key() && empty( $property['settings']['whatsapp_enabled'] ) ) {
+			// WhatsApp: the site's number (WhatsApp → Collegamento), switched on, this message active.
+			if ( 'whatsapp' === $channel->key() && ! $this->whatsapp->sends( $key ) ) {
 				continue;
 			}
 			$recipient = $channel->recipient( $booking );
@@ -536,6 +537,8 @@ class NotificationService {
 			'last_error'     => $row['last_error'],
 			'next_attempt'   => NotificationRepository::QUEUED === $row['status'] ? Clock::iso( (string) $row['next_attempt_at'] ) : null,
 			'sent_at'        => Clock::iso( $row['sent_at'] ),
+			'delivery'       => $row['delivery_status'] ?? null,
+			'delivery_at'    => Clock::iso( $row['delivery_at'] ?? null ),
 			'created_at'     => Clock::iso( (string) $row['created_at'] ),
 		);
 	}
@@ -556,7 +559,11 @@ class NotificationService {
 	 * @param array<string, mixed> $property
 	 */
 	private function compose( array $row, array $booking, array $property ): Message {
-		$key     = (string) $row['template_key'];
+		$key = (string) $row['template_key'];
+		if ( 'whatsapp' === $row['channel'] ) {
+			// WhatsApp fills its approved text itself, from the booking.
+			return new Message( $key, (string) $row['audience'], (string) $row['recipient'], $property, $booking, '', '', '' );
+		}
 		$with_qr = 'guest' === $row['audience']
 			&& 'email' === $row['channel']
 			&& in_array( $key, self::WITH_QR, true )
@@ -593,6 +600,8 @@ class NotificationService {
 					'status'              => NotificationRepository::SENT,
 					'provider'            => (string) $row['channel'],
 					'provider_message_id' => '' === $result->id ? null : mb_substr( $result->id, 0, 190 ),
+					'delivery_status'     => 'whatsapp' === $row['channel'] ? 'sent' : null,
+					'delivery_at'         => 'whatsapp' === $row['channel'] ? $now : null,
 					'last_error'          => null,
 					'sent_at'             => $now,
 					'updated_at'          => $now,

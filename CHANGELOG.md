@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.9] — 27 ottobre 2026
+
+### Novità
+
+- WhatsApp, come in Night Manager. Nuova voce «WhatsApp» nel menu (solo amministratori), con l'interruttore «I messaggi WhatsApp partono da soli» e tre schede.
+- Collegamento: WhatsApp Cloud API di Meta (ID del numero, ID dell'account Business, token permanente, chiave segreta dell'app facoltativa), verificata con Meta al salvataggio. Le credenziali sono cifrate e non vengono mai mostrate. Prefisso predefinito per i numeri scritti senza prefisso. URL e token del webhook da copiare per avere «Consegnato» e «Letto».
+- Messaggi: richiesta ricevuta, richiesta accettata con il pulsante «Completa il pagamento», prenotazione confermata, modificata, annullata, promemoria prima dell'arrivo, pagamento ricevuto e benvenuto. Ognuno si accende o si spegne, ha un testo modificabile con le variabili (nome, struttura, date, camere, importi, scadenza, link…) e l'anteprima come la vede l'ospite. Ogni testo nuovo va in approvazione a WhatsApp; nel frattempo parte quello approvato prima. «Aggiorna lo stato delle approvazioni» e «Invia prova» al proprio cellulare.
+- Il link alla prenotazione è un pulsante sotto il messaggio («Vedi la prenotazione» o «Completa il pagamento»), perché WhatsApp non permette di nascondere un link dietro una parola.
+- Registro: ogni messaggio con stato, numero, ospite e prenotazione, ID di WhatsApp, motivo se non è partito, «Invia di nuovo» e «Riprova».
+- I messaggi partono a tutti gli ospiti con un cellulare, tranne chi spunta «Non voglio ricevere messaggi WhatsApp» nel modulo di prenotazione o chi lo ha nella scheda ospite (modificabile dallo staff). Con WhatsApp attivo il modulo chiede il cellulare.
+
+### Modifiche
+
+- Struttura → Notifiche: l'interruttore «Messaggi WhatsApp (richiede un servizio collegato)» è sostituito da un rimando alla nuova voce WhatsApp, che vale per tutte le strutture del sito.
+- Per gli sviluppatori: il filtro `bkng_whatsapp_provider` è sostituito da `bkng_whatsapp_providers` (vedi docs/HOOKS.md).
+
 ## [0.1.8] — 27 ottobre 2026
 
 ### Novità

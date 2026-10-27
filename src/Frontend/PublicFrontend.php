@@ -17,8 +17,11 @@ declare( strict_types=1 );
 
 namespace BookingManager\Frontend;
 
+use BookingManager\Bookings\BookingCodes;
+use BookingManager\Bookings\BookingRepository;
 use BookingManager\Bookings\ManageLink;
 use BookingManager\Core\NoStore;
+use BookingManager\Notifications\WhatsApp\WhatsAppVariables;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Rest\PublicController;
 
@@ -33,10 +36,16 @@ class PublicFrontend {
 
 	private bool $enqueued = false;
 
-	public function __construct( private PropertyRepository $properties, private Captcha $captcha ) {}
+	public function __construct(
+		private PropertyRepository $properties,
+		private Captcha $captcha,
+		private BookingRepository $bookings,
+		private ManageLink $manage
+	) {}
 
 	public function hooks(): void {
 		add_shortcode( self::SHORTCODE, array( $this, 'render' ) );
+		add_action( 'template_redirect', array( $this, 'whatsapp_link' ), 4 );
 		add_action( 'template_redirect', array( $this, 'manage_page' ), 5 );
 		add_filter( 'bkng_manage_url', array( $this, 'manage_url' ), 5, 2 );
 	}
@@ -78,6 +87,30 @@ class PublicFrontend {
 		}
 		$this->enqueue();
 		return $this->container( $slug, false, ! in_array( strtolower( (string) $atts['intestazione'] ), array( 'no', '0', 'false' ), true ) );
+	}
+
+	/**
+	 * The button of a WhatsApp message (?bkng_wa=CODE.KEY): WhatsApp wants a link whose
+	 * changing part is at its end, so it carries code and key and comes here, which sends
+	 * the guest on to the booking's page.
+	 */
+	public function whatsapp_link(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only redirect; the key is the credential.
+		$value = isset( $_GET[ WhatsAppVariables::ARG ] ) ? sanitize_text_field( wp_unslash( (string) $_GET[ WhatsAppVariables::ARG ] ) ) : '';
+		if ( '' === $value ) {
+			return;
+		}
+		$short   = WhatsAppVariables::parse_short( $value );
+		$booking = $short ? $this->bookings->find_by_code( $short[0] ) : null;
+		NoStore::send();
+		if ( ! $short || ! $booking || empty( $booking['manage_token_hash'] ) || ! hash_equals( (string) $booking['manage_token_hash'], BookingCodes::hash_token( $short[1] ) ) ) {
+			// The booking page says the link is not valid.
+			$target = $short ? add_query_arg( array( ManageLink::ARG_CODE => $short[0], ManageLink::ARG_TOKEN => $short[1] ), home_url( '/' ) ) : home_url( '/' );
+			wp_safe_redirect( $target, 302 );
+			exit;
+		}
+		wp_safe_redirect( $this->manage->url( $booking ), 302 );
+		exit;
 	}
 
 	/** Guest link opened on a page without the form (e.g. the home page). */

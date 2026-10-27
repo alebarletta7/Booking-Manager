@@ -319,15 +319,9 @@ buone notizie: abbiamo accettato la tua richiesta per il soggiorno dal {arrivo} 
 	 * @return array<int, array{0: string, 1: string, 2: string}>
 	 */
 	private function rows( string $key, array $booking, array $property, bool $staff ): array {
-		$v     = self::vars( $booking, $property );
-		$rooms = empty( $booking['id'] ) ? array() : $this->bookings->rooms( (int) $booking['id'], true );
-		$types = $this->types->find_many( array_column( $rooms, 'room_type_id' ) );
-		$names = array();
-		foreach ( $rooms as $room ) {
-			$name           = isset( $types[ $room['room_type_id'] ] ) ? (string) $types[ $room['room_type_id'] ]['name'] : __( 'Camera', 'booking-manager' );
-			$names[ $name ] = ( $names[ $name ] ?? 0 ) + 1;
-		}
-		$room_text = implode( "\n", array_map( static fn( string $n, int $c ) => ( $c > 1 ? $c . ' × ' : '' ) . $n, array_keys( $names ), $names ) );
+		$v         = self::vars( $booking, $property );
+		$rooms     = empty( $booking['id'] ) ? array() : $this->bookings->rooms( (int) $booking['id'], true );
+		$room_text = $this->rooms_text( $booking, "\n" );
 		$rows      = array(
 			/* translators: %s: check-in time. */
 			array( __( 'Arrivo', 'booking-manager' ), $v['{arrivo}'] . "\n" . sprintf( __( 'check-in dalle %s', 'booking-manager' ), $v['{checkin_dalle}'] ), 'calendar' ),
@@ -362,6 +356,22 @@ buone notizie: abbiamo accettato la tua richiesta per il soggiorno dal {arrivo} 
 			$rows[] = array( __( 'Indirizzo', 'booking-manager' ), $address, 'pin' );
 		}
 		return $rows;
+	}
+
+	/**
+	 * The rooms of a booking by type: «2 × Matrimoniale» and the others, one per $glue.
+	 *
+	 * @param array<string, mixed> $booking
+	 */
+	public function rooms_text( array $booking, string $glue = ', ' ): string {
+		$rooms = empty( $booking['id'] ) ? array() : $this->bookings->rooms( (int) $booking['id'], true );
+		$types = $this->types->find_many( array_column( $rooms, 'room_type_id' ) );
+		$names = array();
+		foreach ( $rooms as $room ) {
+			$name           = isset( $types[ $room['room_type_id'] ] ) ? (string) $types[ $room['room_type_id'] ]['name'] : __( 'Camera', 'booking-manager' );
+			$names[ $name ] = ( $names[ $name ] ?? 0 ) + 1;
+		}
+		return implode( $glue, array_map( static fn( string $n, int $c ) => ( $c > 1 ? $c . ' × ' : '' ) . $n, array_keys( $names ), $names ) );
 	}
 
 	private static function date( string $date ): string {

@@ -170,6 +170,15 @@ class GuestRepository {
 		);
 	}
 
+	/** The guest's last answer for a purpose (true granted, false refused), null when never asked. */
+	public function latest_consent( int $guest_id, string $purpose ): ?bool {
+		global $wpdb;
+		$table = Schema::table( 'guest_consents' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT granted FROM {$table} WHERE guest_id = %d AND purpose = %s ORDER BY id DESC LIMIT 1", $guest_id, $purpose ) );
+		return null === $value ? null : (bool) (int) $value;
+	}
+
 	/** @return array<int, array<string, mixed>> */
 	public function consents( int $guest_id ): array {
 		global $wpdb;

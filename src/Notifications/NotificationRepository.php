@@ -101,6 +101,19 @@ class NotificationRepository {
 		return (int) $wpdb->query( $wpdb->prepare( "UPDATE {$t} SET status = %s, last_error = %s, updated_at = %s WHERE status = %s AND updated_at < %s", self::FAILED, $error, $now, self::SENDING, $stale ) );
 	}
 
+	/**
+	 * A message by the provider's id (WhatsApp delivery updates).
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function find_by_provider_id( string $channel, string $provider_id ): ?array {
+		global $wpdb;
+		$t = Schema::table( 'notifications' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table name.
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t} WHERE provider_message_id = %s AND channel = %s ORDER BY id DESC LIMIT 1", $provider_id, $channel ), ARRAY_A );
+		return $row ?: null;
+	}
+
 	/** @param array<string, mixed> $data */
 	public function update( int $id, array $data ): bool {
 		global $wpdb;

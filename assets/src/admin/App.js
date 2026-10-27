@@ -21,6 +21,7 @@ import {
 	settings as settingsIcon,
 	shield as shieldIcon,
 	store as storeIcon,
+	commentContent as whatsappIcon,
 	Icon,
 } from '@wordpress/icons';
 
@@ -48,6 +49,7 @@ import Rooms from './screens/Rooms';
 import Settings from './screens/Settings';
 import Setup from './screens/Setup';
 import Staff from './screens/Staff';
+import WhatsApp from './screens/WhatsApp';
 
 // Grouped like the menus of the other plugins of the family.
 const NAV = [
@@ -126,6 +128,12 @@ const NAV = [
 				icon: storeIcon,
 			},
 			{
+				path: '/whatsapp',
+				label: __( 'WhatsApp', 'booking-manager' ),
+				cap: 'bkng_manage_settings',
+				icon: whatsappIcon,
+			},
+			{
 				path: '/staff',
 				label: __( 'Staff e permessi', 'booking-manager' ),
 				cap: 'bkng_manage_staff',
@@ -161,6 +169,7 @@ const ROUTES = [
 	[ '/rates', Rates ],
 	[ '/property', PropertySettings ],
 	[ '/messages', Messages ],
+	[ '/whatsapp', WhatsApp ],
 	[ '/staff', Staff ],
 	[ '/audit', Audit ],
 	[ '/settings', Settings ],

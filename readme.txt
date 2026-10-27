@@ -4,7 +4,7 @@ Tags: booking, b&b, hotel, prenotazioni, affittacamere
 Requires at least: 6.6
 Tested up to: 6.6
 Requires PHP: 8.1
-Stable tag: 0.1.8
+Stable tag: 0.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,9 @@ Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
 3. Segui la configurazione guidata.
 
 == Changelog ==
+
+= 0.1.9 =
+* Messaggi WhatsApp agli ospiti come in Night Manager: collegamento alla WhatsApp Cloud API di Meta, testi con approvazione, pulsante per la pagina della prenotazione, registro con «Invia di nuovo», stati «consegnato» e «letto», rinuncia dell'ospite.
 
 = 0.1.8 =
 * Check-in più semplice (cerca l'ospite, QR, un pulsante per prenotazione), pulsante «Check-in» nella dashboard, barra in alto che non resta fissa su telefono.

@@ -146,6 +146,7 @@ function GuestForm( {
 	const [ arrivalTime, setArrivalTime ] = useState( '' );
 	const [ privacy, setPrivacy ] = useState( false );
 	const [ marketing, setMarketing ] = useState( false );
+	const [ noWhatsApp, setNoWhatsApp ] = useState( false );
 	const [ website, setWebsite ] = useState( '' );
 	const [ captcha, setCaptcha ] = useState( '' );
 	const [ captchaKey, setCaptchaKey ] = useState( 0 );
@@ -179,6 +180,9 @@ function GuestForm( {
 					arrival_time: arrivalTime || null,
 					privacy,
 					marketing_consent: marketing,
+					whatsapp_opt_out: property.whatsapp
+						? noWhatsApp
+						: undefined,
 					website,
 					form_token: property.form_token,
 					captcha_token: captcha,
@@ -256,13 +260,18 @@ function GuestForm( {
 						) }
 					</Field>
 					<Field
-						label={ __( 'Telefono', 'booking-manager' ) }
+						label={
+							property.whatsapp
+								? __( 'Cellulare', 'booking-manager' )
+								: __( 'Telefono', 'booking-manager' )
+						}
 						error={ fieldError( 'phone' ) }
 					>
 						{ ( id ) => (
 							<input
 								id={ id }
 								type="tel"
+								required={ !! property.whatsapp }
 								autoComplete="tel"
 								value={ guest.phone }
 								onChange={ set( 'phone' ) }
@@ -378,6 +387,14 @@ function GuestForm( {
 					<Check checked={ marketing } onChange={ setMarketing }>
 						{ __(
 							'Voglio ricevere offerte e novità dalla struttura (facoltativo).',
+							'booking-manager'
+						) }
+					</Check>
+				) }
+				{ property.whatsapp && (
+					<Check checked={ noWhatsApp } onChange={ setNoWhatsApp }>
+						{ __(
+							'Non voglio ricevere messaggi WhatsApp sulla prenotazione.',
 							'booking-manager'
 						) }
 					</Check>

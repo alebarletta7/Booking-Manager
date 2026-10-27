@@ -86,11 +86,14 @@ use BookingManager\Checkin\QrToken;
 use BookingManager\Housekeeping\HousekeepingService;
 use BookingManager\Notifications\Channels\EmailChannel;
 use BookingManager\Notifications\Channels\WhatsAppChannel;
+use BookingManager\Notifications\WhatsApp\WhatsAppService;
+use BookingManager\Notifications\WhatsApp\WhatsAppSettings;
 use BookingManager\Notifications\NotificationRepository;
 use BookingManager\Notifications\NotificationService;
 use BookingManager\Notifications\NotificationTemplates;
 use BookingManager\Notifications\TemplateRepository;
 use BookingManager\Rest\NotificationsController;
+use BookingManager\Rest\WhatsAppController;
 use BookingManager\Rest\ChannelsController;
 use BookingManager\Channels\ChannelRefRepository;
 use BookingManager\Channels\ChannelService;
@@ -261,10 +264,11 @@ final class Plugin {
 				$c->get( Clock::class ),
 				$c->get( PaymentService::class ),
 				$c->get( PaymentAccountService::class ),
-				$c->get( RateRepository::class )
+				$c->get( RateRepository::class ),
+				$c->get( WhatsAppSettings::class )
 			)
 		);
-		$c->set( PublicFrontend::class, fn( Container $c ) => new PublicFrontend( $c->get( PropertyRepository::class ), $c->get( Captcha::class ) ) );
+		$c->set( PublicFrontend::class, fn( Container $c ) => new PublicFrontend( $c->get( PropertyRepository::class ), $c->get( Captcha::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
 		$c->set( StaffService::class, fn( Container $c ) => new StaffService( $c->get( RoleManager::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( CloudflareSettings::class, fn( Container $c ) => new CloudflareSettings( $c->get( SecretBox::class ) ) );
 		$c->set( CloudflareClient::class, fn( Container $c ) => new CloudflareClient( $c->get( CloudflareSettings::class ) ) );
@@ -304,12 +308,13 @@ final class Plugin {
 		$c->set( CheckinService::class, fn( Container $c ) => new CheckinService( $c->get( BookingRepository::class ), $c->get( BookingService::class ), $c->get( CheckinRepository::class ), $c->get( PropertyRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( UnitRepository::class ), $c->get( QrToken::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
 		$c->set( HousekeepingService::class, fn( Container $c ) => new HousekeepingService( $c->get( UnitRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ), $c->get( Clock::class ) ) );
 
-		// Messages: e-mail, WhatsApp prepared for an add-on provider.
+		// Messages: e-mail and WhatsApp (the site's WhatsApp Business number, like Night Manager).
 		$c->set( NotificationRepository::class, fn() => new NotificationRepository() );
 		$c->set( TemplateRepository::class, fn() => new TemplateRepository() );
 		$c->set( NotificationTemplates::class, fn( Container $c ) => new NotificationTemplates( $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ), $c->get( RoomTypeRepository::class ) ) );
 		$c->set( EmailChannel::class, fn() => new EmailChannel() );
-		$c->set( WhatsAppChannel::class, fn() => new WhatsAppChannel() );
+		$c->set( WhatsAppSettings::class, fn( Container $c ) => new WhatsAppSettings( $c->get( SecretBox::class ) ) );
+		$c->set( WhatsAppChannel::class, fn( Container $c ) => new WhatsAppChannel( $c->get( WhatsAppSettings::class ), $c->get( GuestRepository::class ), $c->get( ManageLink::class ), $c->get( NotificationTemplates::class ) ) );
 		$c->set(
 			NotificationService::class,
 			fn( Container $c ) => new NotificationService(
@@ -325,6 +330,8 @@ final class Plugin {
 				$c->get( Clock::class )
 			)
 		);
+
+		$c->set( WhatsAppService::class, fn( Container $c ) => new WhatsAppService( $c->get( WhatsAppSettings::class ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
 
 		// Sales channels: prepared for connectors supplied by add-ons.
 		$c->set( ChannelRefRepository::class, fn() => new ChannelRefRepository() );
@@ -350,6 +357,7 @@ final class Plugin {
 		$c->set( CheckinController::class, fn( Container $c ) => new CheckinController( $p( $c ), $c->get( CheckinService::class ), $c->get( BookingRepository::class ) ) );
 		$c->set( HousekeepingController::class, fn( Container $c ) => new HousekeepingController( $p( $c ), $c->get( HousekeepingService::class ), $c->get( UnitRepository::class ) ) );
 		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ) ) );
+		$c->set( WhatsAppController::class, fn( Container $c ) => new WhatsAppController( $p( $c ), $c->get( WhatsAppService::class ) ) );
 		$c->set( ChannelsController::class, fn( Container $c ) => new ChannelsController( $p( $c ), $c->get( ChannelService::class ), $c->get( RoomTypeRepository::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
@@ -411,6 +419,7 @@ final class Plugin {
 			CheckinController::class,
 			HousekeepingController::class,
 			NotificationsController::class,
+			WhatsAppController::class,
 			ChannelsController::class,
 			PublicController::class,
 		);
@@ -433,6 +442,7 @@ final class Plugin {
 		}
 		$c->get( UpdateChecker::class )->hooks();
 		$c->get( NotificationService::class )->hooks();
+		$c->get( WhatsAppService::class )->hooks();
 		$c->get( ChannelService::class )->hooks();
 		add_action( Installer::NOTIFICATIONS_HOOK, fn() => $c->get( NotificationService::class )->run() );
 		add_action( Installer::REMINDERS_HOOK, fn() => $c->get( NotificationService::class )->queue_reminders() );

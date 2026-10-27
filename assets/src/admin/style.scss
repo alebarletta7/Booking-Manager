@@ -1428,3 +1428,287 @@ html.wp-toolbar:has(body.bkng-operational) {
 		}
 	}
 }
+
+// WhatsApp (0.1.9), like Night Manager's: switch on top, tabs Messaggi / Collegamento /
+// Registro, the editor with the message as WhatsApp draws it.
+.bkng-help.is-error {
+	color: $bad;
+}
+
+.bkng-help.is-ok {
+	color: $primary;
+	font-weight: 600;
+}
+
+.bkng-wa {
+
+	&__head {
+		margin-bottom: 16px;
+
+		.components-toggle-control label {
+			font-weight: 650;
+			font-size: 14px;
+		}
+
+		p {
+			margin: 8px 0 0;
+		}
+	}
+
+	&__account {
+		font-weight: 600;
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		margin: 0 0 16px;
+	}
+
+	&__messages {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		> li {
+			display: grid;
+			grid-template-columns: auto minmax(0, 1fr) auto;
+			align-items: start;
+			gap: 12px;
+			margin-bottom: 12px;
+			padding: 14px 16px;
+
+			@media (max-width: 600px) {
+				grid-template-columns: auto minmax(0, 1fr);
+
+				> .components-button {
+					grid-column: 2;
+					justify-self: start;
+				}
+			}
+		}
+
+		.components-toggle-control {
+			padding-top: 10px;
+		}
+
+		p {
+			margin: 4px 0 0;
+		}
+	}
+
+	&__message-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px 8px;
+		min-height: 36px;
+	}
+
+	&__note {
+		margin: 4px 0 0;
+		font-size: 13px;
+		color: $warn;
+	}
+
+	&__title {
+		margin: 20px 0 8px;
+		font-size: 15px;
+	}
+
+	&__label {
+		margin: 16px 0 6px;
+		color: $muted;
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
+	}
+
+	&__columns {
+		display: grid;
+		grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+		gap: 24px;
+
+		@media (max-width: 782px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	&__textarea {
+		width: 100%;
+		min-height: 220px;
+		padding: 10px 12px;
+		border: 1px solid $line;
+		border-radius: 8px;
+		font-family: inherit;
+		font-size: 14px;
+		line-height: 1.5;
+
+		&:focus {
+			border-color: $accent;
+			box-shadow: 0 0 0 1px $accent;
+			outline: none;
+		}
+	}
+
+	&__vars {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin: 0 0 16px;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__var {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 34px;
+		padding: 4px 10px;
+		border: 1px solid $line;
+		border-radius: 999px;
+		background: #fff;
+		color: $text;
+		font-size: 13px;
+		cursor: pointer;
+
+		code {
+			padding: 0;
+			background: none;
+			color: $primary;
+		}
+
+		span {
+			color: $muted;
+		}
+
+		&:hover:not(:disabled) {
+			border-color: $accent;
+		}
+	}
+
+	// The chat behind the bubble, like WhatsApp's.
+	&__preview {
+		max-width: 46ch;
+		margin: 0 0 12px;
+		padding: 12px;
+		border-radius: $radius;
+		background: #efeae2;
+
+		&.is-old {
+			background: $bg;
+
+			.bkng-wa__bubble,
+			.bkng-wa__cta {
+				background: #fff;
+				color: $muted;
+			}
+		}
+	}
+
+	&__bubble {
+		padding: 8px 10px;
+		border-radius: 0 10px 10px;
+		background: #fff;
+		color: #111b21;
+		font-size: 14px;
+		line-height: 1.45;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+	}
+
+	// WhatsApp draws a template's buttons as a separate strip under the bubble.
+	&__cta {
+		margin-top: 2px;
+		padding: 9px 10px;
+		border-radius: 10px;
+		background: #fff;
+		color: #027eb5;
+		font-weight: 600;
+		font-size: 14px;
+		text-align: center;
+		box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+	}
+
+	&__test {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		gap: 8px 12px;
+
+		> :first-child {
+			flex: 1 1 220px;
+		}
+
+		> .components-button {
+			margin-top: 24px;
+		}
+	}
+
+	&__value {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+
+		code {
+			padding: 6px 8px;
+			border-radius: 6px;
+			background: $bg;
+			overflow-wrap: anywhere;
+		}
+	}
+
+	&__log {
+		margin: 0;
+		padding: 0 20px;
+		list-style: none;
+
+		@media (max-width: 600px) {
+			padding: 0 14px;
+		}
+	}
+
+	&__pad {
+		padding: 0 20px;
+
+		@media (max-width: 600px) {
+			padding: 0 14px;
+		}
+	}
+
+	&__row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 8px 16px;
+		padding: 12px 0;
+		border-bottom: 1px solid $line;
+
+		&:last-child {
+			border-bottom: 0;
+		}
+	}
+
+	&__row-main {
+		flex: 1 1 320px;
+		min-width: 0;
+	}
+
+	&__meta {
+		margin: 2px 0 0;
+		color: $muted;
+		font-size: 13px;
+		overflow-wrap: anywhere;
+
+		a {
+			color: $primary;
+		}
+	}
+}

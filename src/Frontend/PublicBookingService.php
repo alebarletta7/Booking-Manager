@@ -30,6 +30,7 @@ use BookingManager\Core\Validation;
 use BookingManager\Inventory\InventoryService;
 use BookingManager\Inventory\RoomTypeRepository;
 use BookingManager\Notifications\NotificationTemplates;
+use BookingManager\Notifications\WhatsApp\WhatsAppSettings;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Payments\PaymentAccountService;
 use BookingManager\Payments\PaymentService;
@@ -62,7 +63,8 @@ class PublicBookingService {
 		private Clock $clock,
 		private PaymentService $payments,
 		private PaymentAccountService $accounts,
-		private RateRepository $rates
+		private RateRepository $rates,
+		private WhatsAppSettings $whatsapp
 	) {}
 
 	/**
@@ -137,6 +139,8 @@ class PublicBookingService {
 			'terms_text'        => (string) $s['terms_text'],
 			'privacy_url'       => $privacy,
 			'marketing_consent' => (bool) $s['marketing_consent'],
+			// WhatsApp messages on: the mobile number is required, with the «no WhatsApp» box.
+			'whatsapp'          => $this->whatsapp->active(),
 			'room_types'        => $types,
 			'extras'            => $this->extras( (int) $property['id'], (bool) $s['show_prices'] ),
 			'available'         => (bool) $types,
@@ -366,6 +370,12 @@ class PublicBookingService {
 		);
 		if ( ! empty( $property['settings']['marketing_consent'] ) ) {
 			$data['marketing_consent'] = rest_sanitize_boolean( $input['marketing_consent'] ?? false );
+		}
+		if ( $this->whatsapp->active() ) {
+			if ( '' === trim( (string) ( $guest['phone'] ?? '' ) ) ) {
+				return Validation::error( array( 'phone' => __( 'Scrivi il numero di cellulare.', 'booking-manager' ) ) );
+			}
+			$data['whatsapp_opt_out'] = rest_sanitize_boolean( $input['whatsapp_opt_out'] ?? false );
 		}
 		$pay    = $this->online_payment( $property );
 		$result = $this->bookings->create(

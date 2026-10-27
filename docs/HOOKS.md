@@ -39,7 +39,8 @@ add_action( 'bkng_booking_confirmed', function ( int $booking_id, array $context
 | `bkng_payment_providers` | aggiunge fornitori di pagamento (oggetti `Payments\Providers\PaymentProvider`) |
 | `bkng_channel_connectors` | aggiunge connettori verso OTA o channel manager (`Channels\ChannelConnector`) |
 | `bkng_notification_channels` | aggiunge canali di notifica (`Notifications\Channels\NotificationChannel`) |
-| `bkng_whatsapp_provider` | fornitore WhatsApp (`Notifications\WhatsApp\WhatsAppProvider`), `null` per nessuno |
+| `bkng_whatsapp_providers` | servizi WhatsApp per id (`Notifications\WhatsApp\WhatsAppProvider`): inclusi `meta` (WhatsApp Cloud API) e `test` (nessun messaggio parte) |
+| `bkng_whatsapp_graph_version` | versione della Graph API di Meta usata (predefinita `v23.0`) |
 | `bkng_modules` | moduli opzionali (`Core\ModuleInterface`: `services()` e `hooks()`); se uno fallisce il plugin continua senza |
 | `bkng_accept_status` | stato che prende una richiesta dal sito quando lo staff la accetta: `confirmed`, oppure `option` (il plugin lo fa quando i pagamenti online sono attivi: l'ospite paga e il pagamento conferma) |
 | `bkng_manage_url` | indirizzo «gestisci la prenotazione» inviato agli ospiti |
@@ -57,7 +58,15 @@ Un connettore implementa `Channels\ChannelConnector` (`key()`, `label()`, `unava
 
 ## WhatsApp
 
-Predisposto, non attivo: nessun fornitore è incluso e il plugin **non finge** invii. Senza un fornitore il canale WhatsApp risulta non disponibile e i messaggi vanno solo per email. Un add-on implementa `Notifications\WhatsApp\WhatsAppProvider` (`key()`, `unavailable( $property )`, `send( Message )`) e lo restituisce dal filtro `bkng_whatsapp_provider`; le sue credenziali si salvano cifrate con `Core\SecretBox`.
+Come in Night Manager: un numero WhatsApp Business per tutto il sito, collegato in **WhatsApp → Collegamento** con la WhatsApp Cloud API di Meta (ID del numero, ID dell'account Business, token permanente, chiave segreta dell'app facoltativa). Le credenziali sono cifrate con `Core\SecretBox`, non tornano mai dall'API e non finiscono nei registri.
+
+- **Testi**: un testo per ogni messaggio all'ospite (richiesta ricevuta, richiesta accettata con «Completa il pagamento», confermata, modificata, annullata, promemoria, pagamento, benvenuto), con `{variabili}`. Salvare un testo lo manda in approvazione come nuovo modello (`bm_{messaggio}_v{n}`, categoria UTILITY): finché non è approvato parte la versione approvata prima. Le approvazioni si controllano ogni ora (`bkng_hourly`) e con «Aggiorna lo stato delle approvazioni».
+- **Pulsante**: WhatsApp non nasconde un link dietro una parola, quindi il link alla pagina della prenotazione è un pulsante sotto il testo. L'URL del pulsante è `home/?bkng_wa=` + `{{1}}` = `CODICE.CHIAVE`; il sito verifica la chiave e porta l'ospite alla pagina della prenotazione.
+- **Invio**: con WhatsApp collegato e acceso, ogni messaggio attivo entra nella coda `bkng_notifications` (canale `whatsapp`) accanto all'email e parte con gli stessi tentativi. Il testo si riempie al momento dell'invio con la prenotazione com'è allora.
+- **Rinuncia**: partono a tutti gli ospiti con un cellulare, tranne chi ha spuntato «Non voglio ricevere messaggi WhatsApp» (nel modulo o nella scheda ospite: riga `guest_consents` con scopo `whatsapp`). Con WhatsApp acceso il modulo pubblico chiede il cellulare.
+- **Consegnato e letto**: webhook `GET/POST /booking-manager/public/v1/whatsapp/webhook` (token di verifica; aggiornamenti firmati `X-Hub-Signature-256` con la chiave segreta dell'app). Lo stato va solo avanti: inviato → consegnato → letto.
+
+Un altro servizio si aggiunge con `bkng_whatsapp_providers`, implementando `Notifications\WhatsApp\WhatsAppProvider` (`fields()`, `check()`, `send()`, `submit_template()`, `template_status()`).
 
 ## Fornitori di pagamento
 

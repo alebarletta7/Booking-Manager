@@ -73,6 +73,8 @@ class WriteGate {
 		'#^/public/manage/[A-Za-z0-9]{6,16}(/(cancel|pay))?$#',
 		// Money already taken must still be settled (confirmed or refunded).
 		'#^/webhooks/[a-z0-9_-]{2,20}/\d+$#',
+		// Delivery updates of WhatsApp messages already sent.
+		'#^/public/whatsapp/webhook$#',
 	);
 
 	/**
@@ -119,6 +121,8 @@ class WriteGate {
 		'#^/properties/\d+/notifications/test$#',
 		'#^/properties/\d+/templates/[a-z_]+(/preview)?$#',
 		'#^/properties/\d+/channels/[a-z0-9_-]{2,40}/mappings$#',
+		'#^/whatsapp/(settings|connection|templates/refresh|templates/[a-z_]{3,30}(/(preview|test))?|messages/\d+/resend)$#',
+		'#^/public/whatsapp/webhook$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}

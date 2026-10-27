@@ -2,7 +2,7 @@
 /**
  * Messages against the real database and WordPress's test mailer: which e-mails leave
  * after which event, the QR inside, texts of the property, reminders before arrival,
- * retries, messages no longer relevant, WhatsApp prepared but off.
+ * retries, messages no longer relevant (WhatsApp: WhatsAppTest).
  *
  * @package BookingManager
  */
@@ -16,28 +16,20 @@ use BookingManager\Bookings\BookingService;
 use BookingManager\Database\Schema;
 use BookingManager\Frontend\FormToken;
 use BookingManager\Frontend\PublicBookingService;
-use BookingManager\Notifications\Message;
 use BookingManager\Notifications\NotificationRepository;
 use BookingManager\Notifications\NotificationService;
-use BookingManager\Notifications\SendResult;
 use BookingManager\Notifications\TemplateRepository;
-use BookingManager\Notifications\WhatsApp\WhatsAppProvider;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Tests\TestCase;
 
 final class NotificationsTest extends TestCase {
 
-	/** @var Message[] */
-	public static array $whatsapp_sent = array();
-
 	public function set_up(): void {
 		parent::set_up();
 		reset_phpmailer_instance();
-		self::$whatsapp_sent = array();
 	}
 
 	public function tear_down(): void {
-		remove_all_filters( 'bkng_whatsapp_provider' );
 		remove_all_filters( 'pre_wp_mail' );
 		parent::tear_down();
 	}
@@ -237,39 +229,5 @@ final class NotificationsTest extends TestCase {
 		$again = $this->notifications()->resend( $id );
 		$this->assertSame( 'sent', $again['status'] );
 		$this->assertSame( 'failed', $repo->find( $id )['status'], 'the old row stays in the log' );
-	}
-
-	public function test_whatsapp_is_prepared_but_never_pretends(): void {
-		$this->admin();
-		$p = $this->guest_property( array( 'whatsapp_enabled' => true ) );
-		$t = $this->room_type( $p['id'], 2 );
-		$b = $this->book( $p['id'], $t['type']['id'], 10, 12, array( 'guest' => array( 'first_name' => 'Mario', 'last_name' => 'Rossi', 'email' => 'mario@example.org', 'phone' => '340 123 4567' ) ) );
-		$this->notifications()->run();
-		$rows = array_column( $this->rows( $b['id'] ), null, 'channel' );
-		$this->assertSame( '+393401234567', $rows['whatsapp']['recipient'] );
-		$this->assertSame( 'skipped', $rows['whatsapp']['status'] );
-		$this->assertStringContainsString( 'Nessun servizio WhatsApp collegato', $rows['whatsapp']['last_error'] );
-		$this->assertSame( 'sent', $rows['email']['status'] );
-
-		add_filter(
-			'bkng_whatsapp_provider',
-			static fn() => new class() implements WhatsAppProvider {
-				public function key(): string {
-					return 'test';
-				}
-				public function unavailable( array $property ): ?string {
-					return null;
-				}
-				public function send( Message $message ): SendResult {
-					NotificationsTest::$whatsapp_sent[] = $message;
-					return SendResult::sent( 'wamid.1' );
-				}
-			}
-		);
-		$b2 = $this->book( $p['id'], $t['type']['id'], 14, 15, array( 'guest' => array( 'first_name' => 'Anna', 'last_name' => 'Blu', 'phone' => '+39 333 000 1111' ) ) );
-		$this->notifications()->run();
-		$this->assertCount( 1, self::$whatsapp_sent );
-		$this->assertSame( 'Anna', self::$whatsapp_sent[0]->vars['{nome}'] );
-		$this->assertSame( 'wamid.1', array_column( $this->rows( $b2['id'] ), null, 'channel' )['whatsapp']['provider_message_id'] );
 	}
 }

@@ -13,6 +13,7 @@ import { useAction, useLoad } from '../lib/hooks';
 import { navigate } from '../lib/router';
 import {
 	Badge,
+	Check,
 	Card,
 	Confirm,
 	Details,
@@ -30,6 +31,7 @@ const PURPOSES = {
 	privacy: __( 'Informativa privacy', 'booking-manager' ),
 	marketing: __( 'Comunicazioni promozionali', 'booking-manager' ),
 	terms: __( 'Condizioni di prenotazione', 'booking-manager' ),
+	whatsapp: __( 'Messaggi WhatsApp', 'booking-manager' ),
 };
 
 function EditModal( { guest, onClose, onDone } ) {
@@ -42,6 +44,7 @@ function EditModal( { guest, onClose, onDone } ) {
 		country: guest.country || '',
 		language: guest.language || '',
 		notes: guest.notes || '',
+		whatsapp_opt_out: ! guest.whatsapp,
 	} );
 	const set = ( k ) => ( v ) => setForm( ( f ) => ( { ...f, [ k ]: v } ) );
 	return (
@@ -102,6 +105,14 @@ function EditModal( { guest, onClose, onDone } ) {
 				label={ __( "Note sull'ospite", 'booking-manager' ) }
 				value={ form.notes }
 				onChange={ set( 'notes' ) }
+			/>
+			<Check
+				label={ __(
+					'Non vuole ricevere messaggi WhatsApp',
+					'booking-manager'
+				) }
+				checked={ form.whatsapp_opt_out }
+				onChange={ set( 'whatsapp_opt_out' ) }
 			/>
 		</FormModal>
 	);
@@ -312,6 +323,18 @@ export default function GuestDetail( { params } ) {
 									String( g.stays_count ),
 								],
 								[ __( 'Note', 'booking-manager' ), g.notes ],
+								[
+									__( 'WhatsApp', 'booking-manager' ),
+									g.whatsapp
+										? __(
+												'Riceve i messaggi',
+												'booking-manager'
+										  )
+										: __(
+												'Non vuole ricevere messaggi',
+												'booking-manager'
+										  ),
+								],
 							] }
 						/>
 					</Card>
