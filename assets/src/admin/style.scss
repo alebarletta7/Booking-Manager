@@ -977,6 +977,169 @@ html.wp-toolbar:has(body.bkng-operational) {
 		font-weight: 700;
 		margin: 0 0 4px;
 	}
+
+	&__head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 8px;
+
+		.components-button {
+			font-size: 22px;
+			line-height: 1;
+		}
+	}
+}
+
+// Check-in and check-out: find the guest, then one button per booking.
+.bkng-desk__find {
+	background: #fff;
+	border: 1px solid $line;
+	border-radius: $radius;
+	padding: 18px;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 12px;
+	margin-bottom: 18px;
+
+	.bkng-help {
+		margin: 0;
+	}
+
+	.bkng-camera {
+		max-width: 520px;
+	}
+}
+
+.bkng-desk__search {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border: 1px solid $line;
+	border-radius: $radius;
+	padding: 4px 4px 4px 12px;
+	background: #fff;
+
+	&:focus-within {
+		border-color: $primary;
+		box-shadow: 0 0 0 1px $primary;
+	}
+
+	svg {
+		flex-shrink: 0;
+		fill: $muted;
+	}
+
+	input[type="search"] {
+		flex: 1;
+		min-width: 0;
+		border: 0;
+		box-shadow: none;
+		background: transparent;
+		font-size: 16px;
+		min-height: 40px;
+		padding: 0;
+
+		&:focus {
+			outline: none;
+			box-shadow: none;
+		}
+	}
+}
+
+.bkng-desk__qr.components-button {
+	justify-content: center;
+	min-height: 48px;
+	font-size: 15px;
+	max-width: 520px;
+	width: 100%;
+}
+
+.bkng-desk__result {
+	scroll-margin-top: 120px;
+
+	> * {
+		margin-bottom: 18px;
+	}
+}
+
+.bkng-desk__day .bkng-tabs {
+	margin-top: -6px;
+}
+
+.bkng-desk__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.bkng-desk__guest {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 0;
+	border-bottom: 1px solid $line;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.bkng-desk__who {
+	flex: 1;
+	min-width: 0;
+	display: grid;
+	gap: 3px;
+}
+
+.bkng-desk__name {
+	font-size: 16px;
+	font-weight: 700;
+	color: $text;
+	text-decoration: none;
+
+	&:hover {
+		color: $primary;
+		text-decoration: underline;
+	}
+}
+
+.bkng-desk__rooms {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 14px;
+}
+
+.bkng-desk__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+
+	&:empty {
+		display: none;
+	}
+}
+
+.bkng-desk__go.components-button {
+	min-height: 44px;
+	min-width: 120px;
+	justify-content: center;
+	font-size: 15px;
+}
+
+.bkng-desk__empty {
+	margin: 6px 0;
+}
+
+.bkng-desk__recent {
+	margin-top: 18px;
+
+	summary {
+		cursor: pointer;
+		color: $muted;
+		font-weight: 600;
+		margin-bottom: 8px;
+	}
 }
 
 // Housekeeping board.
@@ -1129,8 +1292,10 @@ html.wp-toolbar:has(body.bkng-operational) {
 		}
 	}
 
+	// On phones the bar scrolls away with the page: fixed, it covered a third of the screen.
 	.bkng-topbar {
-		top: 46px;
+		position: relative;
+		top: auto;
 		padding: 10px 16px;
 		flex-wrap: wrap;
 
@@ -1150,6 +1315,19 @@ html.wp-toolbar:has(body.bkng-operational) {
 
 	.bkng-content {
 		padding: 16px;
+	}
+
+	.bkng-kpis {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.bkng-desk__guest {
+		flex-wrap: wrap;
+	}
+
+	.bkng-desk__go.components-button {
+		width: 100%;
 	}
 
 	.bkng-band {

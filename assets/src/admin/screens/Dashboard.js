@@ -90,12 +90,31 @@ export default function Dashboard() {
 				} )
 			) }
 			actions={
-				<Button
-					variant="secondary"
-					onClick={ () => navigate( '/planning' ) }
-				>
-					{ __( 'Apri il planning', 'booking-manager' ) }
-				</Button>
+				<>
+					{ can( 'bkng_checkin' ) && (
+						<Button
+							variant="primary"
+							onClick={ () => navigate( '/frontdesk' ) }
+						>
+							{ s.arrivals > s.arrivals_done
+								? sprintf(
+										/* translators: %d: arrivals still to check in. */
+										__(
+											'Check-in (%d)',
+											'booking-manager'
+										),
+										s.arrivals - s.arrivals_done
+								  )
+								: __( 'Check-in', 'booking-manager' ) }
+						</Button>
+					) }
+					<Button
+						variant="secondary"
+						onClick={ () => navigate( '/planning' ) }
+					>
+						{ __( 'Apri il planning', 'booking-manager' ) }
+					</Button>
+				</>
 			}
 		>
 			<div className="bkng-kpis">
@@ -229,7 +248,23 @@ export default function Dashboard() {
 
 			{ day.data && (
 				<div className="bkng-grid is-3">
-					<Card title={ __( 'Arrivi', 'booking-manager' ) }>
+					<Card
+						title={ __( 'Arrivi', 'booking-manager' ) }
+						actions={
+							can( 'bkng_checkin' ) &&
+							day.data.arrivals?.length > 0 && (
+								<Button
+									variant="link"
+									onClick={ () => navigate( '/frontdesk' ) }
+								>
+									{ __(
+										'Fai il check-in',
+										'booking-manager'
+									) }
+								</Button>
+							)
+						}
+					>
 						<StayList
 							rows={ day.data.arrivals }
 							empty={ __(

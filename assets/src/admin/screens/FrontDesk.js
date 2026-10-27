@@ -1,10 +1,13 @@
 /**
- * Reception: the guest's QR read with the camera (or the booking code typed), check-in
- * and check-out room by room, the lists of the day and the latest attempts.
+ * Check-in and check-out: find the guest (name, code or room typed, or the QR of the
+ * e-mail read with the camera), then one button per booking. Today's arrivals, guests in
+ * house and departures are in tabs; a multi-room booking can still go room by room from
+ * the card that opens with the QR or the code.
  */
 import { Button } from '@wordpress/components';
+import { Icon, search as searchIcon } from '@wordpress/icons';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import jsQR from 'jsqr';
 
 import { get, post } from '../lib/api';
@@ -17,10 +20,9 @@ import {
 	Card,
 	Check,
 	ErrorNotice,
-	Kpi,
 	Loading,
 	Page,
-	Text,
+	Tabs,
 } from '../components/ui';
 
 const TONE = {
@@ -39,12 +41,12 @@ const TONE = {
 };
 
 /** The camera with a QR reader; calls onCode once per new code. */
-function Camera( { onCode, paused } ) {
+function Camera( { onCode, paused, start = false, onStop } ) {
 	const video = useRef( null );
 	const canvas = useRef( null );
 	const last = useRef( { text: '', at: 0 } );
 	const [ error, setError ] = useState( '' );
-	const [ on, setOn ] = useState( false );
+	const [ on, setOn ] = useState( start );
 
 	useEffect( () => {
 		if ( ! on ) {
@@ -150,14 +152,17 @@ function Camera( { onCode, paused } ) {
 				<div className="bkng-camera__frame" />
 				<canvas ref={ canvas } hidden />
 			</div>
-			<Button variant="link" onClick={ () => setOn( false ) }>
+			<Button
+				variant="link"
+				onClick={ () => ( onStop ? onStop() : setOn( false ) ) }
+			>
 				{ __( 'Spegni la fotocamera', 'booking-manager' ) }
 			</Button>
 		</>
 	);
 }
 
-function Result( { answer, busy, onCheckin, onCheckout } ) {
+function Result( { answer, busy, onCheckin, onCheckout, onClose } ) {
 	const [ rooms, setRooms ] = useState( [] );
 	const [ ignoreDirty, setIgnoreDirty ] = useState( false );
 	const b = answer.booking;
@@ -173,7 +178,19 @@ function Result( { answer, busy, onCheckin, onCheckout } ) {
 			}
 			role="status"
 		>
-			<p className="bkng-result__label">{ answer.label }</p>
+			<div className="bkng-result__head">
+				<p className="bkng-result__label">{ answer.label }</p>
+				{ onClose && (
+					<Button
+						variant="tertiary"
+						size="small"
+						onClick={ onClose }
+						label={ __( 'Chiudi', 'booking-manager' ) }
+					>
+						×
+					</Button>
+				) }
+			</div>
 			<p>{ answer.message }</p>
 			{ b && (
 				<>
@@ -306,53 +323,135 @@ function Result( { answer, busy, onCheckin, onCheckout } ) {
 	);
 }
 
-function StayRows( { rows, action, label, onRun } ) {
-	if ( ! rows.length ) {
-		return (
-			<p className="bkng-muted">
-				{ __( 'Nessuno.', 'booking-manager' ) }
-			</p>
-		);
+/**
+ * Today's rows (one per room) grouped by booking: the desk works by guest, not by room.
+ *
+ * @param {Array} rows
+ */
+function byBooking( rows ) {
+	const groups = [];
+	const at = {};
+	rows.forEach( ( r ) => {
+		if ( at[ r.booking_id ] === undefined ) {
+			at[ r.booking_id ] = groups.length;
+			groups.push( { ...r, rooms: [] } );
+		}
+		groups[ at[ r.booking_id ] ].rooms.push( r );
+	} );
+	return groups;
+}
+
+function matches( group, q ) {
+	if ( ! q ) {
+		return true;
 	}
+	const text = [
+		group.name,
+		group.code,
+		...group.rooms.map( ( r ) => ( r.unit ? r.unit.code : '' ) ),
+	]
+		.join( ' ' )
+		.toLowerCase();
+	return q
+		.toLowerCase()
+		.split( /\s+/ )
+		.every( ( w ) => text.includes( w ) );
+}
+
+const KIND = {
+	arrivals: {
+		todo: ( r ) => r.stay_status === 'expected',
+		button: __( 'Check-in', 'booking-manager' ),
+		done: __( 'Arrivato', 'booking-manager' ),
+		empty: __( 'Nessun arrivo da fare oggi.', 'booking-manager' ),
+	},
+	in_house: {
+		todo: () => false,
+		empty: __( 'Nessun ospite in struttura.', 'booking-manager' ),
+	},
+	departures: {
+		todo: ( r ) => r.stay_status === 'in_house',
+		button: __( 'Check-out', 'booking-manager' ),
+		done: __( 'Partito', 'booking-manager' ),
+		empty: __( 'Nessuna partenza oggi.', 'booking-manager' ),
+	},
+};
+
+/** One guest of the day: who, which rooms, what is still to collect, one button. */
+function Guest( { group, kind, busy, onRun } ) {
+	const k = KIND[ kind ];
+	const todo = group.rooms.filter( k.todo );
+	const notReady = todo.some(
+		( r ) => kind === 'arrivals' && r.unit && r.unit.op_status !== 'ready'
+	);
+	const guests = group.rooms.reduce( ( n, r ) => n + r.guests, 0 );
 	return (
-		<ul className="bkng-list">
-			{ rows.map( ( r ) => (
-				<li key={ r.booking_room_id }>
-					<div className="bkng-list__main">
-						<a
-							href={ '#/bookings/' + r.booking_id }
-							className="bkng-strong"
-						>
-							{ r.name }
-						</a>
-						<div className="bkng-small bkng-muted">
-							{ r.unit
-								? r.unit.code
-								: __(
-										'senza camera',
-										'booking-manager'
-								  ) }{ ' ' }
-							· { r.code } · { date( r.arrival ) } →{ ' ' }
-							{ date( r.departure ) }
-						</div>
-					</div>
-					{ r.unit && (
-						<Badge status={ r.unit.op_status } kind="op" />
+		<li className="bkng-desk__guest">
+			<div className="bkng-desk__who">
+				<a
+					href={ '#/bookings/' + group.booking_id }
+					className="bkng-desk__name"
+				>
+					{ group.name }
+				</a>
+				<div className="bkng-desk__rooms">
+					{ group.rooms.map( ( r ) => (
+						<span key={ r.booking_room_id }>
+							<strong>
+								{ r.unit
+									? r.unit.code
+									: __( 'Da assegnare', 'booking-manager' ) }
+							</strong>
+							{ r.room_type ? ' · ' + r.room_type : '' }
+						</span>
+					) ) }
+				</div>
+				<div className="bkng-small bkng-muted">
+					{ guestsLabel( guests, 0 ) } ·{ ' ' }
+					{ sprintf(
+						/* translators: %d: nights. */
+						_n(
+							'%d notte',
+							'%d notti',
+							group.nights,
+							'booking-manager'
+						),
+						group.nights
+					) }{ ' ' }
+					· { date( group.arrival ) } → { date( group.departure ) } ·{ ' ' }
+					{ group.code }
+				</div>
+				<div className="bkng-desk__tags">
+					{ notReady && (
+						<span className="bkng-badge is-warn">
+							{ __( 'Camera non pronta', 'booking-manager' ) }
+						</span>
 					) }
-					{ action && r.stay_status !== 'departed' && (
-						<Button
-							variant="secondary"
-							onClick={ () => onRun( r ) }
-						>
-							{ label }
-						</Button>
+					{ group.balance > 0 && (
+						<span className="bkng-badge is-warn">
+							{ sprintf(
+								/* translators: %s: amount. */
+								__( 'Da incassare %s', 'booking-manager' ),
+								group.balance_label
+							) }
+						</span>
 					) }
-					{ r.stay_status === 'departed' && (
-						<Badge status="departed" kind="stay" />
-					) }
-				</li>
-			) ) }
-		</ul>
+				</div>
+			</div>
+			{ k.button && todo.length > 0 && (
+				<Button
+					variant="primary"
+					className="bkng-desk__go"
+					disabled={ busy }
+					onClick={ () => onRun( group, todo ) }
+				>
+					{ k.button }
+				</Button>
+			) }
+			{ k.button && ! todo.length && (
+				<span className="bkng-badge is-ok">✓ { k.done }</span>
+			) }
+		</li>
 	);
 }
 
@@ -362,9 +461,12 @@ export default function FrontDesk() {
 		() => get( '/properties/' + property.id + '/frontdesk' ),
 		[ property.id ]
 	);
-	const [ code, setCode ] = useState( '' );
+	const [ query, setQuery ] = useState( '' );
+	const [ camera, setCamera ] = useState( false );
+	const [ tab, setTab ] = useState( 'arrivals' );
 	const [ answer, setAnswer ] = useState( null );
 	const action = useAction();
+	const resultRef = useRef( null );
 	const base = '/properties/' + property.id;
 
 	const show = useCallback(
@@ -372,6 +474,14 @@ export default function FrontDesk() {
 			if ( res ) {
 				setAnswer( res );
 				desk.reload();
+				window.setTimeout( () => {
+					if ( resultRef.current ) {
+						resultRef.current.scrollIntoView( {
+							behavior: 'smooth',
+							block: 'start',
+						} );
+					}
+				}, 50 );
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -388,7 +498,13 @@ export default function FrontDesk() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[ base ]
 	);
-	const onCode = useCallback( ( text ) => scan( text, 'qr' ), [ scan ] );
+	const onCode = useCallback(
+		( text ) => {
+			setCamera( false );
+			scan( text, 'qr' );
+		},
+		[ scan ]
+	);
 
 	const checkin = async ( b, rooms, ignoreDirty, method = 'manual' ) => {
 		show(
@@ -417,9 +533,44 @@ export default function FrontDesk() {
 	};
 
 	const d = desk.data;
+	const lists = d
+		? {
+				arrivals: byBooking( d.arrivals ),
+				in_house: byBooking( d.in_house ),
+				departures: byBooking( d.departures ),
+		  }
+		: null;
+	const q = query.trim();
+	const found = lists
+		? Object.fromEntries(
+				Object.entries( lists ).map( ( [ key, list ] ) => [
+					key,
+					list.filter( ( g ) => matches( g, q ) ),
+				] )
+		  )
+		: null;
+	const todo = ( key ) =>
+		lists
+			? lists[ key ].filter( ( g ) => g.rooms.some( KIND[ key ].todo ) )
+					.length
+			: 0;
+
+	// Enter: one guest of the day found → its card; otherwise the code as typed.
+	const submit = ( e ) => {
+		e.preventDefault();
+		if ( ! q ) {
+			return;
+		}
+		const hits = found
+			? [ ...found.arrivals, ...found.in_house, ...found.departures ]
+			: [];
+		const codes = [ ...new Set( hits.map( ( g ) => g.code ) ) ];
+		scan( codes.length === 1 ? codes[ 0 ] : q, 'manual' );
+	};
+
 	return (
 		<Page
-			title={ __( 'Reception', 'booking-manager' ) }
+			title={ __( 'Check-in e check-out', 'booking-manager' ) }
 			subtitle={
 				d
 					? date( d.date, {
@@ -430,128 +581,162 @@ export default function FrontDesk() {
 					: ''
 			}
 		>
-			{ d && (
-				<div className="bkng-kpis">
-					<Kpi
-						label={ __( 'Arrivi da fare', 'booking-manager' ) }
-						value={ d.counts.arrivals_expected }
-						tone="accent"
+			<section className="bkng-desk__find">
+				<form className="bkng-desk__search" onSubmit={ submit }>
+					<label className="screen-reader-text" htmlFor="bkng-desk-q">
+						{ __( 'Cerca l’ospite', 'booking-manager' ) }
+					</label>
+					<Icon icon={ searchIcon } />
+					<input
+						id="bkng-desk-q"
+						type="search"
+						value={ query }
+						onChange={ ( e ) => setQuery( e.target.value ) }
+						placeholder={ __(
+							'Nome, codice o camera',
+							'booking-manager'
+						) }
+						autoComplete="off"
 					/>
-					<Kpi
-						label={ __( 'In struttura', 'booking-manager' ) }
-						value={ d.counts.in_house }
-					/>
-					<Kpi
-						label={ __( 'Partenze da fare', 'booking-manager' ) }
-						value={ d.counts.departures_expected }
-					/>
-					<Kpi
-						label={ __( 'Partenze fatte', 'booking-manager' ) }
-						value={ d.counts.departures_done }
-					/>
-				</div>
-			) }
-			<div className="bkng-scan">
-				<Card title={ __( 'Leggi il QR', 'booking-manager' ) }>
-					<Camera onCode={ onCode } paused={ action.busy } />
-					<form
-						className="bkng-row"
-						style={ { marginTop: 14 } }
-						onSubmit={ ( e ) => {
-							e.preventDefault();
-							if ( code.trim() ) {
-								scan( code.trim(), 'manual' );
-							}
-						} }
+					<Button
+						variant="secondary"
+						type="submit"
+						isBusy={ action.busy }
+						disabled={ ! q }
 					>
-						<div style={ { flex: 1 } }>
-							<Text
-								label={ __(
-									'Oppure il codice della prenotazione',
-									'booking-manager'
-								) }
-								value={ code }
-								onChange={ setCode }
-								autoComplete="off"
-							/>
-						</div>
-						<Button
-							variant="secondary"
-							type="submit"
-							isBusy={ action.busy }
-						>
-							{ __( 'Cerca', 'booking-manager' ) }
-						</Button>
-					</form>
-				</Card>
-				<div>
-					<ErrorNotice
-						error={ action.error }
-						onDismiss={ () => action.setError( null ) }
+						{ __( 'Apri', 'booking-manager' ) }
+					</Button>
+				</form>
+				{ camera ? (
+					<Camera
+						start
+						onCode={ onCode }
+						paused={ action.busy }
+						onStop={ () => setCamera( false ) }
 					/>
-					{ answer ? (
-						<Result
-							answer={ answer }
-							busy={ action.busy }
-							onCheckin={ ( b, rooms, dirty ) =>
-								checkin( b, rooms, dirty )
-							}
-							onCheckout={ ( b, rooms ) => checkout( b, rooms ) }
-						/>
-					) : (
-						<div className="bkng-result">
-							<p className="bkng-muted">
-								{ __(
-									'Inquadra il QR della email di conferma o scrivi il codice: qui compare la prenotazione con le camere.',
-									'booking-manager'
-								) }
-							</p>
-						</div>
+				) : (
+					<Button
+						variant="primary"
+						className="bkng-desk__qr"
+						onClick={ () => setCamera( true ) }
+					>
+						{ __(
+							'Scansiona il QR dell’ospite',
+							'booking-manager'
+						) }
+					</Button>
+				) }
+				<p className="bkng-help">
+					{ __(
+						'Il QR è nell’email di conferma. Oppure cerca l’ospite qui sopra o premi «Check-in» nella lista.',
+						'booking-manager'
 					) }
-				</div>
+				</p>
+			</section>
+
+			<div ref={ resultRef } className="bkng-desk__result">
+				<ErrorNotice
+					error={ action.error }
+					onDismiss={ () => action.setError( null ) }
+				/>
+				{ answer && (
+					<Result
+						answer={ answer }
+						busy={ action.busy }
+						onCheckin={ ( b, rooms, dirty ) =>
+							checkin( b, rooms, dirty )
+						}
+						onCheckout={ ( b, rooms ) => checkout( b, rooms ) }
+						onClose={ () => setAnswer( null ) }
+					/>
+				) }
 			</div>
 
 			{ desk.loading && ! d && <Loading /> }
 			<ErrorNotice error={ desk.error } onRetry={ desk.reload } />
-			{ d && (
-				<div className="bkng-grid is-3" style={ { marginTop: 20 } }>
-					<Card title={ __( 'Arrivi', 'booking-manager' ) }>
-						<StayRows
-							rows={ d.arrivals }
-							action
-							label={ __( 'Check-in', 'booking-manager' ) }
-							onRun={ ( r ) =>
-								checkin(
-									r,
-									[ r.booking_room_id ],
-									false,
-									'list'
-								)
-							}
-						/>
-					</Card>
-					<Card title={ __( 'In struttura', 'booking-manager' ) }>
-						<StayRows rows={ d.in_house } />
-					</Card>
-					<Card title={ __( 'Partenze', 'booking-manager' ) }>
-						<StayRows
-							rows={ d.departures }
-							action
-							label={ __( 'Check-out', 'booking-manager' ) }
-							onRun={ ( r ) =>
-								checkout( r, [ r.booking_room_id ], 'list' )
-							}
-						/>
-					</Card>
-				</div>
+			{ found && (
+				<Card className="bkng-desk__day">
+					<Tabs
+						current={ tab }
+						onChange={ setTab }
+						tabs={ [
+							[
+								'arrivals',
+								sprintf(
+									/* translators: %d: arrivals still to do. */
+									__( 'Arrivi (%d)', 'booking-manager' ),
+									todo( 'arrivals' )
+								),
+							],
+							[
+								'in_house',
+								sprintf(
+									/* translators: %d: bookings in house. */
+									__(
+										'In struttura (%d)',
+										'booking-manager'
+									),
+									lists.in_house.length
+								),
+							],
+							[
+								'departures',
+								sprintf(
+									/* translators: %d: departures still to do. */
+									__( 'Partenze (%d)', 'booking-manager' ),
+									todo( 'departures' )
+								),
+							],
+						] }
+					/>
+					{ found[ tab ].length ? (
+						<ul className="bkng-desk__list">
+							{ found[ tab ].map( ( g ) => (
+								<Guest
+									key={ g.booking_id }
+									group={ g }
+									kind={ tab }
+									busy={ action.busy }
+									onRun={ ( group, rooms ) =>
+										tab === 'arrivals'
+											? checkin(
+													group,
+													rooms.map(
+														( r ) =>
+															r.booking_room_id
+													),
+													false,
+													'list'
+											  )
+											: checkout(
+													group,
+													rooms.map(
+														( r ) =>
+															r.booking_room_id
+													),
+													'list'
+											  )
+									}
+								/>
+							) ) }
+						</ul>
+					) : (
+						<p className="bkng-muted bkng-desk__empty">
+							{ q
+								? __(
+										'Nessun ospite di oggi corrisponde: premi «Apri» per cercare il codice.',
+										'booking-manager'
+								  )
+								: KIND[ tab ].empty }
+						</p>
+					) }
+				</Card>
 			) }
 			{ d && d.recent.length > 0 && (
-				<Card
-					title={ __(
-						'Ultime operazioni di oggi',
-						'booking-manager'
-					) }
-				>
+				<details className="bkng-desk__recent">
+					<summary>
+						{ __( 'Ultime operazioni di oggi', 'booking-manager' ) }
+					</summary>
 					<ul className="bkng-list">
 						{ d.recent.map( ( r ) => (
 							<li key={ r.id }>
@@ -579,7 +764,7 @@ export default function FrontDesk() {
 							</li>
 						) ) }
 					</ul>
-				</Card>
+				</details>
 			) }
 		</Page>
 	);

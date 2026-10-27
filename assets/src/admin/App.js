@@ -74,7 +74,7 @@ const NAV = [
 			},
 			{
 				path: '/frontdesk',
-				label: __( 'Reception', 'booking-manager' ),
+				label: __( 'Check-in / out', 'booking-manager' ),
 				cap: 'bkng_checkin',
 				icon: checkIcon,
 			},

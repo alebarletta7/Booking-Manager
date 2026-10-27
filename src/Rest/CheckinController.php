@@ -46,7 +46,7 @@ class CheckinController extends RestController {
 			$base . '/frontdesk',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->service->overview( (int) $r['property_id'] ) ),
+				'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->service->overview( (int) $r['property_id'], $this->policy->can( 'bkng_view_payments', (int) $r['property_id'] ) ) ),
 				'permission_callback' => $desk,
 			)
 		);

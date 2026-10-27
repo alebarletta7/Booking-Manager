@@ -209,6 +209,11 @@ final class CheckinTest extends TestCase {
 
 		$overview = $this->desk()->overview( $p['id'] );
 		$this->assertSame( 1, $overview['counts']['in_house'] );
+		$row = $overview['in_house'][0];
+		$this->assertSame( $t['type']['name'], $row['room_type'], 'the desk list says which room type' );
+		$this->assertGreaterThan( 0, $row['nights'] );
+		$this->assertArrayNotHasKey( 'balance', $row, 'amounts only for who sees payments' );
+		$this->assertArrayHasKey( 'balance_label', $this->desk()->overview( $p['id'], true )['in_house'][0] );
 
 		$this->assertSame( CheckinService::OK, $this->desk()->check_out( $p['id'], $b['id'], $user )['result'] );
 		$this->assertSame( 'completed', $this->booking( $b['id'] )['status'] );

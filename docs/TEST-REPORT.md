@@ -1,4 +1,4 @@
-# Report dei test — Booking Manager 0.1.7 (Fase 2)
+# Report dei test — Booking Manager 0.1.8 (Fase 2)
 
 Data: 27 ottobre 2026 · ramo `fase-2/sviluppo`
 
@@ -18,7 +18,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 87 test, 1.027 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 87 test, 1.031 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|
@@ -43,8 +43,8 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 |---|---|
 | `php -l` su tutti i file PHP del pacchetto | SUPERATO |
 | ESLint (`@wordpress/eslint-plugin`) su `assets/src` | SUPERATO (0 errori) |
-| Build `npm run build` | SUPERATO (admin ~335 KB, modulo pubblico ~56 KB con sole dipendenze `wp-element` e `wp-i18n`) |
-| Generazione `languages/booking-manager.pot` | SUPERATO (1.441 testi) |
+| Build `npm run build` | SUPERATO (admin ~338 KB, modulo pubblico ~56 KB con sole dipendenze `wp-element` e `wp-i18n`) |
+| Generazione `languages/booking-manager.pot` | SUPERATO (1.448 testi) |
 
 ## 3. Prove manuali su WordPress (browser)
 
@@ -66,6 +66,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Pagina dopo la prenotazione (1280 px e 390 px, anche con le regole di Astra) nello stile dell'email; tema che stampa la pagina da bordo a bordo: il modulo prende 16 px di margine | SUPERATO |
 | Primo giorno proposto dal modulo dopo l'orario limite di oggi: domani | SUPERATO |
 | Pagina della prenotazione dal link (1280 px e 390 px, con le regole di Astra) nello stile delle email | SUPERATO |
+| Check-in (1366 px e telefono 400 px): dalla dashboard «Check-in (1)» apre la pagina; la ricerca «luc» filtra la lista; «Check-in» sulla riga registra l'ospite («Fatto», camera in soggiorno, saldo da incassare mostrato); su telefono la barra in alto scorre via con la pagina e i numeri della dashboard sono su due colonne | SUPERATO (lettura del QR con la fotocamera di un telefono vero NON ESEGUITA: in questo ambiente non c'è una fotocamera) |
 | Richiesta accettata in locale: pulsante «Aggiungi al calendario» nella pagina della prenotazione (1280 px e 390 px con le regole di Astra), scarica `prenotazione-CODICE.ics` con date, indirizzo e orari | SUPERATO (importazione nei calendari reali di iPhone, Google e Outlook NON ESEGUITA) |
 | Email «Richiesta accettata: completa il pagamento» (anteprima): titolo, riepilogo, pulsante «Completa il pagamento» | SUPERATO |
 | Pagamento di una richiesta accettata con Stripe/Nexi sandbox | NON ESEGUITO (fornitori non raggiungibili da questo ambiente; provato con il fornitore finto nei test automatici) |
@@ -76,7 +77,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 4. Pacchetto ZIP
 
-`bin/build-zip.sh` → `dist/booking-manager-0.1.7.zip` (525 KB, 175 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
+`bin/build-zip.sh` → `dist/booking-manager-0.1.8.zip` (527 KB, 175 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
 
 | Prova su WordPress 6.6 pulito (WP-CLI) | Esito |
 |---|---|

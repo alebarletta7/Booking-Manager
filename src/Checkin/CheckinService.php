@@ -224,11 +224,12 @@ class CheckinService {
 
 	/**
 	 * The front desk screen: arrivals, guests in house and departures of today, latest
-	 * attempts.
+	 * attempts. With $with_money (who may see payments) each stay carries what is still
+	 * to collect.
 	 *
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public function overview( int $property_id ): array|\WP_Error {
+	public function overview( int $property_id, bool $with_money = false ): array|\WP_Error {
 		$property = $this->properties->find( $property_id );
 		if ( ! $property ) {
 			return self::property_not_found();
@@ -242,9 +243,15 @@ class CheckinService {
 		foreach ( $this->units->for_property( $property_id, true ) as $u ) {
 			$units[ (int) $u['id'] ] = $u;
 		}
-		$row = static function ( array $s ) use ( $units ): array {
-			$unit = $s['unit_id'] ? ( $units[ (int) $s['unit_id'] ] ?? null ) : null;
-			return array(
+		$types = array();
+		$row   = function ( array $s ) use ( $units, &$types, $with_money ): array {
+			$unit    = $s['unit_id'] ? ( $units[ (int) $s['unit_id'] ] ?? null ) : null;
+			$type_id = (int) $s['room_type_id'];
+			if ( ! array_key_exists( $type_id, $types ) ) {
+				$type              = $this->types->find( $type_id );
+				$types[ $type_id ] = $type ? (string) $type['name'] : '';
+			}
+			$out = array(
 				'booking_id'      => (int) $s['booking_id'],
 				'booking_room_id' => (int) $s['id'],
 				'code'            => (string) $s['code'],
@@ -261,7 +268,14 @@ class CheckinService {
 					'op_label'  => OpStatus::label( (string) $unit['op_status'] ),
 				) : null,
 				'version'         => (int) $s['booking_version'],
+				'room_type'       => $types[ $type_id ],
+				'nights'          => Dates::count( (string) $s['arrival'], (string) $s['departure'] ),
 			);
+			if ( $with_money ) {
+				$out['balance']       = (int) $s['balance'];
+				$out['balance_label'] = Money::format( (int) $s['balance'], (string) ( $s['currency'] ?? 'EUR' ) );
+			}
+			return $out;
 		};
 		foreach ( $this->bookings->stays_between( $property_id, $today, Dates::add_days( $today, 1 ) ) as $s ) {
 			if ( in_array( $s['status'], array( BookingStatus::PENDING, BookingStatus::OPTION ), true ) ) {

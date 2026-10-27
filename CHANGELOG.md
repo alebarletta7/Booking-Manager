@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.8] — 27 ottobre 2026
+
+### Novità
+
+- Check-in più semplice. La voce del menu ora si chiama «Check-in / out». In alto c'è un solo campo per cercare l'ospite per nome, codice o camera: la lista si filtra mentre scrivi e Invio apre la prenotazione. Sotto c'è il pulsante grande «Scansiona il QR dell'ospite».
+- Arrivi, ospiti in struttura e partenze di oggi sono in schede con il numero di quelli da fare. Ogni prenotazione è una riga con le camere, gli ospiti, le notti, quanto c'è da incassare e se la camera non è pronta, più un solo pulsante «Check-in» o «Check-out» per tutte le sue camere. L'esito compare in alto e si può chiudere.
+- Dashboard: pulsante «Check-in» in alto, con il numero di arrivi ancora da fare, e il collegamento «Fai il check-in» sulla scheda degli arrivi.
+
+### Correzioni
+
+- Su telefono la barra in alto (menu, struttura, «Nuova prenotazione») non resta più fissa sopra la pagina: scorre via con il contenuto.
+- Dashboard su telefono: i riquadri dei numeri sono su due colonne invece di uno sotto l'altro.
+
 ## [0.1.7] — 27 ottobre 2026
 
 ### Novità
