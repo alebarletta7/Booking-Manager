@@ -1,6 +1,6 @@
 <?php
 /**
- * The look of a property's e-mails, chosen in Messaggi → Aspetto: logo, header photo,
+ * The look of a property's e-mails, chosen in Email → Aspetto: logo, header photo,
  * colours, background and the short sentences of header and footer.
  *
  * Images travel inside the e-mail (cid), never as links to the site: logo and photo from

@@ -1,4 +1,4 @@
-# Report dei test — Booking Manager 0.1.9 (Fase 2)
+# Report dei test — Booking Manager 0.1.10 (Fase 2)
 
 Data: 27 ottobre 2026 · ramo `fase-2/sviluppo`
 
@@ -63,7 +63,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Scheda della camera (1400 px e 390 px, anche con le regole di Astra): le foto della lista non si aprono; «Seleziona» apre la scheda con galleria, foto a schermo intero (Esc chiude solo le foto), servizi, tariffe con colazione, cancellazione e caparra; servizi aggiuntivi per tariffa (colazione 12 € a persona a notte solo sulla non rimborsabile, cancellazione gratuita 10% fino a 7 giorni prima); totale ricalcolato dal server: 256,50 € + 25,65 € = 282,15 €, + colazione 72 € = 354,15 €; condizioni della tariffa che diventano «cancellazione gratuita fino a 7 giorni prima»; «Prenota» porta al riepilogo con i servizi scelti | SUPERATO |
 | Tariffe → Supplementi e sconti: campo dei giorni di cancellazione gratuita, salvataggio e lista | SUPERATO |
 | Email nella nuova grafica (anteprima e invio di prova in locale, 800 px e 390 px): intestazione con foto, riepilogo con icone nel colore scelto, pulsante, piè di pagina; colonne una sotto l'altra su telefono | SUPERATO (resa nei programmi di posta reali come Gmail e Outlook NON ESEGUITA: nessun server di posta raggiungibile da questo ambiente) |
-| Messaggi → Aspetto: sottotitolo, frase, colore, anteprima dal vivo su computer e telefono, salvataggio | SUPERATO |
+| Email → Aspetto (prima «Messaggi»): sottotitolo, frase, colore, anteprima dal vivo su computer e telefono, salvataggio | SUPERATO |
 | Pagina dopo la prenotazione (1280 px e 390 px, anche con le regole di Astra) nello stile dell'email; tema che stampa la pagina da bordo a bordo: il modulo prende 16 px di margine | SUPERATO |
 | Primo giorno proposto dal modulo dopo l'orario limite di oggi: domani | SUPERATO |
 | Pagina della prenotazione dal link (1280 px e 390 px, con le regole di Astra) nello stile delle email | SUPERATO |
@@ -82,7 +82,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 4. Pacchetto ZIP
 
-`bin/build-zip.sh` → `dist/booking-manager-0.1.9.zip` (568 KB, 183 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
+`bin/build-zip.sh` → `dist/booking-manager-0.1.10.zip` (568 KB, 183 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
 
 | Prova su WordPress 6.6 pulito (WP-CLI) | Esito |
 |---|---|

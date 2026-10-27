@@ -112,9 +112,15 @@ const NAV = [
 			},
 			{
 				path: '/messages',
-				label: __( 'Messaggi', 'booking-manager' ),
+				label: __( 'Email', 'booking-manager' ),
 				cap: 'bkng_view_bookings',
 				icon: inboxIcon,
+			},
+			{
+				path: '/whatsapp',
+				label: __( 'WhatsApp', 'booking-manager' ),
+				cap: 'bkng_manage_settings',
+				icon: whatsappIcon,
 			},
 		],
 	},
@@ -126,12 +132,6 @@ const NAV = [
 				label: __( 'Struttura', 'booking-manager' ),
 				cap: 'bkng_manage_property_settings',
 				icon: storeIcon,
-			},
-			{
-				path: '/whatsapp',
-				label: __( 'WhatsApp', 'booking-manager' ),
-				cap: 'bkng_manage_settings',
-				icon: whatsappIcon,
 			},
 			{
 				path: '/staff',

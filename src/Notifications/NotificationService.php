@@ -478,7 +478,7 @@ class NotificationService {
 	 * Preview of a guest e-mail with the texts being edited (not saved), built on a real
 	 * booking of the property when there is one, or on example values never saved.
 	 *
-	 * @param array<string, mixed> $design look of the e-mails being edited (Messaggi → Aspetto), not saved
+	 * @param array<string, mixed> $design look of the e-mails being edited (Email → Aspetto), not saved
 	 * @return array{subject: string, html: string, defaults: array<string, string>, example: bool}|\WP_Error
 	 */
 	public function preview( int $property_id, string $key, ?string $subject = null, ?string $body = null, array $design = array() ): array|\WP_Error {

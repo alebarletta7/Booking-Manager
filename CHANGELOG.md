@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10] — 27 ottobre 2026
+
+### Modifiche
+
+- Menu: la voce «Messaggi» si chiama ora «Email» e «WhatsApp» è subito sotto, nel gruppo «Gestione».
+- Il registro della pagina Email mostra solo le email: i messaggi WhatsApp sono nel registro della pagina WhatsApp.
+
 ## [0.1.9] — 27 ottobre 2026
 
 ### Novità

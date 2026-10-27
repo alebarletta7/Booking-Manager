@@ -123,7 +123,7 @@ class NotificationsController extends RestController {
 				'callback'            => function ( \WP_REST_Request $r ) {
 					$subject = $r->get_param( 'subject' );
 					$body    = $r->get_param( 'body' );
-					// The look being edited in Messaggi → Aspetto, not saved: only the e-mail keys.
+					// The look being edited in Email → Aspetto, not saved: only the e-mail keys.
 					$design = array_filter( (array) $r->get_param( 'design' ), static fn( $k ) => is_string( $k ) && str_starts_with( $k, 'email_' ), ARRAY_FILTER_USE_KEY );
 					return self::respond( $this->service->preview( (int) $r['property_id'], (string) $r['key'], null === $subject ? null : sanitize_text_field( (string) $subject ), null === $body ? null : sanitize_textarea_field( (string) $body ), $design ) );
 				},

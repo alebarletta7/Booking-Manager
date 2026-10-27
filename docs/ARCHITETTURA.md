@@ -96,7 +96,7 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 
 ## Email
 
-`Notifications\EmailDesign` scrive l'HTML (tabelle e stili in linea, colonne che si impilano su telefono); `Notifications\EmailBrand` porta l'aspetto scelto in Messaggi → Aspetto (impostazioni `email_*` della struttura). Logo, foto e icone sono allegati in linea (`cid:`): le icone di `assets/email` sono tracciate in nero e prendono il colore scelto con GD al momento dell'invio (senza GD l'email esce senza icone). L'anteprima nel gestionale sostituisce i `cid:` con indirizzi `data:`.
+`Notifications\EmailDesign` scrive l'HTML (tabelle e stili in linea, colonne che si impilano su telefono); `Notifications\EmailBrand` porta l'aspetto scelto in Email → Aspetto (impostazioni `email_*` della struttura). Logo, foto e icone sono allegati in linea (`cid:`): le icone di `assets/email` sono tracciate in nero e prendono il colore scelto con GD al momento dell'invio (senza GD l'email esce senza icone). L'anteprima nel gestionale sostituisce i `cid:` con indirizzi `data:`.
 
 ## Privacy e registri
 

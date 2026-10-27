@@ -1,5 +1,5 @@
 /**
- * Messages: the log of e-mails (and WhatsApp, when connected) with retries, the texts of
+ * Email: the log of e-mails with retries (WhatsApp has its own section), the texts of
  * the property in every language with a preview, their look (logo, photo, colours) and
  * a test e-mail.
  */
@@ -52,6 +52,8 @@ function Log( { property } ) {
 	const list = useLoad(
 		() =>
 			getPaged( '/properties/' + property.id + '/notifications', {
+				// WhatsApp messages have their own log (WhatsApp → Registro).
+				channel: 'email',
 				status,
 				page,
 				per_page: PER_PAGE,
@@ -63,7 +65,7 @@ function Log( { property } ) {
 	return (
 		<Card
 			className="is-flush"
-			title={ __( 'Registro dei messaggi', 'booking-manager' ) }
+			title={ __( 'Registro delle email', 'booking-manager' ) }
 			actions={
 				<Select
 					label={ __( 'Stato', 'booking-manager' ) }
@@ -884,7 +886,7 @@ export default function Messages() {
 	const [ tab, setTab ] = useState( 'log' );
 	const settings = can( 'bkng_manage_property_settings' );
 	return (
-		<Page title={ __( 'Messaggi', 'booking-manager' ) }>
+		<Page title={ __( 'Email', 'booking-manager' ) }>
 			{ settings && (
 				<Tabs
 					current={ tab }

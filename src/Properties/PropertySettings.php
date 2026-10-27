@@ -62,7 +62,7 @@ final class PropertySettings {
 			'reminder_days'         => 2,
 			'send_pre_arrival'      => true,
 			'send_checkin_confirmation' => false,
-			// Look of the e-mails (Messaggi → Aspetto). Images are media library ids; the
+			// Look of the e-mails (Email → Aspetto). Images are media library ids; the
 			// header photo 0 = the first photo of the rooms, -1 = none. Colours #rrggbb or
 			// empty for the defaults (the form's colour, then the green of Booking Manager).
 			'email_logo_id'         => 0,
