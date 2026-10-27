@@ -128,7 +128,18 @@ class NotificationService {
 
 	/** @param array<string, mixed> $ctx */
 	public function on_updated( int $booking_id, array $ctx ): void {
-		if ( 'stay' !== ( $ctx['change'] ?? '' ) || empty( $ctx['notify'] ) ) {
+		if ( empty( $ctx['notify'] ) ) {
+			return;
+		}
+		if ( 'accepted' === ( $ctx['change'] ?? '' ) ) {
+			// Request accepted, the guest pays online: the confirmation comes with the payment.
+			$booking = $this->bookings->find( $booking_id );
+			if ( $booking && BookingStatus::OPTION === $booking['status'] ) {
+				$this->queue_guest( NotificationTemplates::GUEST_ACCEPTED, $booking );
+			}
+			return;
+		}
+		if ( 'stay' !== ( $ctx['change'] ?? '' ) ) {
 			return;
 		}
 		$booking = $this->bookings->find( $booking_id );

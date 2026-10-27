@@ -16,15 +16,18 @@ namespace BookingManager\Notifications;
 
 use BookingManager\Bookings\BookingRepository;
 use BookingManager\Bookings\BookingStatus;
+use BookingManager\Bookings\CalendarFile;
 use BookingManager\Core\Money;
 use BookingManager\Core\QrCode;
 use BookingManager\Inventory\RoomTypeRepository;
+use BookingManager\Payments\PaymentService;
 
 defined( 'ABSPATH' ) || exit;
 
 class NotificationTemplates {
 
 	public const GUEST_RECEIVED   = 'guest_received';
+	public const GUEST_ACCEPTED   = 'guest_accepted';
 	public const GUEST_CONFIRMED  = 'guest_confirmed';
 	public const GUEST_UPDATED    = 'guest_updated';
 	public const GUEST_CANCELLED  = 'guest_cancelled';
@@ -33,6 +36,9 @@ class NotificationTemplates {
 	public const GUEST_CHECKED_IN = 'guest_checked_in';
 	public const STAFF_NEW        = 'staff_new';
 	public const STAFF_CANCELLED  = 'staff_cancelled';
+
+	/** Guest e-mails that carry the stay as a calendar file (.ics), as in Beach Manager. */
+	public const WITH_CALENDAR = array( self::GUEST_CONFIRMED, self::GUEST_UPDATED, self::GUEST_PRE_ARRIVAL, self::GUEST_PAYMENT );
 
 	public const PLACEHOLDERS = array( '{nome}', '{struttura}', '{codice}', '{arrivo}', '{partenza}', '{notti}', '{ospiti}', '{totale}', '{saldo}', '{checkin_dalle}', '{checkin_alle}', '{checkout_entro}' );
 
@@ -46,6 +52,7 @@ class NotificationTemplates {
 	public static function labels(): array {
 		return array(
 			self::GUEST_RECEIVED    => __( 'Richiesta ricevuta', 'booking-manager' ),
+			self::GUEST_ACCEPTED    => __( 'Richiesta accettata: completa il pagamento', 'booking-manager' ),
 			self::GUEST_CONFIRMED   => __( 'Prenotazione confermata', 'booking-manager' ),
 			self::GUEST_UPDATED     => __( 'Prenotazione modificata', 'booking-manager' ),
 			self::GUEST_CANCELLED   => __( 'Prenotazione annullata', 'booking-manager' ),
@@ -74,6 +81,12 @@ class NotificationTemplates {
 				'title'   => __( 'Abbiamo ricevuto la tua richiesta', 'booking-manager' ),
 				'intro'   => __( "Ciao {nome},\nla tua richiesta per il soggiorno dal {arrivo} al {partenza} è arrivata. La controlliamo e ti scriviamo appena è confermata.", 'booking-manager' ),
 			),
+			self::GUEST_ACCEPTED    => array(
+				'subject' => __( 'Richiesta accettata: completa il pagamento – {struttura}', 'booking-manager' ),
+				'title'   => __( 'Richiesta accettata: manca solo il pagamento', 'booking-manager' ),
+				'intro'   => __( "Ciao {nome},
+buone notizie: abbiamo accettato la tua richiesta per il soggiorno dal {arrivo} al {partenza} e le camere sono riservate per te. Completa il pagamento online per confermare la prenotazione: appena arriva ti mandiamo la conferma.", 'booking-manager' ),
+			),
 			self::GUEST_UPDATED     => array(
 				'subject' => __( 'Prenotazione modificata – {struttura}', 'booking-manager' ),
 				'title'   => __( 'La tua prenotazione è stata modificata', 'booking-manager' ),
@@ -92,7 +105,7 @@ class NotificationTemplates {
 			self::GUEST_PAYMENT     => array(
 				'subject' => __( 'Pagamento ricevuto – {struttura}', 'booking-manager' ),
 				'title'   => __( 'Grazie, abbiamo ricevuto il pagamento', 'booking-manager' ),
-				'intro'   => __( "Ciao {nome},\nabbiamo registrato il tuo pagamento per la prenotazione {codice}. Saldo ancora da pagare: {saldo}.", 'booking-manager' ),
+				'intro'   => __( "Ciao {nome},\nabbiamo registrato il tuo pagamento per la prenotazione {codice}. Qui sotto trovi il totale e quanto hai già pagato.", 'booking-manager' ),
 			),
 			self::GUEST_CHECKED_IN  => array(
 				'subject' => __( 'Benvenuto a {struttura}', 'booking-manager' ),
@@ -127,6 +140,7 @@ class NotificationTemplates {
 		$status = (string) $booking['status'];
 		return match ( $key ) {
 			self::GUEST_RECEIVED                         => in_array( $status, array( BookingStatus::PENDING, BookingStatus::OPTION ), true ),
+			self::GUEST_ACCEPTED                         => BookingStatus::OPTION === $status,
 			self::GUEST_CONFIRMED, self::GUEST_UPDATED   => in_array( $status, array( BookingStatus::CONFIRMED, BookingStatus::IN_HOUSE ), true ),
 			self::GUEST_PRE_ARRIVAL                      => BookingStatus::CONFIRMED === $status,
 			self::GUEST_CANCELLED, self::STAFF_CANCELLED => BookingStatus::CANCELLED === $status,
@@ -216,6 +230,11 @@ class NotificationTemplates {
 				'url'   => (string) $links['admin_url'],
 				'label' => __( 'Apri la prenotazione', 'booking-manager' ),
 			);
+		} elseif ( ! $staff && ! empty( $links['manage_url'] ) && self::GUEST_ACCEPTED === $key ) {
+			$button = array(
+				'url'   => (string) $links['manage_url'],
+				'label' => __( 'Completa il pagamento', 'booking-manager' ),
+			);
 		} elseif ( ! $staff && ! empty( $links['manage_url'] ) && self::GUEST_CANCELLED !== $key ) {
 			$button = array(
 				'url'   => (string) $links['manage_url'],
@@ -226,6 +245,10 @@ class NotificationTemplates {
 		if ( self::GUEST_CANCELLED === $key && ! empty( $booking['cancel_reason'] ) && ! $staff ) {
 			/* translators: %s: reason of the cancellation. */
 			$note = sprintf( __( 'Motivo: %s', 'booking-manager' ), (string) $booking['cancel_reason'] );
+		} elseif ( self::GUEST_ACCEPTED === $key && ! empty( $booking['option_expires_at'] ) ) {
+			$until = wp_date( 'j F Y, H:i', (int) strtotime( $booking['option_expires_at'] . ' UTC' ), new \DateTimeZone( (string) ( $property['timezone'] ?? 'UTC' ) ) );
+			/* translators: %s: date and time. */
+			$note = sprintf( __( 'Le camere restano riservate fino al %s: se il pagamento non arriva entro allora la richiesta viene annullata.', 'booking-manager' ), $until );
 		} elseif ( $staff && ! empty( $booking['customer_notes'] ) ) {
 			/* translators: %s: the guest's notes. */
 			$note = sprintf( __( 'Note dell\'ospite: %s', 'booking-manager' ), (string) $booking['customer_notes'] );
@@ -256,7 +279,17 @@ class NotificationTemplates {
 			$text .= "\n" . $button['label'] . ': ' . $button['url'] . "\n";
 		}
 		$text .= "\n" . (string) $property['name'];
-		return new Message( $key, $audience, $recipient, $property, $booking, $texts['subject'], $text, $html, self::vars( $booking, $property ), $inline );
+		$files = array();
+		if ( ! $staff && in_array( $key, self::WITH_CALENDAR, true ) && self::in_calendar( $booking ) ) {
+			$files[] = CalendarFile::for_booking( $booking, $property, time() );
+		}
+		return new Message( $key, $audience, $recipient, $property, $booking, $texts['subject'], $text, $html, self::vars( $booking, $property ), $inline, $files );
+	}
+
+	/** A stay worth a calendar event: confirmed (or under way) with its dates. */
+	public static function in_calendar( array $booking ): bool {
+		return in_array( (string) ( $booking['status'] ?? '' ), array( BookingStatus::CONFIRMED, BookingStatus::IN_HOUSE ), true )
+			&& ! empty( $booking['arrival'] ) && ! empty( $booking['departure'] );
 	}
 
 	/**
@@ -311,9 +344,16 @@ class NotificationTemplates {
 		}
 		if ( self::GUEST_CANCELLED !== $key && self::STAFF_CANCELLED !== $key ) {
 			$rows[] = array( __( 'Totale', 'booking-manager' ), $v['{totale}'], 'coins' );
+			$now    = self::GUEST_ACCEPTED === $key ? PaymentService::online_amount( $booking, (string) ( $property['settings']['online_payment'] ?? 'full' ) ) : 0;
+			if ( $now > 0 && $now < (int) $booking['balance'] ) {
+				// A deposit: what is paid now, the rest as the property says.
+				$rows[] = array( __( 'Da pagare ora (acconto)', 'booking-manager' ), Money::format( $now, (string) $booking['currency'] ), 'card' );
+			}
 			if ( (int) $booking['paid'] - (int) $booking['refunded'] > 0 ) {
 				$rows[] = array( __( 'Già pagato', 'booking-manager' ), Money::format( (int) $booking['paid'] - (int) $booking['refunded'], (string) $booking['currency'] ), 'card' );
-				$rows[] = array( __( 'Saldo', 'booking-manager' ), $v['{saldo}'], 'coins' );
+				if ( (int) $booking['balance'] > 0 ) {
+					$rows[] = array( __( 'Da pagare', 'booking-manager' ), $v['{saldo}'], 'coins' );
+				}
 			}
 		}
 		$rows[]  = array( __( 'Codice prenotazione', 'booking-manager' ), $v['{codice}'], 'tag' );

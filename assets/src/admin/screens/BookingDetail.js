@@ -53,6 +53,20 @@ const STATUS_ACTIONS = {
 	pending: __( 'Rimetti in attesa', 'booking-manager' ),
 };
 
+// A guest's request when the property takes online payments: accepting it holds the
+// rooms and asks the guest to pay; the payment confirms it.
+const ACCEPT_AND_PAY = __( 'Accetta e chiedi il pagamento', 'booking-manager' );
+
+function statusLabel( booking, to ) {
+	if ( booking.status === 'in_house' && to === 'confirmed' ) {
+		return __( 'Annulla il check-in', 'booking-manager' );
+	}
+	if ( to === 'confirmed' && booking.accept_to === 'option' ) {
+		return ACCEPT_AND_PAY;
+	}
+	return STATUS_ACTIONS[ to ];
+}
+
 // Same mapping as BookingsController::STATUS_CAPS.
 const STATUS_CAPS = {
 	pending: 'bkng_edit_booking',
@@ -66,6 +80,10 @@ const STATUS_CAPS = {
 
 const TEMPLATES = {
 	guest_received: __( 'Richiesta ricevuta', 'booking-manager' ),
+	guest_accepted: __(
+		'Richiesta accettata: completa il pagamento',
+		'booking-manager'
+	),
 	guest_confirmed: __( 'Prenotazione confermata', 'booking-manager' ),
 	guest_updated: __( 'Prenotazione modificata', 'booking-manager' ),
 	guest_cancelled: __( 'Prenotazione annullata', 'booking-manager' ),
@@ -94,13 +112,18 @@ function StatusModal( { booking, to, onClose, onDone } ) {
 			'booking-manager'
 		),
 	};
+	if ( to === 'confirmed' && booking.accept_to === 'option' ) {
+		texts.confirmed = __(
+			"Le camere restano riservate all'ospite, che riceve una email per pagare online. La prenotazione si conferma da sola quando arriva il pagamento, e solo allora parte la mail di conferma.",
+			'booking-manager'
+		);
+	}
+	const label = statusLabel( booking, to );
 	return (
 		<Confirm
-			title={ STATUS_ACTIONS[ to ] || BOOKING_STATUS[ to ] }
+			title={ label || BOOKING_STATUS[ to ] }
 			text={ texts[ to ] }
-			confirmLabel={
-				STATUS_ACTIONS[ to ] || __( 'Conferma', 'booking-manager' )
-			}
+			confirmLabel={ label || __( 'Conferma', 'booking-manager' ) }
 			destructive={ to === 'cancelled' || to === 'no_show' }
 			reasonLabel={
 				needsReason
@@ -1025,12 +1048,7 @@ export default function BookingDetail( { params } ) {
 									setModal( { kind: 'status', to: s } )
 								}
 							>
-								{ b.status === 'in_house' && s === 'confirmed'
-									? __(
-											'Annulla il check-in',
-											'booking-manager'
-									  )
-									: STATUS_ACTIONS[ s ] }
+								{ statusLabel( b, s ) }
 							</Button>
 						) ) }
 				</>

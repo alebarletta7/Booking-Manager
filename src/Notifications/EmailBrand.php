@@ -122,12 +122,13 @@ final class EmailBrand {
 		imagecopyresampled( $out, $src, 0, 0, (int) ( ( $sw - $cw ) / 2 ), (int) ( ( $sh - $ch ) / 2 ), $w, $h, $cw, $ch );
 		[ $r, $g, $b ] = self::rgb( $background );
 		imagealphablending( $out, true );
-		$span = 'top' === $fade ? (int) ( $h * 0.45 ) : (int) ( $w * 0.45 );
+		// A long, even veil: no edge by the text, then the photo comes out little by
+		// little under the colour.
+		$span = 'top' === $fade ? (int) ( $h * 0.85 ) : (int) ( $w * 0.85 );
 		for ( $i = 0; $i < $span; $i++ ) {
-			// Smooth: solid at the edge, gone at $span.
-			$t     = $i / $span;
-			$alpha = (int) round( 127 * ( $t * $t * ( 3 - 2 * $t ) ) );
-			$color = imagecolorallocatealpha( $out, $r, $g, $b, $alpha );
+			$t       = $i / $span;
+			$opacity = 1 - $t * $t * ( 3 - 2 * $t );
+			$color   = imagecolorallocatealpha( $out, $r, $g, $b, (int) round( 127 * ( 1 - $opacity ) ) );
 			if ( 'top' === $fade ) {
 				imageline( $out, 0, $i, $w - 1, $i, $color );
 			} else {

@@ -18,7 +18,14 @@ import {
 import { Captcha } from './Captcha';
 import { Hero, Results, SearchBar } from './Results';
 import { Icon } from './icons';
-import { LONG, StayFooter, StayHead, StaySummary, stayItems } from './StayCard';
+import {
+	CalendarLink,
+	LONG,
+	StayFooter,
+	StayHead,
+	StaySummary,
+	stayItems,
+} from './StayCard';
 import { Check, ErrorBox, Field, Spinner } from './ui';
 
 function newRequestId() {
@@ -499,6 +506,7 @@ function Done( { property, result } ) {
 					  ) }
 			</p>
 			<StaySummary items={ stayItems( b ) } />
+			<CalendarLink file={ b.calendar } />
 			{ result.manage_url && (
 				<p className="bkng-p-done__go">
 					<a

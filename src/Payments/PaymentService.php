@@ -1122,6 +1122,33 @@ class PaymentService {
 	}
 
 	/**
+	 * What the guest pays online now: the deposit still missing (mode deposit), or all
+	 * that is due.
+	 *
+	 * @param array<string, mixed> $booking
+	 */
+	public static function online_amount( array $booking, string $mode ): int {
+		$t = self::totals( $booking );
+		return 'deposit' === $mode && $t['deposit_missing'] > 0 ? $t['deposit_missing'] : $t['due'];
+	}
+
+	/**
+	 * Whether a guest's request, once accepted, waits for the guest's online payment: the
+	 * property takes payments online (mode and an active account) and there is something
+	 * to pay. Answers the filter bkng_accept_status.
+	 *
+	 * @param array<string, mixed> $booking
+	 * @param array<string, mixed> $property
+	 */
+	public function accept_status( string $status, array $booking, array $property ): string {
+		$mode = (string) ( $property['settings']['online_payment'] ?? 'none' );
+		if ( 'none' === $mode || empty( $property['id'] ) || null === $this->accounts->active_online_account( (int) $property['id'] ) ) {
+			return $status;
+		}
+		return self::online_amount( $booking, $mode ) >= self::MIN_ONLINE_CENTS ? BookingStatus::OPTION : $status;
+	}
+
+	/**
 	 * deposit when the amount covers only part of the total and the booking asks for a
 	 * deposit not yet collected; balance when something was already paid; full otherwise.
 	 *

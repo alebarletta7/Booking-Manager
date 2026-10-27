@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.7] — 27 ottobre 2026
+
+### Novità
+
+- Prenotazioni su richiesta («accetto io le richieste») con pagamento online attivo: quando accetti una richiesta le camere restano riservate all'ospite, che riceve l'email «Richiesta accettata: completa il pagamento» con il pulsante per pagare e la scadenza. La conferma parte solo quando il pagamento arriva. Se il pagamento non arriva entro le ore dell'opzione la richiesta viene annullata e le camere tornano libere. Nella scheda della prenotazione il pulsante diventa «Accetta e chiedi il pagamento».
+- Calendario come in Beach Manager: le email di conferma, modifica, promemoria e pagamento hanno in allegato il soggiorno come file per il calendario (.ics: dal giorno di arrivo a quello di partenza, con indirizzo e orari di check-in e check-out). Nella pagina della prenotazione e dopo una prenotazione confermata c'è il pulsante «Aggiungi al calendario».
+- Nuovo messaggio modificabile in Messaggi: «Richiesta accettata: completa il pagamento».
+
+### Correzioni
+
+- Email: al posto di «Saldo» ora ci sono «Totale», «Già pagato» e «Da pagare» (le ultime due solo se c'è già un pagamento), come nella pagina della prenotazione.
+- Email: la foto dell'intestazione sfuma in modo uniforme nel colore di sfondo, senza stacchi.
+
 ## [0.1.6] — 26 ottobre 2026
 
 ### Novità

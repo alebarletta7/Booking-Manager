@@ -21,7 +21,7 @@ Poi **Verifica** (il plugin chiama il fornitore con la chiave) e **Usa per i pag
 
 Impostazioni della struttura:
 
-- **Pagamento online**: nessuno, solo caparra, oppure intero importo. Vale per le strutture con prenotazione diretta; con «su richiesta» lo staff conferma prima e poi può mandare un link di pagamento.
+- **Pagamento online**: nessuno, solo caparra, oppure intero importo. Con la prenotazione diretta l'ospite paga subito dal modulo; con «su richiesta» paga dopo che lo staff ha accettato la richiesta (vedi sotto).
 - **Saldo**: quanti giorni prima dell'arrivo va pagato il resto.
 
 ## Come funziona il pagamento online
@@ -32,6 +32,15 @@ Impostazioni della struttura:
    - Nexi: le notifiche non sono firmate, quindi il loro contenuto non è mai creduto: il plugin rilegge l'ordine con la chiave API (`GET /orders/{id}`) e vale solo quella risposta.
 3. Al ritorno sul sito la pagina dell'ospite chiede lo stato al fornitore (al massimo ogni 10 secondi) e si aggiorna da sola: il browser dell'ospite non prova nulla.
 4. Pagamento confermato → prenotazione confermata ed email all'ospite.
+
+### Prenotazioni su richiesta
+
+1. L'ospite manda la richiesta: la prenotazione è **in attesa**, nessun pagamento.
+2. Lo staff la accetta (il pulsante nella scheda è «Accetta e chiedi il pagamento»): la prenotazione diventa **opzione** per le ore impostate in «Ore di validità dell'opzione», le camere restano riservate e l'ospite riceve l'email «Richiesta accettata: completa il pagamento» con il pulsante che apre la sua pagina e la scadenza.
+3. L'ospite paga dalla sua pagina; il pagamento confermato dal fornitore conferma la prenotazione e solo allora parte l'email di conferma (con il file per il calendario).
+4. Se il pagamento non arriva entro la scadenza l'opzione viene annullata e le camere tornano libere.
+
+Senza pagamento online (modalità «Nulla», nessun conto attivo o niente da pagare) accettare conferma subito, come prima. Lo staff può sempre confermare a mano un'opzione (per esempio dopo un bonifico).
 
 Casi limite gestiti (tutti idempotenti, ogni evento si applica una volta sola):
 

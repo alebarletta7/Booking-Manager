@@ -538,7 +538,7 @@ class BookingService {
 	 * by today (or only $opts['room_ids']), completed checks out the rooms in house, and
 	 * undoing a check-in sets them back to expected.
 	 *
-	 * @param array{reason?: string, user_id?: int, actor?: string, room_ids?: int[], ignore_dirty?: bool, notify?: bool} $opts notify false: no e-mail to the guest
+	 * @param array{reason?: string, user_id?: int, actor?: string, room_ids?: int[], ignore_dirty?: bool, notify?: bool, skip_payment?: bool} $opts notify false: no e-mail to the guest; skip_payment: confirm a guest's request without waiting for the online payment
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function set_status( int $id, int $version, string $to, array $opts = array() ): array|\WP_Error {
@@ -557,6 +557,13 @@ class BookingService {
 			return new \WP_Error( 'bkng_invalid_transition', __( 'Questo cambio di stato non è possibile.', 'booking-manager' ), array( 'status' => 409 ) );
 		}
 		$property = (array) $this->properties->find( (int) $booking['property_id'] );
+		$accepted = false;
+		if ( BookingStatus::CONFIRMED === $to && empty( $opts['skip_payment'] ) && BookingStatus::OPTION === $this->accept_status( $booking, $property ) ) {
+			// A guest's request accepted while online payment is on: the rooms are held for
+			// the guest, who pays; the payment confirms it (PaymentService::settle_booking).
+			$to       = BookingStatus::OPTION;
+			$accepted = true;
+		}
 		$today    = $this->clock->today_in( (string) $property['timezone'] );
 		if ( BookingStatus::NO_SHOW === $to && $booking['arrival'] > $today ) {
 			return new \WP_Error( 'bkng_too_early', __( 'Il no-show si può segnare solo dal giorno di arrivo.', 'booking-manager' ), array( 'status' => 409 ) );
@@ -678,6 +685,7 @@ class BookingService {
 			$id,
 			$this->context( $after ) + array(
 				'previous_status' => $from,
+				'change'          => $accepted ? 'accepted' : 'status',
 				'actor'           => $opts['actor'] ?? null,
 				'notify'          => 'import' !== $after['source'] && false !== ( $opts['notify'] ?? true ),
 			)
@@ -1013,6 +1021,29 @@ class BookingService {
 		return $this->payload( $after );
 	}
 
+	/**
+	 * What accepting a booking leads to: confirmed, or, for a guest's request from the site
+	 * while the property takes online payments, the option waiting for the guest's payment
+	 * (filter bkng_accept_status, answered by PaymentService).
+	 *
+	 * @param array<string, mixed> $booking
+	 * @param array<string, mixed> $property
+	 */
+	public function accept_status( array $booking, array $property ): string {
+		if ( BookingStatus::PENDING !== $booking['status'] || 'public_form' !== $booking['source'] ) {
+			return BookingStatus::CONFIRMED;
+		}
+		/**
+		 * Status a guest's request takes when the staff accept it.
+		 *
+		 * @param string               $status   confirmed or option
+		 * @param array<string, mixed> $booking
+		 * @param array<string, mixed> $property
+		 */
+		$status = apply_filters( 'bkng_accept_status', BookingStatus::CONFIRMED, $booking, $property );
+		return BookingStatus::OPTION === $status ? BookingStatus::OPTION : BookingStatus::CONFIRMED;
+	}
+
 	/** Hourly: options past their expiry are cancelled and free their rooms. */
 	public function expire_options(): int {
 		global $wpdb;
@@ -1098,6 +1129,8 @@ class BookingService {
 			'property_id'       => (int) $b['property_id'],
 			'status'            => (string) $b['status'],
 			'next_statuses'     => BookingStatus::next( (string) $b['status'] ),
+			// "Conferma" of a guest's request: confirmed, or option until the guest pays online.
+			'accept_to'         => BookingStatus::PENDING === $b['status'] ? $this->accept_status( $b, (array) $this->properties->find( (int) $b['property_id'] ) ) : null,
 			'payment_status'    => (string) $b['payment_status'],
 			'source'            => (string) $b['source'],
 			'guest_id'          => $b['guest_id'],

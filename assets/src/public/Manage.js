@@ -7,7 +7,13 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import { applyColor, dateTime, money } from './format';
-import { StayFooter, StayHead, StaySummary, stayItems } from './StayCard';
+import {
+	CalendarLink,
+	StayFooter,
+	StayHead,
+	StaySummary,
+	stayItems,
+} from './StayCard';
 import { ErrorBox, Spinner } from './ui';
 
 const STATUS = {
@@ -193,6 +199,7 @@ export default function Manage( { api, code, token, paid, root } ) {
 					</p>
 				) }
 				<StaySummary items={ stayItems( b, more ) } />
+				<CalendarLink file={ b.calendar } />
 				<ErrorBox error={ actionError } />
 				{ ( b.can_pay || ( b.can_cancel && ! confirming ) ) && (
 					<div className="bkng-p-actions bkng-p-manage__actions">

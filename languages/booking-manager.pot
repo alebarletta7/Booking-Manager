@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Booking Manager 0.1.6\n"
+"Project-Id-Version: Booking Manager 0.1.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/booking-manager\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T19:23:16+00:00\n"
+"POT-Creation-Date: 2026-10-27T09:51:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: booking-manager\n"
@@ -71,7 +71,7 @@ msgid "Housekeeping"
 msgstr ""
 
 #: src/Access/Capabilities.php:135
-#: src/Notifications/NotificationTemplates.php:304
+#: src/Notifications/NotificationTemplates.php:337
 #: assets/build/admin.js:4
 #: assets/build/admin.js:12
 #: assets/build/admin.js:16
@@ -432,71 +432,71 @@ msgid "Una delle camere non appartiene a questa prenotazione."
 msgstr ""
 
 #: src/Bookings/BookingService.php:557
-#: src/Bookings/BookingService.php:707
+#: src/Bookings/BookingService.php:715
 msgid "Questo cambio di stato non è possibile."
 msgstr ""
 
-#: src/Bookings/BookingService.php:562
+#: src/Bookings/BookingService.php:569
 msgid "Il no-show si può segnare solo dal giorno di arrivo."
 msgstr ""
 
-#: src/Bookings/BookingService.php:565
+#: src/Bookings/BookingService.php:572
 msgid "Il check-in si può registrare solo dal giorno di arrivo."
 msgstr ""
 
-#: src/Bookings/BookingService.php:704
+#: src/Bookings/BookingService.php:712
 msgid "La prenotazione non è in soggiorno."
 msgstr ""
 
-#: src/Bookings/BookingService.php:723
+#: src/Bookings/BookingService.php:731
 msgid "Una delle camere indicate non è in soggiorno."
 msgstr ""
 
-#: src/Bookings/BookingService.php:794
+#: src/Bookings/BookingService.php:802
 msgid "Una camera ha già fatto il check-out: il check-in non si può più annullare."
 msgstr ""
 
-#: src/Bookings/BookingService.php:817
+#: src/Bookings/BookingService.php:825
 msgid "Una delle camere indicate non è in arrivo oggi o ha già fatto il check-in."
 msgstr ""
 
-#: src/Bookings/BookingService.php:826
+#: src/Bookings/BookingService.php:834
 msgid "Nessuna camera della prenotazione è in arrivo oggi."
 msgstr ""
 
 #. translators: %s: room codes.
-#: src/Bookings/BookingService.php:845
+#: src/Bookings/BookingService.php:853
 msgid "La camera non è ancora pronta: %s."
 msgstr ""
 
-#: src/Bookings/BookingService.php:900
+#: src/Bookings/BookingService.php:908
 msgid "Questa camera non appartiene alla tipologia della prenotazione."
 msgstr ""
 
-#: src/Bookings/BookingService.php:924
-#: src/Frontend/PublicBookingService.php:284
+#: src/Bookings/BookingService.php:932
+#: src/Frontend/PublicBookingService.php:286
 msgid "Camera non valida."
 msgstr ""
 
-#: src/Bookings/BookingService.php:930
+#: src/Bookings/BookingService.php:938
 #: src/Rest/AvailabilityController.php:174
 #: src/Rest/BookingsController.php:147
 msgid "Data non valida."
 msgstr ""
 
-#: src/Bookings/BookingService.php:987
+#: src/Bookings/BookingService.php:995
 msgid "La camera scelta è già occupata in queste date."
 msgstr ""
 
-#: src/Bookings/BookingService.php:1029
+#: src/Bookings/BookingService.php:1060
 msgid "Opzione scaduta"
 msgstr ""
 
-#: src/Bookings/BookingService.php:1278
+#: src/Bookings/BookingService.php:1311
 msgid "Prenotazione non trovata."
 msgstr ""
 
-#: src/Bookings/BookingService.php:1282
+#: src/Bookings/BookingService.php:1315
 msgid "La prenotazione è stata modificata da qualcun altro. Ricarica e riprova."
 msgstr ""
 
@@ -544,6 +544,26 @@ msgstr ""
 msgid "No-show"
 msgstr ""
 
+#. translators: 1: from time, 2: until time.
+#: src/Bookings/CalendarFile.php:74
+msgid "Check-in dalle %1$s alle %2$s"
+msgstr ""
+
+#. translators: %s: time.
+#: src/Bookings/CalendarFile.php:77
+msgid "Check-in dalle %s"
+msgstr ""
+
+#. translators: %s: time.
+#: src/Bookings/CalendarFile.php:81
+msgid "Check-out entro le %s"
+msgstr ""
+
+#. translators: %s: booking code.
+#: src/Bookings/CalendarFile.php:84
+msgid "Prenotazione %s"
+msgstr ""
+
 #: src/Bookings/StayBuilder.php:55
 msgid "Scegli almeno una camera."
 msgstr ""
@@ -566,7 +586,7 @@ msgid "Date non valide."
 msgstr ""
 
 #: src/Bookings/StayBuilder.php:92
-#: src/Frontend/PublicBookingService.php:222
+#: src/Frontend/PublicBookingService.php:224
 msgid "Numero di ospiti non valido."
 msgstr ""
 
@@ -669,7 +689,7 @@ msgid "Da confermare"
 msgstr ""
 
 #: src/Checkin/CheckinService.php:431
-#: src/Notifications/NotificationTemplates.php:51
+#: src/Notifications/NotificationTemplates.php:58
 #: assets/build/admin.js:4
 msgid "Prenotazione annullata"
 msgstr ""
@@ -838,48 +858,48 @@ msgstr ""
 msgid "Conferma di non essere un robot e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:217
-#: src/Frontend/PublicBookingService.php:287
+#: src/Frontend/PublicBookingService.php:219
+#: src/Frontend/PublicBookingService.php:289
 msgid "Scegli date di arrivo e partenza valide."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:321
+#: src/Frontend/PublicBookingService.php:323
 msgid "Non è stato possibile inviare la richiesta. Ricarica la pagina e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:325
+#: src/Frontend/PublicBookingService.php:327
 msgid "Hai inviato il modulo troppo in fretta. Controlla i dati e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:328
+#: src/Frontend/PublicBookingService.php:330
 msgid "Il modulo è scaduto. Ricarica la pagina e riprova."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:393
+#: src/Frontend/PublicBookingService.php:395
 msgid "Pagamento online non avviato."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:434
+#: src/Frontend/PublicBookingService.php:436
 msgid "Per questa prenotazione non c'è nulla da pagare online."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:450
+#: src/Frontend/PublicBookingService.php:452
 msgid "Questa prenotazione non si può annullare online. Contatta la struttura."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:459
+#: src/Frontend/PublicBookingService.php:461
 msgid "Annullata dall'ospite con il link della prenotazione."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:671
+#: src/Frontend/PublicBookingService.php:674
 msgid "Prenotazione non trovata. Controlla il link ricevuto."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:687
+#: src/Frontend/PublicBookingService.php:690
 msgid "Le prenotazioni online non sono disponibili per questa struttura."
 msgstr ""
 
-#: src/Frontend/PublicBookingService.php:703
+#: src/Frontend/PublicBookingService.php:706
 msgid "Troppe richieste in poco tempo. Riprova più tardi."
 msgstr ""
 
@@ -1337,248 +1357,267 @@ msgstr ""
 msgid "Codice prenotazione:"
 msgstr ""
 
-#: src/Notifications/NotificationService.php:294
+#: src/Notifications/NotificationService.php:305
 msgid "Invio interrotto: il messaggio potrebbe essere partito. Controlla prima di reinviarlo."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:323
+#: src/Notifications/NotificationService.php:334
 msgid "Prenotazione o struttura non più presente."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:325
+#: src/Notifications/NotificationService.php:336
 msgid "Destinatario rimosso (dati dell'ospite anonimizzati)."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:327
+#: src/Notifications/NotificationService.php:338
 msgid "Non più attuale: la prenotazione è cambiata prima dell'invio."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:329
+#: src/Notifications/NotificationService.php:340
 msgid "Canale non disponibile."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:331
+#: src/Notifications/NotificationService.php:342
 msgid "Notifiche sospese dalla licenza."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:357
+#: src/Notifications/NotificationService.php:368
 msgid "Notifica non trovata."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:360
+#: src/Notifications/NotificationService.php:371
 msgid "Questa notifica è già in coda."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:366
+#: src/Notifications/NotificationService.php:377
 msgid "Non c'è più un destinatario per questa notifica."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:380
-#: src/Notifications/NotificationService.php:415
+#: src/Notifications/NotificationService.php:391
+#: src/Notifications/NotificationService.php:426
 msgid "Non è stato possibile mettere in coda la notifica."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:394
+#: src/Notifications/NotificationService.php:405
 msgid "Prenotazione o messaggio non validi."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:397
+#: src/Notifications/NotificationService.php:408
 msgid "Questo messaggio non corrisponde allo stato attuale della prenotazione."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:401
+#: src/Notifications/NotificationService.php:412
 msgid "L'ospite non ha un indirizzo e-mail valido."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:431
+#: src/Notifications/NotificationService.php:442
 msgid "Indirizzo o struttura non validi."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:435
+#: src/Notifications/NotificationService.php:446
 msgid "Questa è una e-mail di prova di Booking Manager. Se la leggi, le e-mail della struttura partono correttamente."
 msgstr ""
 
 #. translators: %s: property name.
-#: src/Notifications/NotificationService.php:443
+#: src/Notifications/NotificationService.php:454
 msgid "Prova e-mail – %s"
 msgstr ""
 
-#: src/Notifications/NotificationService.php:447
+#: src/Notifications/NotificationService.php:458
 msgid "E-mail di prova"
 msgstr ""
 
-#: src/Notifications/NotificationService.php:475
+#: src/Notifications/NotificationService.php:486
 msgid "Struttura o messaggio non validi."
 msgstr ""
 
-#: src/Notifications/NotificationService.php:632
+#: src/Notifications/NotificationService.php:643
 msgid "Mario"
 msgstr ""
 
-#: src/Notifications/NotificationService.php:633
+#: src/Notifications/NotificationService.php:644
 msgid "Rossi"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:48
+#: src/Notifications/NotificationTemplates.php:54
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
 msgid "Richiesta ricevuta"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:49
+#: src/Notifications/NotificationTemplates.php:55
+#: assets/build/admin.js:4
+msgid "Richiesta accettata: completa il pagamento"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:56
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
 #: assets/build/public.js:25
 msgid "Prenotazione confermata"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:50
+#: src/Notifications/NotificationTemplates.php:57
 #: assets/build/admin.js:4
 msgid "Prenotazione modificata"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:52
+#: src/Notifications/NotificationTemplates.php:59
 #: assets/build/admin.js:4
 #: assets/build/admin.js:5
 msgid "Promemoria prima dell'arrivo"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:53
+#: src/Notifications/NotificationTemplates.php:60
 #: assets/build/admin.js:4
 msgid "Pagamento ricevuto"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:54
+#: src/Notifications/NotificationTemplates.php:61
 msgid "Benvenuto (dopo il check-in)"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:55
+#: src/Notifications/NotificationTemplates.php:62
 msgid "Struttura: nuova prenotazione online"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:56
+#: src/Notifications/NotificationTemplates.php:63
 msgid "Struttura: annullata dall'ospite"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:73
+#: src/Notifications/NotificationTemplates.php:80
 msgid "Richiesta di prenotazione ricevuta – {struttura}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:74
+#: src/Notifications/NotificationTemplates.php:81
 #: assets/build/public.js:25
 msgid "Abbiamo ricevuto la tua richiesta"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:75
+#: src/Notifications/NotificationTemplates.php:82
 msgid ""
 "Ciao {nome},\n"
 "la tua richiesta per il soggiorno dal {arrivo} al {partenza} è arrivata. La controlliamo e ti scriviamo appena è confermata."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:78
+#: src/Notifications/NotificationTemplates.php:85
+msgid "Richiesta accettata: completa il pagamento – {struttura}"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:86
+msgid "Richiesta accettata: manca solo il pagamento"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:87
+msgid ""
+"Ciao {nome},\n"
+"buone notizie: abbiamo accettato la tua richiesta per il soggiorno dal {arrivo} al {partenza} e le camere sono riservate per te. Completa il pagamento online per confermare la prenotazione: appena arriva ti mandiamo la conferma."
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:91
 msgid "Prenotazione modificata – {struttura}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:79
+#: src/Notifications/NotificationTemplates.php:92
 msgid "La tua prenotazione è stata modificata"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:80
+#: src/Notifications/NotificationTemplates.php:93
 msgid ""
 "Ciao {nome},\n"
 "questi sono i dettagli aggiornati del tuo soggiorno."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:83
+#: src/Notifications/NotificationTemplates.php:96
 msgid "Prenotazione annullata – {struttura}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:84
+#: src/Notifications/NotificationTemplates.php:97
 msgid "La tua prenotazione è stata annullata"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:85
+#: src/Notifications/NotificationTemplates.php:98
 msgid ""
 "Ciao {nome},\n"
 "la prenotazione {codice} dal {arrivo} al {partenza} è stata annullata. Speriamo di ospitarti presto."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:88
+#: src/Notifications/NotificationTemplates.php:101
 msgid "Ti aspettiamo il {arrivo} – {struttura}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:89
+#: src/Notifications/NotificationTemplates.php:102
 msgid "Il tuo arrivo si avvicina"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:90
+#: src/Notifications/NotificationTemplates.php:103
 msgid ""
 "Ciao {nome},\n"
 "ti aspettiamo il {arrivo}. Il check-in è dalle {checkin_dalle} alle {checkin_alle}; il giorno della partenza la camera va lasciata entro le {checkout_entro}."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:93
+#: src/Notifications/NotificationTemplates.php:106
 msgid "Pagamento ricevuto – {struttura}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:94
+#: src/Notifications/NotificationTemplates.php:107
 msgid "Grazie, abbiamo ricevuto il pagamento"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:95
+#: src/Notifications/NotificationTemplates.php:108
 msgid ""
 "Ciao {nome},\n"
-"abbiamo registrato il tuo pagamento per la prenotazione {codice}. Saldo ancora da pagare: {saldo}."
+"abbiamo registrato il tuo pagamento per la prenotazione {codice}. Qui sotto trovi il totale e quanto hai già pagato."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:98
+#: src/Notifications/NotificationTemplates.php:111
 msgid "Benvenuto a {struttura}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:99
+#: src/Notifications/NotificationTemplates.php:112
 msgid "Benvenuto!"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:100
+#: src/Notifications/NotificationTemplates.php:113
 msgid ""
 "Ciao {nome},\n"
 "il check-in è registrato. Per qualsiasi necessità durante il soggiorno siamo a disposizione. La partenza è il {partenza} entro le {checkout_entro}."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:103
+#: src/Notifications/NotificationTemplates.php:116
 msgid "Nuova prenotazione online {codice}: {arrivo} – {partenza}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:104
+#: src/Notifications/NotificationTemplates.php:117
 msgid "Nuova prenotazione online"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:105
+#: src/Notifications/NotificationTemplates.php:118
 msgid "{nome} ha prenotato dal sito: {arrivo} – {partenza}, {notti} notti, {ospiti}."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:108
+#: src/Notifications/NotificationTemplates.php:121
 msgid "Annullata dall'ospite: {codice} ({arrivo})"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:109
+#: src/Notifications/NotificationTemplates.php:122
 msgid "Prenotazione annullata dall'ospite"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:110
+#: src/Notifications/NotificationTemplates.php:123
 msgid "{nome} ha annullato la prenotazione {codice} dal link ricevuto: le camere sono di nuovo disponibili."
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:113
+#: src/Notifications/NotificationTemplates.php:126
 msgid "Prenotazione confermata – {struttura}"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:114
+#: src/Notifications/NotificationTemplates.php:127
 #: assets/build/public.js:28
 msgid "La tua prenotazione è confermata"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:115
+#: src/Notifications/NotificationTemplates.php:128
 msgid ""
 "Ciao {nome},\n"
 "grazie per aver scelto {struttura}: il tuo soggiorno dal {arrivo} al {partenza} è confermato. Ti aspettiamo!"
@@ -1586,34 +1625,43 @@ msgstr ""
 
 #. translators: %d: number of guests.
 #. translators: %d: guests.
-#: src/Notifications/NotificationTemplates.php:155
+#: src/Notifications/NotificationTemplates.php:169
 #: assets/build/public.js:16
 msgid "%d ospite"
 msgid_plural "%d ospiti"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Notifications/NotificationTemplates.php:217
+#: src/Notifications/NotificationTemplates.php:231
 msgid "Apri la prenotazione"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:222
+#: src/Notifications/NotificationTemplates.php:236
+msgid "Completa il pagamento"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:241
 #: assets/build/public.js:28
 msgid "Vedi o gestisci la prenotazione"
 msgstr ""
 
 #. translators: %s: reason of the cancellation.
-#: src/Notifications/NotificationTemplates.php:228
+#: src/Notifications/NotificationTemplates.php:247
 msgid "Motivo: %s"
 msgstr ""
 
+#. translators: %s: date and time.
+#: src/Notifications/NotificationTemplates.php:251
+msgid "Le camere restano riservate fino al %s: se il pagamento non arriva entro allora la richiesta viene annullata."
+msgstr ""
+
 #. translators: %s: the guest's notes.
-#: src/Notifications/NotificationTemplates.php:231
+#: src/Notifications/NotificationTemplates.php:254
 msgid "Note dell'ospite: %s"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:294
-#: src/Notifications/NotificationTemplates.php:307
+#: src/Notifications/NotificationTemplates.php:327
+#: src/Notifications/NotificationTemplates.php:340
 #: assets/build/admin.js:6
 #: assets/build/admin.js:15
 #: assets/build/admin.js:17
@@ -1624,7 +1672,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: check-in time.
-#: src/Notifications/NotificationTemplates.php:300
+#: src/Notifications/NotificationTemplates.php:333
 #: assets/build/admin.js:4
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
@@ -1634,13 +1682,13 @@ msgstr ""
 
 #. translators: %s: check-in time.
 #. translators: %s: time.
-#: src/Notifications/NotificationTemplates.php:300
+#: src/Notifications/NotificationTemplates.php:333
 #: assets/build/public.js:22
 msgid "check-in dalle %s"
 msgstr ""
 
 #. translators: %s: check-out time.
-#: src/Notifications/NotificationTemplates.php:302
+#: src/Notifications/NotificationTemplates.php:335
 #: assets/build/admin.js:4
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
@@ -1650,18 +1698,18 @@ msgstr ""
 
 #. translators: %s: check-out time.
 #. translators: %s: time.
-#: src/Notifications/NotificationTemplates.php:302
+#: src/Notifications/NotificationTemplates.php:335
 #: assets/build/public.js:23
 msgid "check-out entro le %s"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:303
+#: src/Notifications/NotificationTemplates.php:336
 #: assets/build/admin.js:17
 #: assets/build/public.js:23
 msgid "Notti"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:310
+#: src/Notifications/NotificationTemplates.php:343
 #: assets/build/admin.js:5
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
@@ -1669,7 +1717,7 @@ msgstr ""
 msgid "Ospite"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:313
+#: src/Notifications/NotificationTemplates.php:346
 #: assets/build/admin.js:5
 #: assets/build/admin.js:16
 #: assets/build/admin.js:17
@@ -1679,22 +1727,27 @@ msgstr ""
 msgid "Totale"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:315
+#: src/Notifications/NotificationTemplates.php:350
+msgid "Da pagare ora (acconto)"
+msgstr ""
+
+#: src/Notifications/NotificationTemplates.php:353
 #: assets/build/public.js:28
 msgid "Già pagato"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:316
-#: assets/build/admin.js:16
-msgid "Saldo"
+#: src/Notifications/NotificationTemplates.php:355
+#: assets/build/admin.js:4
+#: assets/build/public.js:28
+msgid "Da pagare"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:319
+#: src/Notifications/NotificationTemplates.php:359
 #: assets/build/public.js:23
 msgid "Codice prenotazione"
 msgstr ""
 
-#: src/Notifications/NotificationTemplates.php:322
+#: src/Notifications/NotificationTemplates.php:362
 #: assets/build/admin.js:5
 #: assets/build/admin.js:12
 msgid "Indirizzo"
@@ -1813,11 +1866,11 @@ msgstr ""
 msgid "Rimborso automatico non riuscito: %s. Rimborsa a mano."
 msgstr ""
 
-#: src/Payments/PaymentService.php:1160
+#: src/Payments/PaymentService.php:1187
 msgid "Prenotazione non trovata in questa struttura."
 msgstr ""
 
-#: src/Payments/PaymentService.php:1281
+#: src/Payments/PaymentService.php:1308
 msgid "Non è stato possibile salvare il pagamento: riprova."
 msgstr ""
 
@@ -2350,11 +2403,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assets/build/admin.js:4
-#: assets/build/public.js:28
-msgid "Da pagare"
-msgstr ""
-
-#: assets/build/admin.js:4
 msgid "Caparra pagata"
 msgstr ""
 
@@ -2838,6 +2886,14 @@ msgid "Rimetti in attesa"
 msgstr ""
 
 #: assets/build/admin.js:4
+msgid "Accetta e chiedi il pagamento"
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Annulla il check-in"
+msgstr ""
+
+#: assets/build/admin.js:4
 msgid "Le camere tornano disponibili. I pagamenti ricevuti non vengono rimborsati da soli: usa «Rimborsa» nei pagamenti."
 msgstr ""
 
@@ -2851,6 +2907,10 @@ msgstr ""
 
 #: assets/build/admin.js:4
 msgid "Tutte le camere risultano liberate. Le camere vanno in «Da pulire» se l'housekeeping è attivo."
+msgstr ""
+
+#: assets/build/admin.js:4
+msgid "Le camere restano riservate all'ospite, che riceve una email per pagare online. La prenotazione si conferma da sola quando arriva il pagamento, e solo allora parte la mail di conferma."
 msgstr ""
 
 #: assets/build/admin.js:4
@@ -5284,6 +5344,10 @@ msgid "Codice"
 msgstr ""
 
 #: assets/build/admin.js:16
+msgid "Saldo"
+msgstr ""
+
+#: assets/build/admin.js:16
 msgid "Non puoi creare prenotazioni"
 msgstr ""
 
@@ -5347,10 +5411,6 @@ msgstr ""
 
 #: assets/build/admin.js:17
 msgid "Elenco"
-msgstr ""
-
-#: assets/build/admin.js:17
-msgid "Annulla il check-in"
 msgstr ""
 
 #. translators: %s: date and time.
@@ -6036,6 +6096,10 @@ msgstr ""
 
 #: assets/build/public.js:21
 msgid "Azzera i filtri"
+msgstr ""
+
+#: assets/build/public.js:23
+msgid "Aggiungi al calendario"
 msgstr ""
 
 #. translators: %s: minutes:seconds.

@@ -41,6 +41,7 @@ add_action( 'bkng_booking_confirmed', function ( int $booking_id, array $context
 | `bkng_notification_channels` | aggiunge canali di notifica (`Notifications\Channels\NotificationChannel`) |
 | `bkng_whatsapp_provider` | fornitore WhatsApp (`Notifications\WhatsApp\WhatsAppProvider`), `null` per nessuno |
 | `bkng_modules` | moduli opzionali (`Core\ModuleInterface`: `services()` e `hooks()`); se uno fallisce il plugin continua senza |
+| `bkng_accept_status` | stato che prende una richiesta dal sito quando lo staff la accetta: `confirmed`, oppure `option` (il plugin lo fa quando i pagamenti online sono attivi: l'ospite paga e il pagamento conferma) |
 | `bkng_manage_url` | indirizzo «gestisci la prenotazione» inviato agli ospiti |
 | `bkng_client_ip` | IP del visitatore dietro un proxy diverso da Cloudflare (fidarsi dell'header solo se la richiesta viene davvero dal proxy) |
 

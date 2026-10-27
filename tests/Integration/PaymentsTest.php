@@ -157,6 +157,72 @@ final class PaymentsTest extends TestCase {
 		$this->assertSame( array(), FakeProvider::$refunds );
 	}
 
+	public function test_a_request_accepted_waits_for_the_payment_before_the_confirmation(): void {
+		wp_set_current_user( 0 );
+		$p = $this->online_property();
+		$this->service( \BookingManager\Properties\PropertyRepository::class )->update( $p['id'], array( 'booking_mode' => 'request' ) );
+		$this->reset_services();
+		$t = $this->room_type( $p['id'], 1 );
+
+		$result = $this->public_booking( $p, $t['type']['id'] );
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertSame( 'pending', $result['booking']['status'], 'a request: no payment before the property accepts' );
+		$this->assertArrayNotHasKey( 'payment', array_filter( $result ) );
+		$this->assertNull( $result['booking']['calendar'] );
+		$booking = $this->booking( (int) $this->service( BookingRepository::class )->find_by_code( $result['booking']['code'] )['id'] );
+
+		$this->admin();
+		$bookings = $this->service( BookingService::class );
+		$this->assertSame( 'option', $bookings->payload( $booking )['accept_to'], 'the staff see that accepting asks for the payment' );
+		$accepted = $bookings->set_status( (int) $booking['id'], (int) $booking['version'], 'confirmed' );
+		$this->assertIsArray( $accepted );
+		$this->assertSame( 'option', $accepted['status'], 'accepted: rooms held while the guest pays' );
+		$this->assertNotNull( $accepted['option_expires_at'] );
+		$this->assertSame( array( 'guest_received', 'guest_accepted' ), $this->templates( (int) $booking['id'] ), 'no confirmation before the payment' );
+
+		reset_phpmailer_instance();
+		$this->service( \BookingManager\Notifications\NotificationService::class )->send( $this->notification( (int) $booking['id'], 'guest_accepted' ) );
+		$mailer = tests_retrieve_phpmailer_instance();
+		$this->assertStringContainsString( 'Completa il pagamento', $mailer->Body );
+		$this->assertStringContainsString( 'bkng_token', $mailer->Body, 'the button opens the page where the guest pays' );
+		$this->assertSame( array(), array_filter( $mailer->getAttachments(), static fn( array $a ) => 'attachment' === $a[6] ), 'no calendar before the confirmation' );
+
+		$booking = $this->booking( (int) $booking['id'] );
+		$started = $this->payments()->start_online_payment( $booking, 20000, 'https://example.org/ok', 'https://example.org/ko' );
+		$this->assertIsArray( $started );
+		$payment = $this->service( PaymentRepository::class )->for_booking( (int) $booking['id'] )[0];
+		$this->webhook( (int) $payment['payment_account_id'], array( 'id' => 'ev_acc', 'type' => 'paid', 'session' => $payment['external_id'], 'amount' => 20000 ) );
+		$this->assertSame( 'confirmed', $this->booking( (int) $booking['id'] )['status'], 'the payment confirms it' );
+		$this->assertSame( array( 'guest_received', 'guest_accepted', 'guest_confirmed' ), $this->templates( (int) $booking['id'] ), 'then, and only then, the confirmation' );
+
+		reset_phpmailer_instance();
+		$this->service( \BookingManager\Notifications\NotificationService::class )->send( $this->notification( (int) $booking['id'], 'guest_confirmed' ) );
+		$files = array_values( array_filter( tests_retrieve_phpmailer_instance()->getAttachments(), static fn( array $a ) => 'attachment' === $a[6] ) );
+		$this->assertCount( 1, $files, 'the confirmation carries the stay for the calendar' );
+		$this->assertStringEndsWith( '.ics', $files[0][2] );
+		$this->assertStringContainsString( 'DTSTART;VALUE=DATE:' . str_replace( '-', '', self::day( 30 ) ), $files[0][0] );
+		$this->assertStringContainsString( 'DTEND;VALUE=DATE:' . str_replace( '-', '', self::day( 33 ) ), $files[0][0], 'the departure day included' );
+		$this->assertNotNull( $this->service( PublicBookingService::class )->public_payload( $this->booking( (int) $booking['id'] ) )['calendar'] );
+
+		// Accepting without the online payment (paid at the desk, by transfer...) stays possible.
+		wp_set_current_user( 0 );
+		$other = $this->public_booking( $p, $t['type']['id'], 40, 41 );
+		$this->admin();
+		$other = $this->booking( (int) $this->service( BookingRepository::class )->find_by_code( $other['booking']['code'] )['id'] );
+		$this->assertSame( 'confirmed', $bookings->set_status( (int) $other['id'], (int) $other['version'], 'confirmed', array( 'skip_payment' => true ) )['status'] );
+	}
+
+	/** @return string[] template keys queued for a booking, oldest first */
+	private function templates( int $booking_id ): array {
+		global $wpdb;
+		return array_values( array_unique( (array) $wpdb->get_col( $wpdb->prepare( 'SELECT template_key FROM ' . \BookingManager\Database\Schema::table( 'notifications' ) . " WHERE booking_id = %d AND channel = 'email' ORDER BY id", $booking_id ) ) ) );
+	}
+
+	private function notification( int $booking_id, string $key ): int {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . \BookingManager\Database\Schema::table( 'notifications' ) . ' WHERE booking_id = %d AND template_key = %s', $booking_id, $key ) );
+	}
+
 	public function test_a_payment_page_that_cannot_open_frees_the_rooms(): void {
 		wp_set_current_user( 0 );
 		$p                           = $this->online_property();

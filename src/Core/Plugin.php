@@ -450,6 +450,8 @@ final class Plugin {
 				$c->get( BookingService::class )->expire_options();
 			}
 		);
+		// A guest's request accepted while payments are online waits for the guest's payment.
+		add_filter( 'bkng_accept_status', fn( string $status, array $booking, array $property ) => $c->get( PaymentService::class )->accept_status( $status, $booking, $property ), 10, 3 );
 		// A cancelled booking closes its open payment pages (a payment already made is refunded).
 		add_action( Hooks::BOOKING_CANCELLED, fn( int $booking_id ) => $c->get( PaymentService::class )->cancel_open_payments( $booking_id ) );
 		// A room checked out becomes "da pulire" (when the property asks so).

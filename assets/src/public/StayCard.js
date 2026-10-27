@@ -154,3 +154,31 @@ export function StayFooter( { name, where = {}, signoff } ) {
 		</footer>
 	);
 }
+
+/**
+ * "Aggiungi al calendario": the stay as a .ics file (the same attached to the e-mails),
+ * only once the booking is confirmed.
+ *
+ * @param {Object} props
+ * @param {Object} props.file { name, data } from the booking, or null.
+ */
+export function CalendarLink( { file } ) {
+	if ( ! file ) {
+		return null;
+	}
+	return (
+		<p className="bkng-p-calendar">
+			<a
+				className="bkng-p-button"
+				href={
+					'data:text/calendar;charset=utf-8,' +
+					encodeURIComponent( file.data )
+				}
+				download={ file.name }
+			>
+				<Icon name="calendar" />
+				{ __( 'Aggiungi al calendario', 'booking-manager' ) }
+			</a>
+		</p>
+	);
+}

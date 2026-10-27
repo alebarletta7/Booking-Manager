@@ -21,6 +21,7 @@ use BookingManager\Bookings\BookingCodes;
 use BookingManager\Bookings\BookingRepository;
 use BookingManager\Bookings\BookingService;
 use BookingManager\Bookings\BookingStatus;
+use BookingManager\Bookings\CalendarFile;
 use BookingManager\Bookings\ManageLink;
 use BookingManager\Core\Clock;
 use BookingManager\Core\Dates;
@@ -28,6 +29,7 @@ use BookingManager\Core\RateLimiter;
 use BookingManager\Core\Validation;
 use BookingManager\Inventory\InventoryService;
 use BookingManager\Inventory\RoomTypeRepository;
+use BookingManager\Notifications\NotificationTemplates;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Payments\PaymentAccountService;
 use BookingManager\Payments\PaymentService;
@@ -482,8 +484,7 @@ class PublicBookingService {
 	 * @param array<string, mixed> $booking
 	 */
 	public static function amount_to_pay( array $booking, string $mode ): int {
-		$t = PaymentService::totals( $booking );
-		return 'deposit' === $mode && $t['deposit_missing'] > 0 ? $t['deposit_missing'] : $t['due'];
+		return PaymentService::online_amount( $booking, $mode );
 	}
 
 	/** @param array<string, mixed> $booking */
@@ -598,6 +599,8 @@ class PublicBookingService {
 			'option_expires_at' => \BookingManager\Core\Clock::iso( $b['option_expires_at'] ),
 			'can_pay'        => $this->can_pay( $b ),
 			'cancel_penalty' => $terms['penalty'],
+			// The stay as a calendar file (.ics) for "Aggiungi al calendario", once confirmed.
+			'calendar'       => NotificationTemplates::in_calendar( $b ) ? CalendarFile::for_booking( $b, $property, $this->clock->now_utc()->getTimestamp() ) : null,
 		);
 	}
 
