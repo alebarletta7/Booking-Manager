@@ -61,6 +61,20 @@ Lo script controlla che la versione nell'intestazione di `booking-manager.php` c
 
 Nuova versione: aggiornare `Version:` e `BKNG_VERSION` in `booking-manager.php`, la sezione della versione in `CHANGELOG.md` (è quella che WordPress mostra in «Visualizza dettagli»), poi creare lo ZIP e caricarlo sul server licenze.
 
+## Channex
+
+Le credenziali possono stare in `wp-config.php` (consigliato in produzione), e allora la schermata non le chiede:
+
+```php
+define( 'BKNG_CHANNEX_API_KEY', '…' );
+define( 'BKNG_CHANNEX_WEBHOOK_SECRET', '…' );
+define( 'BKNG_CHANNEX_BASE_URL', 'https://app.channex.io/api/v1' ); // facoltativa
+```
+
+L'invio parte da WP-Cron ogni minuto (`bkng_channex_tick`), o da Action Scheduler se è già installato. Su un sito con poche visite conviene un cron di sistema: `define( 'DISABLE_WP_CRON', true );` e `* * * * * wget -q -O - https://sito.it/wp-cron.php?doing_wp_cron >/dev/null 2>&1`.
+
+Per i test l'ambiente staging è `https://staging.channex.io/api/v1`; i test automatici usano risposte finte (`pre_http_request`) e non chiamano Channex.
+
 ## Migrazioni
 
 Nuova classe in `src/Database/Migrations/Migration_YYYYMMDD_NNNNNN_Nome.php`, aggiunta all’elenco in `Database\Migrator`. Si applicano all’attivazione e al caricamento dopo un aggiornamento; ognuna una sola volta (`bkng_migrations`).

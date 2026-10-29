@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.11] — 29 ottobre 2026
+
+### Novità
+
+- Channex, il channel manager verso Booking.com e gli altri portali. Nuova voce «Channex» nel menu (gruppo «Gestione», solo chi gestisce le integrazioni) con quattro schede.
+- Collegamento: ambiente di prova (staging) o produzione, chiave API e chiave di firma dei webhook cifrate e mai mostrate (oppure nelle costanti di `wp-config.php`), «Prova la chiave», interruttore generale, indirizzo del webhook da copiare e pulsanti per creare la chiave di firma, il webhook su Channex e una chiamata di prova.
+- Mappatura: per ogni struttura si sceglie la proprietà Channex, poi ogni tipologia e ogni coppia tipologia × tariffa (prezzo per camera o per persona). Salvare la mappatura avvia una sincronizzazione completa.
+- Sincronizzazione: disponibilità, prezzi e regole (soggiorno minimo e massimo, chiusure all'arrivo e alla partenza, stop vendite) partono da sole pochi secondi dopo ogni modifica, raggruppate e solo per le notti cambiate, nei limiti di Channex (10 chiamate al minuto per struttura, pausa crescente dopo un errore). Sincronizzazione completa a 500 giorni in 2 chiamate, al massimo una volta per notte, e controllo notturno che rimanda le notti diverse. Registro delle chiamate con l'ID dell'attività di Channex e gli avvisi.
+- Prenotazioni: le prenotazioni nuove, modificate e annullate arrivano dal feed di Channex (webhook firmato e controllo ogni 2 minuti) e vengono confermate a Channex solo dopo che sono salvate. Tipologia non mappata o importazione non riuscita: la prenotazione resta in elenco da sistemare, con «Importa di nuovo» e «Risolta». I dati della carta non vengono mai salvati.
+- Avvisi in cima alla pagina e nel gestionale (con email all'amministratore, al massimo una all'ora) per chiave rifiutata, troppi errori di seguito, overbooking e prenotazioni da sistemare.
+
+### Per gli sviluppatori
+
+- Nuove azioni `bkng_availability_changed` e `bkng_rates_changed` (vedi docs/HOOKS.md).
+- Cinque tabelle nuove (`cx_dirty`, `cx_state`, `cx_tasks`, `cx_revisions`, `cx_webhook_log`); nessuna tabella viene cancellata alla disattivazione.
+
 ## [0.1.10] — 27 ottobre 2026
 
 ### Modifiche

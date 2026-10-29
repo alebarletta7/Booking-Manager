@@ -20,6 +20,8 @@ Ogni azione di dominio riceve **l'id dell'entità** e un **contesto senza dati p
 | `bkng_booking_completed` | soggiorno concluso |
 | `bkng_room_checked_in`, `bkng_room_checked_out` | check-in / check-out di una singola camera |
 | `bkng_payment_recorded`, `bkng_payment_refunded`, `bkng_payment_failed` | pagamenti |
+| `bkng_availability_changed` | camere libere cambiate senza una prenotazione (camere aggiunte o archiviate, chiusure, blocchi del modulo); contesto `room_type_ids`, `from`, `to` (date facoltative) |
+| `bkng_rates_changed` | prezzi o regole di soggiorno cambiati; contesto `room_type_ids`, `rate_plan_ids` (vuoti = tutti), `from`, `to` |
 | `bkng_unit_status_changed` | stato operativo di una camera (housekeeping) |
 | `bkng_notification_sent`, `bkng_notification_failed` | messaggio inviato / fallito |
 | `bkng_payment_needs_attention` | un pagamento tardivo non si è potuto rimborsare da solo: serve lo staff (`$payment_id`, `$error`) |
@@ -53,6 +55,8 @@ Booking Manager **non include connettori** e non imita l'API di nessun portale: 
 - **in entrata**: `ChannelService::import_reservation( $canale, $property_id, $prenotazione )` (campi: `external_id`, `modified`, `status` confirmed/cancelled, `arrival`, `departure`, `guest`, `rooms[]` con `external_room_type_id`, `adults`, `children`, `price_total`) importa una prenotazione una sola volta (idempotente), la collega con `bkng_channel_refs` e registra ogni tentativo in `bkng_sync_log`; non manda email all'ospite; ciò che non entra (camera piena, tipologia non mappata) viene registrato e riprovato;
 - **in uscita**: dopo ogni cambio di disponibilità della struttura viene chiamato `push_availability( $property_id, $room_type_ids, $from, $to )` di ogni connettore attivo;
 - **mappature**: **Struttura → Canali** abbina le tipologie ai codici del canale (`PUT /properties/{id}/channels/{canale}/mappings`).
+
+Channex è integrato nel plugin (vedi [ARCHITETTURA.md](ARCHITETTURA.md#channex)) e usa le azioni `bkng_availability_changed`, `bkng_rates_changed` e quelle delle prenotazioni per sapere quali notti rimandare.
 
 Un connettore implementa `Channels\ChannelConnector` (`key()`, `label()`, `unavailable( $property )`, `push_availability(…)`) e si registra con `bkng_channel_connectors`.
 
