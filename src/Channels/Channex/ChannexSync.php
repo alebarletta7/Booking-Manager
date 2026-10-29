@@ -330,7 +330,7 @@ class ChannexSync {
 				}
 				$results[ $kind ] = $this->send( $property_id, 'full_' . $kind, $values );
 				if ( ! $results[ $kind ] ) {
-					return new \WP_Error( 'bkng_channex_failed', (string) ( $this->log->state( $property_id )['last_error'] ?? __( 'Invio non riuscito.', 'booking-manager' ) ), array( 'status' => 502 ) );
+					return new \WP_Error( 'bkng_channex_failed', (string) ( $this->log->state( $property_id )['last_error'] ?? __( 'Invio non riuscito.', 'booking-manager' ) ), array( 'status' => 422 ) );
 				}
 				$this->queue->remove_sent( $kind, $pending );
 			}

@@ -3,7 +3,7 @@
  * wp-api-fetch; here only the namespace and the errors.
  */
 import apiFetch from '@wordpress/api-fetch';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 import { boot } from './boot';
 
@@ -51,7 +51,16 @@ export function readableError( error ) {
 	return {
 		message:
 			error.message ||
-			__( 'Operazione non riuscita.', 'booking-manager' ),
+			( data.status
+				? sprintf(
+						/* translators: %d: HTTP status */
+						__(
+							'Operazione non riuscita (HTTP %d).',
+							'booking-manager'
+						),
+						data.status
+				  )
+				: __( 'Operazione non riuscita.', 'booking-manager' ) ),
 		code: error.code || '',
 		fields: data.fields || data.params || {},
 		status: data.status || 0,

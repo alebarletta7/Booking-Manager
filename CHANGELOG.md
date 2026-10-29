@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12] — 29 ottobre 2026
+
+### Correzioni
+
+- Channex → Collegamento: «Genera la chiave del webhook» non chiede più la chiave a Channex (dava «Operazione non riuscita»). La chiave viene creata dal sito e Channex la rimanda in un'intestazione a ogni chiamata del webhook. Se c'è già un webhook creato dal plugin, viene aggiornato con la nuova chiave invece di crearne un altro.
+- Gli errori di Channex ora si vedono con il motivo (prima alcuni server mostravano solo «Operazione non riuscita»).
+
 ## [0.1.11] — 29 ottobre 2026
 
 ### Novità

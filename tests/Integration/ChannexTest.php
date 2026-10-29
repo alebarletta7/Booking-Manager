@@ -16,6 +16,7 @@ namespace BookingManager\Tests\Integration;
 
 use BookingManager\Availability\HoldService;
 use BookingManager\Bookings\BookingRepository;
+use BookingManager\Channels\Channex\ChannexAdmin;
 use BookingManager\Channels\Channex\ChannexAlerts;
 use BookingManager\Channels\Channex\ChannexBookings;
 use BookingManager\Channels\Channex\ChannexLog;
@@ -535,6 +536,46 @@ final class ChannexTest extends TestCase {
 		$this->assertCount( 4, $log );
 		$this->assertTrue( $log[0]['valid'] );
 		$this->assertFalse( $log[1]['valid'] );
+	}
+
+	public function test_the_webhook_key_is_made_on_the_site_and_sent_back_in_our_header(): void {
+		$admin = $this->service( ChannexAdmin::class );
+		$this->assertIsArray( $admin->create_signing_key() );
+		$this->assertSame( array(), $this->calls, 'the key is not asked to Channex' );
+		$secret = $this->service( ChannexSettings::class )->webhook_secret();
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]{64}$/', $secret );
+		$this->assertNotSame( self::SECRET, $secret );
+
+		$this->responder = static fn() => array( 200, array( 'data' => array( 'id' => 'dddddddd-0000-4000-8000-000000000001', 'type' => 'webhook' ) ) );
+		$this->assertIsArray( $admin->register_webhook() );
+		$this->assertSame( 'POST', $this->calls[0]['method'] );
+		$this->assertSame( 'webhooks', $this->calls[0]['path'] );
+		$this->assertSame( $secret, $this->calls[0]['body']['webhook']['headers'][ ChannexBookings::TOKEN_HEADER ] );
+		$this->assertArrayNotHasKey( 'is_signed', $this->calls[0]['body']['webhook'] );
+
+		// A new key reaches the webhook already there.
+		$admin->create_signing_key();
+		$admin->register_webhook();
+		$this->assertSame( 'PUT', $this->calls[1]['method'] );
+		$this->assertSame( 'webhooks/dddddddd-0000-4000-8000-000000000001', $this->calls[1]['path'] );
+		$secret = $this->service( ChannexSettings::class )->webhook_secret();
+
+		$send = static function ( string $token ) {
+			$request = new \WP_REST_Request( 'POST', '/booking-manager/public/v1/channex/webhook' );
+			$request->set_header( 'content-type', 'application/json' );
+			$request->set_header( ChannexBookings::TOKEN_HEADER, $token );
+			$request->set_body( '{"event":"booking","property_id":"' . self::P_UUID . '"}' );
+			return rest_get_server()->dispatch( $request );
+		};
+		$this->assertSame( 401, $send( 'wrong' )->get_status() );
+		$this->assertSame( 200, $send( $secret )->get_status() );
+
+		// Channex's error reaches the screen, with a status no proxy replaces.
+		$this->responder = static fn() => array( 422, array( 'errors' => array( 'code' => 'validation_error', 'title' => 'Validation Error', 'details' => array( 'callback_url' => array( 'is invalid' ) ) ) ) );
+		$error           = $admin->register_webhook();
+		$this->assertInstanceOf( \WP_Error::class, $error );
+		$this->assertSame( 422, $error->get_error_data()['status'] );
+		$this->assertStringContainsString( 'callback_url: is invalid', $error->get_error_message() );
 	}
 
 	public function test_nothing_is_queued_when_the_sync_is_off(): void {

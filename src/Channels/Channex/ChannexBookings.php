@@ -45,6 +45,9 @@ class ChannexBookings {
 	/** Webhook timestamps older (or newer) than this are refused. */
 	public const TOLERANCE = 300;
 
+	/** Header Channex sends with every webhook call: set as a custom header of the webhook. */
+	public const TOKEN_HEADER = 'X-Bkng-Webhook-Token';
+
 	/** Events that only call for a warning to the staff. */
 	public const ALERT_EVENTS = array( 'booking_unmapped_room', 'booking_unmapped_rate', 'non_acked_booking', 'sync_error', 'disconnect_channel' );
 
@@ -100,12 +103,22 @@ class ChannexBookings {
 	}
 
 	/**
-	 * A call from Channex: checked, logged, the work scheduled. Nothing heavy here.
-	 *
-	 * @return int HTTP status to answer (200, or 401 when the signature is wrong)
+	 * The secret sent back in our own header (the webhook is created with it), compared
+	 * in constant time. It only lets a call start a read of the feed.
 	 */
-	public function webhook( string $raw, string $timestamp, string $signatures ): int {
-		$valid       = self::verify( $raw, $timestamp, $signatures, $this->settings->webhook_secret(), time() );
+	public static function verify_token( string $token, string $secret ): bool {
+		return '' !== $secret && '' !== $token && hash_equals( $secret, $token );
+	}
+
+	/**
+	 * A call from Channex: checked (our header, or Channex's HMAC signature), logged,
+	 * the work scheduled. Nothing heavy here.
+	 *
+	 * @return int HTTP status to answer (200, or 401 when the call is not authenticated)
+	 */
+	public function webhook( string $raw, string $timestamp, string $signatures, string $token = '' ): int {
+		$secret      = $this->settings->webhook_secret();
+		$valid       = self::verify_token( $token, $secret ) || self::verify( $raw, $timestamp, $signatures, $secret, time() );
 		$data        = json_decode( $raw, true );
 		$data        = is_array( $data ) ? $data : array();
 		$event       = substr( sanitize_key( (string) ( $data['event'] ?? '' ) ), 0, 64 );
@@ -201,7 +214,7 @@ class ChannexBookings {
 						$this->settings->save( array( 'suspended' => (string) $res['error'] ) );
 						$this->alerts->raise( $property_id, 'unauthorized', __( 'Channex ha rifiutato la chiave API: la sincronizzazione è sospesa. Inserisci di nuovo la chiave nella schermata Channex.', 'booking-manager' ) );
 					}
-					return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 502 ) );
+					return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 422 ) );
 				}
 				$items = array_values( array_filter( (array) ( $res['body']['data'] ?? array() ), 'is_array' ) );
 				$new   = array_values( array_filter( $items, static fn( array $i ) => ! isset( $seen[ (string) ( $i['id'] ?? '' ) ] ) ) );

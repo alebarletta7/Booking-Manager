@@ -7,7 +7,7 @@
  *   POST /channex/test                            checks the key (properties seen by it)
  *   POST /channex/webhook                         creates the webhook on Channex
  *   POST /channex/webhook/test                    asks Channex to call it once
- *   POST /channex/signing-key                     asks Channex for the webhook signing key
+ *   POST /channex/signing-key                     generates the webhook key (kept on the site)
  *   POST /channex/alerts/read                     warnings read
  *   GET  /properties/{id}/channex                 mapping, Channex's options, sync state, reservations
  *   PUT  /properties/{id}/channex/mapping         saves the mapping (starts a full sync)
@@ -138,7 +138,8 @@ class ChannexController extends RestController {
 		$status = $this->inbound->webhook(
 			(string) $request->get_body(),
 			(string) $request->get_header( 'x_hmac_timestamp' ),
-			(string) $request->get_header( 'x_hmac_signature_256' )
+			(string) $request->get_header( 'x_hmac_signature_256' ),
+			(string) $request->get_header( strtolower( str_replace( '-', '_', ChannexBookings::TOKEN_HEADER ) ) )
 		);
 		// Minimal body: nothing useful to someone probing the endpoint.
 		return new \WP_REST_Response( array( 'received' => 200 === $status ), $status );

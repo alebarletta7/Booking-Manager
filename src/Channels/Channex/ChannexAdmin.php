@@ -131,7 +131,7 @@ class ChannexAdmin {
 	public function test(): array|\WP_Error {
 		$res = $this->client->get( 'properties/options' );
 		if ( null !== $res['error'] ) {
-			return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 502 ) );
+			return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 422 ) );
 		}
 		if ( '' !== (string) $this->settings->config()['suspended'] ) {
 			$this->settings->save( array( 'suspended' => '' ) );
@@ -357,54 +357,50 @@ class ChannexAdmin {
 	 */
 	public function register_webhook(): array|\WP_Error {
 		if ( '' === $this->settings->webhook_secret() ) {
-			return new \WP_Error( 'bkng_channex_secret', __( 'Prima genera o inserisci la chiave di firma dei webhook.', 'booking-manager' ), array( 'status' => 409 ) );
+			return new \WP_Error( 'bkng_channex_secret', __( 'Prima genera la chiave del webhook.', 'booking-manager' ), array( 'status' => 409 ) );
 		}
-		$res = $this->client->post(
-			'webhooks',
-			array(
-				'webhook' => array(
-					'callback_url'   => self::webhook_url(),
-					'event_mask'     => ChannexBookings::EVENT_MASK,
-					'is_active'      => true,
-					'is_global'      => true,
-					'send_data'      => false,
-					'is_signed'      => true,
-					'headers'        => (object) array(),
-					'request_params' => (object) array(),
-				),
-			)
+		$body = array(
+			'webhook' => array(
+				'callback_url'   => self::webhook_url(),
+				'event_mask'     => ChannexBookings::EVENT_MASK,
+				'is_active'      => true,
+				'is_global'      => true,
+				'send_data'      => false,
+				'headers'        => $this->webhook_headers(),
+				'request_params' => (object) array(),
+			),
 		);
-		if ( null !== $res['error'] ) {
-			return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 502 ) );
+		// The webhook made before is updated (a new key must reach it), or made again if gone.
+		$id  = (string) $this->settings->config()['webhook_id'];
+		$res = '' !== $id ? $this->client->request( 'PUT', 'webhooks/' . rawurlencode( $id ), array(), $body ) : null;
+		if ( null === $res || 404 === $res['status'] ) {
+			$res = $this->client->post( 'webhooks', $body );
 		}
-		$id = (string) ( $res['body']['data']['id'] ?? '' );
+		if ( null !== $res['error'] ) {
+			return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 422 ) );
+		}
+		$id = (string) ( $res['body']['data']['id'] ?? $id );
 		$this->settings->save( array( 'webhook_id' => substr( $id, 0, 36 ) ) );
 		return $this->overview();
 	}
 
 	/**
-	 * Asks Channex for a signing key and stores its secret (sealed).
+	 * Generates the webhook key on the site (Channex has nothing to hand out): the
+	 * webhook created below sends it back in our header at every call.
 	 *
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function create_signing_key(): array|\WP_Error {
-		$res = $this->client->post( 'signing_keys', array( 'signing_key' => (object) array() ) );
-		if ( null !== $res['error'] ) {
-			return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 502 ) );
+		if ( ! empty( $this->settings->view()['webhook_secret_constant'] ) ) {
+			return new \WP_Error( 'bkng_channex_secret', __( 'La chiave è impostata in wp-config.php: cambiala lì.', 'booking-manager' ), array( 'status' => 409 ) );
 		}
-		$attributes = (array) ( $res['body']['data']['attributes'] ?? $res['body']['data'] ?? array() );
-		$secret     = '';
-		foreach ( array( 'secret', 'key', 'signing_key', 'value' ) as $field ) {
-			if ( isset( $attributes[ $field ] ) && is_string( $attributes[ $field ] ) && strlen( $attributes[ $field ] ) >= 16 ) {
-				$secret = $attributes[ $field ];
-				break;
-			}
-		}
-		if ( '' === $secret ) {
-			return new \WP_Error( 'bkng_channex_secret', __( 'Channex non ha restituito la chiave: copiala dal pannello di Channex e incollala qui.', 'booking-manager' ), array( 'status' => 502 ) );
-		}
-		$this->settings->save_credentials( array( 'webhook_secret' => $secret ) );
+		$this->settings->save_credentials( array( 'webhook_secret' => bin2hex( random_bytes( 32 ) ) ) );
 		return $this->overview();
+	}
+
+	/** @return array<string, string> the headers Channex sends back at every call */
+	private function webhook_headers(): array {
+		return array( ChannexBookings::TOKEN_HEADER => $this->settings->webhook_secret() );
 	}
 
 	/** Sends a test call to our webhook through Channex. */
@@ -416,12 +412,12 @@ class ChannexAdmin {
 					'callback_url' => self::webhook_url(),
 					'event_mask'   => ChannexBookings::EVENT_MASK,
 					'send_data'    => false,
-					'is_signed'    => true,
+					'headers'      => $this->webhook_headers(),
 				),
 			)
 		);
 		if ( null !== $res['error'] ) {
-			return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 502 ) );
+			return new \WP_Error( 'bkng_channex_failed', $res['error'], array( 'status' => 422 ) );
 		}
 		return $this->overview() + array( 'tested' => true );
 	}

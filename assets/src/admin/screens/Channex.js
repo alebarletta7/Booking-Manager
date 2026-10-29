@@ -230,10 +230,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 						help={ keyHelp( s ) }
 					/>
 					<Text
-						label={ __(
-							'Chiave di firma dei webhook',
-							'booking-manager'
-						) }
+						label={ __( 'Chiave del webhook', 'booking-manager' ) }
 						type="password"
 						autoComplete="off"
 						value={ form.webhook_secret }
@@ -332,13 +329,16 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 							run(
 								'/channex/signing-key',
 								__(
-									'Chiave di firma salvata.',
+									'Chiave del webhook generata. Ora crea o aggiorna il webhook su Channex.',
 									'booking-manager'
 								)
 							)
 						}
 					>
-						{ __( 'Genera chiave di firma', 'booking-manager' ) }
+						{ __(
+							'Genera la chiave del webhook',
+							'booking-manager'
+						) }
 					</Button>
 					<Button
 						variant="secondary"
@@ -351,7 +351,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 							run(
 								'/channex/webhook',
 								__(
-									'Webhook creato su Channex.',
+									'Webhook creato (o aggiornato) su Channex.',
 									'booking-manager'
 								)
 							)
@@ -359,7 +359,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 					>
 						{ s.webhook_id
 							? __(
-									'Crea di nuovo il webhook',
+									'Aggiorna il webhook su Channex',
 									'booking-manager'
 							  )
 							: __(
@@ -1187,7 +1187,10 @@ function secretHelp( s ) {
 			'booking-manager'
 		);
 	}
-	return __( 'Generala qui sotto o copiala da Channex.', 'booking-manager' );
+	return __(
+		'Generala qui sotto: il sito la crea e la manda a Channex con il webhook.',
+		'booking-manager'
+	);
 }
 
 function connectionStatus( s ) {

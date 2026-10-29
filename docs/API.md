@@ -176,7 +176,7 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | POST | `/properties/{property_id}/channex/push`, `/pull`, `/full-sync` |
 | POST | `/channex/revisions/{revision}/retry`, `/resolve` |
 
-`POST /booking-manager/public/v1/channex/webhook` è chiamata da Channex: risponde 401 senza una firma valida (`x-hmac-signature-256` su `{x-hmac-timestamp}.{corpo}`, tolleranza 5 minuti) e non importa nulla da sola: avvia la lettura del feed.
+`POST /booking-manager/public/v1/channex/webhook` è chiamata da Channex: risponde 401 senza l'intestazione `X-Bkng-Webhook-Token` giusta o una firma valida (`x-hmac-signature-256` su `{x-hmac-timestamp}.{corpo}`, tolleranza 5 minuti) e non importa nulla da sola: avvia la lettura del feed.
 
 ### Canali
 
