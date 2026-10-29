@@ -1472,6 +1472,7 @@ html.wp-toolbar:has(body.bkng-operational) {
 		padding: 0;
 		list-style: none;
 
+		// stylelint-disable-next-line no-descending-specificity
 		> li {
 			display: grid;
 			grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1710,5 +1711,58 @@ html.wp-toolbar:has(body.bkng-operational) {
 		a {
 			color: $primary;
 		}
+	}
+}
+
+// Channex (0.1.11): warnings on top, the webhook address to copy,
+// Channex's warnings.
+.bkng-cx {
+
+	&__alerts {
+		border-left: 4px solid $bad;
+	}
+
+	&__alert-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		// stylelint-disable-next-line no-descending-specificity
+		> li {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px 10px;
+			padding: 6px 0;
+			border-bottom: 1px solid #e6ece8;
+
+			&:last-child {
+				border-bottom: 0;
+			}
+		}
+	}
+
+	&__url {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+
+		code {
+			padding: 4px 8px;
+			border-radius: 4px;
+			background: #f4f6f4;
+			word-break: break-all;
+		}
+	}
+
+	&__pre {
+		max-height: 220px;
+		margin: 6px 0 0;
+		padding: 8px;
+		overflow: auto;
+		border-radius: 4px;
+		background: #f4f6f4;
+		font-size: 12px;
+		white-space: pre-wrap;
 	}
 }

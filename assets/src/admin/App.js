@@ -11,6 +11,7 @@ import {
 	check as checkIcon,
 	currencyEuro as currencyEuroIcon,
 	fullscreen as fullscreenIcon,
+	globe as globeIcon,
 	home as homeIcon,
 	inbox as inboxIcon,
 	key as keyIcon,
@@ -34,6 +35,7 @@ import { Empty } from './components/ui';
 import Audit from './screens/Audit';
 import BookingDetail from './screens/BookingDetail';
 import Bookings from './screens/Bookings';
+import Channex from './screens/Channex';
 import Dashboard from './screens/Dashboard';
 import FrontDesk from './screens/FrontDesk';
 import GuestDetail from './screens/GuestDetail';
@@ -122,6 +124,12 @@ const NAV = [
 				cap: 'bkng_manage_settings',
 				icon: whatsappIcon,
 			},
+			{
+				path: '/channex',
+				label: __( 'Channex', 'booking-manager' ),
+				cap: 'bkng_manage_integrations',
+				icon: globeIcon,
+			},
 		],
 	},
 	{
@@ -170,6 +178,7 @@ const ROUTES = [
 	[ '/property', PropertySettings ],
 	[ '/messages', Messages ],
 	[ '/whatsapp', WhatsApp ],
+	[ '/channex', Channex ],
 	[ '/staff', Staff ],
 	[ '/audit', Audit ],
 	[ '/settings', Settings ],
