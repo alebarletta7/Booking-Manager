@@ -85,12 +85,47 @@ final class IcalCalendarTest extends WP_UnitTestCase {
 		$this->assertSame( array( '2026-11-13', '2026-11-14' ), array( $back[1]['from'], $back[1]['to'] ) );
 	}
 
+	public function test_a_calendar_cut_off_or_unreadable_is_not_trusted(): void {
+		$ok = IcalCalendar::read( "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:a\r\nDTSTART;VALUE=DATE:20261110\r\nDTEND;VALUE=DATE:20261112\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n" );
+		$this->assertTrue( $ok['complete'] );
+		$this->assertSame( 0, $ok['invalid'] );
+		$this->assertCount( 1, $ok['events'] );
+
+		$cut = IcalCalendar::read( "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:a\r\nDTSTART;VALUE=DATE:20261110\r\nDTEND;VALUE=DATE:2026" );
+		$this->assertFalse( $cut['complete'], 'no END:VCALENDAR: download stopped half way' );
+
+		$bad = IcalCalendar::read( "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:a\r\nDTSTART:soon\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:b\r\nSTATUS:CANCELLED\r\nDTSTART;VALUE=DATE:20261110\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n" );
+		$this->assertSame( 1, $bad['invalid'], 'unreadable date; a cancelled event is not an error' );
+
+		$twice = IcalCalendar::read( "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:same\r\nDTSTART;VALUE=DATE:20261110\r\nDTEND;VALUE=DATE:20261112\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:same\r\nDTSTART;VALUE=DATE:20261111\r\nDTEND;VALUE=DATE:20261114\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n" );
+		$this->assertCount( 1, $twice['events'], 'the same UID twice is one event' );
+		$this->assertSame( array( '2026-11-10', '2026-11-14' ), array( $twice['events'][0]['from'], $twice['events'][0]['to'] ) );
+	}
+
+	public function test_portal_found_from_the_address_and_hint_without_the_key(): void {
+		$this->assertSame( 'airbnb', IcalCalendar::detect_channel( 'https://www.airbnb.it/calendar/ical/123.ics?s=abc' ) );
+		$this->assertSame( 'airbnb', IcalCalendar::detect_channel( 'https://www.airbnb.co.uk/calendar/ical/123.ics' ) );
+		$this->assertSame( 'booking', IcalCalendar::detect_channel( 'https://admin.booking.com/hotel/hoteladmin/ical.html?t=x' ) );
+		$this->assertSame( 'vrbo', IcalCalendar::detect_channel( 'https://www.vrbo.com/icalendar/abc.ics' ) );
+		$this->assertSame( 'other', IcalCalendar::detect_channel( 'https://booking.com.evil.example/cal.ics' ) );
+		$this->assertSame( 'other', IcalCalendar::detect_channel( 'https://notairbnb.example/cal.ics' ) );
+		$hint = IcalCalendar::hint( 'https://www.airbnb.it/calendar/ical/123.ics?s=secret-key' );
+		$this->assertSame( 'www.airbnb.it/calendar/ical/123.ics?…', $hint );
+		$this->assertStringNotContainsString( 'secret', $hint );
+	}
+
 	public function test_calendar_addresses(): void {
 		$this->assertSame( 'https://www.airbnb.it/calendar/ical/123.ics?s=abc', IcalService::clean_url( ' webcal://www.airbnb.it/calendar/ical/123.ics?s=abc ' ) );
 		$this->assertSame( 'https://admin.booking.com/hotel/hoteladmin/ical.html?t=x-y', IcalService::clean_url( 'https://admin.booking.com/hotel/hoteladmin/ical.html?t=x-y' ) );
 		$this->assertNull( IcalService::clean_url( 'ftp://example.org/cal.ics' ) );
+		$this->assertNull( IcalService::clean_url( 'http://www.airbnb.it/calendar/ical/123.ics' ), 'plain http would send the private key in clear' );
+		$this->assertNull( IcalService::clean_url( 'https://user:pass@example.org/cal.ics' ) );
 		$this->assertNull( IcalService::clean_url( 'javascript:alert(1)' ) );
 		$this->assertNull( IcalService::clean_url( 'file:///etc/passwd' ) );
 		$this->assertNull( IcalService::clean_url( '' ) );
+	}
+
+	public function test_retries_wait_longer_and_longer(): void {
+		$this->assertSame( array( 15, 30, 60, 120, 240, 240 ), array_map( array( IcalService::class, 'retry_minutes' ), array( 1, 2, 3, 4, 5, 9 ) ) );
 	}
 }

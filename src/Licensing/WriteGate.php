@@ -123,8 +123,9 @@ class WriteGate {
 		'#^/properties/\d+/channels/[a-z0-9_-]{2,40}/mappings$#',
 		'#^/whatsapp/(settings|connection|templates/refresh|templates/[a-z_]{3,30}(/(preview|test))?|messages/\d+/resend)$#',
 		'#^/public/whatsapp/webhook$#',
-		'#^/properties/\d+/ical/(feeds|sync)$#',
+		'#^/properties/\d+/ical/(feeds(/bulk)?|sync)$#',
 		'#^/ical/feeds/\d+(/sync)?$#',
+		'#^/ical/units/\d+/link$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}

@@ -98,7 +98,9 @@ use BookingManager\Rest\ChannelsController;
 use BookingManager\Channels\ChannelRefRepository;
 use BookingManager\Channels\ChannelService;
 use BookingManager\Channels\SyncLogRepository;
+use BookingManager\Channels\Ical\IcalEventRepository;
 use BookingManager\Channels\Ical\IcalFeedRepository;
+use BookingManager\Cli\IcalCommand;
 use BookingManager\Channels\Ical\IcalService;
 use BookingManager\Rest\IcalController;
 use BookingManager\Properties\PropertyRepository;
@@ -341,8 +343,9 @@ final class Plugin {
 		$c->set( SyncLogRepository::class, fn() => new SyncLogRepository() );
 		$c->set( ChannelService::class, fn( Container $c ) => new ChannelService( $c->get( ChannelRefRepository::class ), $c->get( SyncLogRepository::class ), $c->get( BookingService::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ) ) );
 
-		$c->set( IcalFeedRepository::class, fn() => new IcalFeedRepository() );
-		$c->set( IcalService::class, fn( Container $c ) => new IcalService( $c->get( IcalFeedRepository::class ), $c->get( UnitRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( PropertyRepository::class ), $c->get( Ledger::class ), $c->get( SyncLogRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
+		$c->set( IcalFeedRepository::class, fn( Container $c ) => new IcalFeedRepository( $c->get( SecretBox::class ) ) );
+		$c->set( IcalEventRepository::class, fn() => new IcalEventRepository() );
+		$c->set( IcalService::class, fn( Container $c ) => new IcalService( $c->get( IcalFeedRepository::class ), $c->get( IcalEventRepository::class ), $c->get( UnitRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( PropertyRepository::class ), $c->get( Ledger::class ), $c->get( SyncLogRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
 
 		// REST controllers.
 		$p = fn( Container $c ) => $c->get( Policy::class );
@@ -364,7 +367,7 @@ final class Plugin {
 		$c->set( HousekeepingController::class, fn( Container $c ) => new HousekeepingController( $p( $c ), $c->get( HousekeepingService::class ), $c->get( UnitRepository::class ) ) );
 		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ) ) );
 		$c->set( WhatsAppController::class, fn( Container $c ) => new WhatsAppController( $p( $c ), $c->get( WhatsAppService::class ) ) );
-		$c->set( IcalController::class, fn( Container $c ) => new IcalController( $p( $c ), $c->get( IcalService::class ), $c->get( IcalFeedRepository::class ) ) );
+		$c->set( IcalController::class, fn( Container $c ) => new IcalController( $p( $c ), $c->get( IcalService::class ), $c->get( IcalFeedRepository::class ), $c->get( UnitRepository::class ) ) );
 		$c->set( ChannelsController::class, fn( Container $c ) => new ChannelsController( $p( $c ), $c->get( ChannelService::class ), $c->get( RoomTypeRepository::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
@@ -447,6 +450,7 @@ final class Plugin {
 		$c->get( LicenseScheduler::class )->hooks();
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( 'booking-manager license', new LicenseCommand( $c->get( LicenseManager::class ) ) );
+			\WP_CLI::add_command( 'booking-manager ical', new IcalCommand( $c->get( IcalService::class ), $c->get( IcalFeedRepository::class ), $c->get( PropertyRepository::class ) ) );
 		}
 		$c->get( UpdateChecker::class )->hooks();
 		$c->get( NotificationService::class )->hooks();

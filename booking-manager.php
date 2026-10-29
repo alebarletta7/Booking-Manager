@@ -3,7 +3,7 @@
  * Plugin Name:       Booking Manager
  * Plugin URI:        https://www.alessandrobarletta.it/
  * Description:       Gestionale per B&B, affittacamere, case vacanza, appartamenti e hotel: camere, tariffe, disponibilità, prenotazioni, pagamenti, check-in e housekeeping.
- * Version:           0.1.11
+ * Version:           0.1.12
  * Requires at least: 6.6
  * Requires PHP:      8.1
  * Author:            Alessandro Barletta
@@ -29,7 +29,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BKNG_VERSION', '0.1.11' );
+define( 'BKNG_VERSION', '0.1.12' );
 define( 'BKNG_FILE', __FILE__ );
 define( 'BKNG_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BKNG_URL', plugin_dir_url( __FILE__ ) );

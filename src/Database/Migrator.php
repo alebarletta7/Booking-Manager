@@ -27,6 +27,7 @@ class Migrator {
 			Migrations\Migration_20261025_000001_CancellationOption::class,
 			Migrations\Migration_20261027_000001_WhatsAppDelivery::class,
 			Migrations\Migration_20261027_000002_IcalCalendars::class,
+			Migrations\Migration_20261029_000001_IcalSources::class,
 		);
 	}
 

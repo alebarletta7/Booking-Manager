@@ -1,6 +1,6 @@
-# Report dei test — Booking Manager 0.1.11 (Fase 2)
+# Report dei test — Booking Manager 0.1.12 (Fase 2)
 
-Data: 27 ottobre 2026 · ramo `fase-2/sviluppo`
+Data: 29 ottobre 2026 · ramo `fase-2/sviluppo`
 
 Legenda: **SUPERATO** = eseguito e riuscito · **NON ESEGUITO** = non provato, con il motivo. Nessuna prova non eseguita è indicata come superata.
 
@@ -18,12 +18,12 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 105 test, 1.288 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 119 test, 1.433 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|
 | Unit — file per il calendario | 1 | evento di tutto il giorno dall'arrivo alla partenza compresa, testo con virgole e punti e virgola protetti, righe piegate a 75 byte, stesso UID per la stessa prenotazione |
-| Unit — **calendari dei portali (iCal)** | 3 | eventi di Airbnb e Booking.com (righe piegate, date con e senza ora, evento senza fine = una notte, annullati e vuoti scartati, «Reserved» riconosciuto), periodi contigui, calendario per i portali che si rilegge uguale, indirizzi `webcal://` accettati e `ftp:`, `file:`, `javascript:` rifiutati |
+| Unit — **calendari dei portali (iCal)** | 6 | eventi di Airbnb e Booking.com (righe piegate, date con e senza ora, evento senza fine = una notte, annullati e vuoti scartati, «Reserved» riconosciuto), stesso UID due volte = un evento, **calendario troncato o con eventi illeggibili non affidabile**, periodi contigui, calendario per i portali che si rilegge uguale, **portale riconosciuto dall'indirizzo** (anche `booking.com.evil.example` → «Altro»), indirizzo mascherato senza la chiave, `webcal://` accettato e `http:`, `ftp:`, `file:`, `javascript:`, utente e password rifiutati, tentativi dopo un errore 15 → 240 minuti |
 | Unit — stati prenotazione | 3 | transizioni ammesse, stati che occupano camere, notti senza il giorno di partenza |
 | Unit — regole Cloudflare | 3 | eccezione solo per gli URL esatti dei webhook, nessuna eccezione senza conti, aggiornamento solo delle nostre regole |
 | Unit — riepilogo pagamenti | 3 | stato di pagamento, importi, condizioni di cancellazione per l'ospite |
@@ -32,7 +32,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Integrazione — motore prenotazioni | 21 | camere in serie (tutte o nessuna, numeri già usati o ripetuti), ultima camera non vendibile due volte, giorno di partenza libero, doppia camera rifiutata dal database, blocco ottimistico (409), idempotenza, cambio date con nuovo prezzo, holds, regole e forzatura dello staff, chiusure, prezzo venduto invariato, **licenza: blocco di nuove prenotazioni e camere ma non del resto**, modalità online, schede ospite, archiviazione, B&B |
 | Integrazione — **concorrenza reale** | 1 | 8 processi PHP separati, ognuno con la sua connessione, prenotano l'ultima camera nello stesso istante: **ne riesce uno solo**, gli altri ricevono «non disponibile» (ripetuto 4 volte di fila, sempre superato) |
 | Integrazione — canali | 4 | importazione una sola volta e senza email, ciò che non entra viene registrato e riprovato, i connettori ricevono i cambi di disponibilità, anonimizzazione |
-| Integrazione — **Booking.com e Airbnb (iCal)** (calendari serviti dai test, nessun portale contattato) | 7 | le date del portale chiudono la camera e non si possono prenotare qui; lettura ripetuta senza cambi; evento spostato o tolto libera le notti, nessuna riga lasciata indietro; portale che non risponde, errore 500 o pagina non iCal: le chiusure restano, errore registrato una volta al giorno; le nostre date che tornano dal portale non sono errori, un «Reserved» su notti occupate è segnalato una volta sola; scollegare libera le notti; controlli su camera, portale, indirizzo e doppioni; link per i portali con soggiorni e chiusure, senza nome, email o codice della prenotazione, chiave sbagliata o di un'altra camera rifiutata, camera vuota chiusa quando la tipologia ha un soggiorno non assegnato, nuove chiavi; rotte REST e permessi |
+| Integrazione — **Booking.com e Airbnb (iCal)** (calendari serviti dai test, nessun portale contattato) | 18 | le date del portale chiudono la camera e non si prenotano qui; lettura ripetuta senza cambi; evento spostato o tolto libera le notti; **due calendari sulle stesse notti: ogni notte chiusa una volta, e se uno le toglie l'altro le tiene chiuse subito**; **ciclo Booking.com → Airbnb → noi: dopo l'annullamento su Booking.com la camera si riapre e si prenota di nuovo, la copia di Airbnb è riconosciuta come eco**; una prenotazione Airbnb vera non è mai un'eco ed è segnalata se Booking.com tiene quelle notti; portale che cambia UID non libera le date; **portale che non risponde, errore 500/503, pagina non iCal, calendario troncato, evento illeggibile: date tenute**; **calendario vuoto: tenuto alla prima lettura, liberato alla conferma**; tentativi 15 → 30 minuti, ultima lettura riuscita conservata, due letture insieme impossibili, cron che legge solo i calendari in scadenza; fonti separate (dirette, Airbnb, manuali) con notti; **indirizzo cifrato nel database e mai restituito**; collegamento di più camere insieme con portale riconosciuto e righe sbagliate rifiutate una per una; nuovo link per una camera (il vecchio smette, le altre tengono il loro); holds non esportati; **prenotazione diretta annullata → chiusura del portale applicata senza scaricare di nuovo**; **staff di un'altra struttura: 404 su vista, scollegamento, lettura, nuovo link, e non può collegare una camera non sua**; **aggiornamento da 0.1.11: indirizzo cifrato, chiusure diventate eventi, fonte impostata, niente perso**; nessun dato dell'ospite nel link; rotte REST e permessi |
 | Integrazione — check-in | 9 | QR firmato senza dati personali, check-in una volta sola anche da due telefoni, codici errati o di altre strutture, check-out e camera da pulire, camere non pulite, camere separate, annullamento del check-in, housekeeping, permessi |
 | Integrazione — messaggi | 7 | richiesta all'ospite e alla struttura, conferma con QR (tutte le immagini dentro l'email, nessuna remota), aspetto della struttura (sottotitolo, frasi, colori; anteprima con le scelte non salvate), messaggi non più veri non inviati, promemoria una volta, testi della struttura, server di posta in errore riprovato e segnalato |
 | Integrazione — **WhatsApp** (servizio di prova, nessun messaggio parte) | 9 | nulla in coda finché WhatsApp non è collegato e acceso (e non si accende senza collegamento); testo approvato inviato all'ospite con numero normalizzato (`+39`), ID e stato «inviato»; testo riempito con nome, struttura e codice, nessun parametro vuoto; pulsante con codice e chiave della prenotazione giusti; messaggio spento non accodato; rinuncia dal modulo o dallo staff rispettata anche per un messaggio già in coda; modulo pubblico che chiede il cellulare; testo nuovo in approvazione con il vecchio ancora in uso, rifiutato, in pausa; controlli dei testi come Meta; webhook con firma sbagliata rifiutato, «letto» che non torna «consegnato»; registro e «Invia di nuovo»; segreti mai restituiti e cifrati nel database; schermata solo per amministratori |
@@ -47,7 +47,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | `php -l` su tutti i file PHP del pacchetto | SUPERATO |
 | ESLint (`@wordpress/eslint-plugin`) su `assets/src` | SUPERATO (0 errori) |
 | Build `npm run build` | SUPERATO (admin ~361 KB, modulo pubblico ~57 KB con sole dipendenze `wp-element` e `wp-i18n`) |
-| Generazione `languages/booking-manager.pot` | SUPERATO (1.662 testi) |
+| Generazione `languages/booking-manager.pot` | SUPERATO (1.699 testi) |
 
 ## 3. Prove manuali su WordPress (browser)
 
@@ -80,6 +80,9 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Pulsante WhatsApp: `/?bkng_wa=CODICE.CHIAVE` porta alla pagina della prenotazione; una chiave sbagliata porta alla pagina che dice «Prenotazione non trovata» | SUPERATO |
 | Modulo pubblico con WhatsApp acceso: campo «Cellulare» obbligatorio e casella «Non voglio ricevere messaggi WhatsApp sulla prenotazione» | SUPERATO |
 | **Booking e Airbnb** (1280 px e 400 px) con due calendari finti serviti in locale (formato Airbnb con «Reserved» e formato Booking.com «CLOSED - Not available»): «Collega un calendario» → letto subito, 3 periodi Airbnb e 1 Booking.com chiusi, 2 notti già occupate da una nostra prenotazione saltate senza errore; indirizzo inesistente → «Errore» con il motivo (404) e riga nel registro; «Sincronizza ora» | SUPERATO |
+| **0.1.12 — Booking e Airbnb** (1280 px, sito locale aggiornato da 0.1.11 con 3 calendari già collegati): aggiornamento senza perdite (indirizzi cifrati, 4 chiusure diventate eventi, fonti Airbnb/Booking.com); «Collega i calendari di tutte le camere» con un link Airbnb, un link Booking.com e un link `http://` → «Collegati: 2. Non collegati: 1» con il motivo sulla camera giusta, portale riconosciuto dall'indirizzo; «Sincronizza ora» → «Calendari letti: 5 (non raggiungibili: 1)»; riquadro «Sincronizzazione automatica» con l'avviso del cron disattivato; per camera occupazioni per fonte (dirette 5 periodi, Airbnb 3, Booking.com 1), stati «Collegato» / «Non raggiungibile», indirizzo mascherato, ultima sincronizzazione riuscita e prossima lettura | SUPERATO (i calendari dei portali erano finti, serviti in locale) |
+| `wp booking-manager ical sync` e `status` (WP-CLI) | SUPERATO: legge i calendari in scadenza, tabella con stato, ultima lettura riuscita, prossima lettura ed errore, senza indirizzi |
+| Link della camera letto con curl: 200 `text/calendar`, notti registrate come esportate (26 notti per la camera 101) | SUPERATO |
 | Planning: le date dei portali in blu con «Airbnb · prenotazione», non rimovibili da qui | SUPERATO |
 | Link della camera `/?bkng_ical=…` aperto con curl: `text/calendar`, periodi «Non disponibile» uniti (prenotazione + chiusura Airbnb), `noindex`; chiave sbagliata → 404 | SUPERATO |
 | Licenza non valida: modulo pubblico «prenotazioni non disponibili», banner nel gestionale | SUPERATO |
@@ -87,11 +90,12 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 4. Pacchetto ZIP
 
-`bin/build-zip.sh` → `dist/booking-manager-0.1.11.zip` (588 KB, 188 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
+`bin/build-zip.sh` → `dist/booking-manager-0.1.12.zip` (605 KB, 191 file: file principale, `uninstall.php`, `src/`, `assets/build/`, `assets/email/` (icone delle email), `languages/`, `CHANGELOG.md`, `readme.txt`, licenza; nessun sorgente dell'interfaccia, test o file di sviluppo).
 
 | Prova su WordPress 6.6 pulito (WP-CLI) | Esito |
 |---|---|
-| Installazione e attivazione dallo ZIP | SUPERATO: 29 tabelle (nuova `bkng_ical_feeds`, colonne `feed_id` ed `external_uid` in `bkng_unit_blocks`), 5 ruoli, lettura dei calendari pianificata ogni 15 minuti |
+| Installazione e attivazione dallo ZIP | SUPERATO: 31 tabelle (0.1.12: nuove `bkng_ical_events` e `bkng_ical_exports`, colonna `source` in `bkng_unit_blocks`), 5 ruoli, lettura dei calendari pianificata ogni 15 minuti |
+| Aggiornamento 0.1.11 → 0.1.12 dallo ZIP con un calendario già collegato | SUPERATO: indirizzo cifrato (nessuna copia in chiaro nel database), indirizzo mascherato, la chiusura esistente diventa un evento, fonte «airbnb», versione 0.1.12 |
 | Disinstallazione con impostazione predefinita | SUPERATO: tabelle, opzioni e ruoli **conservati** |
 | Disinstallazione con «Cancella tutti i dati» attivo | SUPERATO: 0 tabelle, 0 opzioni, 0 ruoli |
 
@@ -106,7 +110,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 | Cloudflare Turnstile con chiavi vere | `challenges.cloudflare.com` non raggiungibile | Inserire le chiavi in **Impostazioni → Generali** e inviare una prenotazione |
 | Consegna reale delle email (SMTP) | nessun server di posta; la coda, i tentativi e gli errori sono coperti dai test | Sito con SMTP configurato, prenotazione di prova |
 | **WhatsApp con Meta reale** (collegamento con il numero di prova di Meta, approvazione dei testi, invio a un cellulare vero, pulsante, «consegnato» e «letto» dal webhook) | `graph.facebook.com` non raggiungibile da questo ambiente; tutto è provato con il servizio «Prova», che non invia nulla | Sito online, **WhatsApp → Collegamento** con ID numero, ID account Business e token permanente; cellulare tra i destinatari autorizzati del numero di prova; **Invia prova**; per il webhook incollare URL e token in Meta → WhatsApp → Configurazione |
-| **Booking.com e Airbnb reali** (incollare il link della camera nel portale, lettura del calendario del portale, prenotazione vera che chiude la camera qui e viceversa, tempi di aggiornamento dei portali) | nessun account di prova sui portali e uscita verso i loro server bloccata; tutto è provato con calendari finti nello stesso formato | Sito online: **Booking e Airbnb**, per una camera copiare il link in Airbnb → Calendario → Disponibilità → Sincronizza calendari → Importa, e incollare qui il link «Esporta»; chiudere una data su Airbnb e premere **Sincronizza** |
+| **Booking.com e Airbnb reali** (incollare il link della camera nel portale, lettura del calendario del portale, prenotazione vera che chiude la camera qui e viceversa, annullamento che riapre, tempi di aggiornamento dei portali, eco tra portali con calendari veri) | nessun account di prova sui portali e uscita verso i loro server bloccata; tutto è provato con calendari finti nello stesso formato | Sito online con cron di sistema: **Booking e Airbnb → Copia tutti i link**, incollarli nei portali (Importa calendario); poi **Collega i calendari di tutte le camere** con i link «Esporta»; chiudere una data su Airbnb, **Sincronizza ora** e controllare il planning; annullare e ricontrollare |
 | Fotocamera reale per il QR in reception | nessuna fotocamera nel browser automatico; la lettura per codice è provata | Da tablet o telefono, **Reception → Attiva la fotocamera** |
 | WordPress multisito, PHP 8.1 reale, temi classici | non disponibili in questo ambiente | Installazione di prova dedicata |
 | Prova con utenti reali dei ruoli Reception e Housekeeping nel browser | i permessi sono provati dai test dell'API, non a schermo | Creare due utenti da **Staff** e accedere |

@@ -5,7 +5,9 @@
  *
  *   GET    /properties/{id}/ical               rooms, export addresses, calendars, log
  *   POST   /properties/{id}/ical/feeds         unit_id, channel, url → added and read at once
+ *   POST   /properties/{id}/ical/feeds/bulk    items[{unit_id, url, channel?}] → several at once
  *   POST   /properties/{id}/ical/sync          «Sincronizza ora» for the whole property
+ *   POST   /ical/units/{id}/link               a new export address for one room
  *   DELETE /ical/feeds/{id}                    removes a calendar and frees its nights
  *   POST   /ical/feeds/{id}/sync               reads one calendar now
  *
@@ -19,6 +21,7 @@ namespace BookingManager\Rest;
 use BookingManager\Access\Policy;
 use BookingManager\Channels\Ical\IcalFeedRepository;
 use BookingManager\Channels\Ical\IcalService;
+use BookingManager\Inventory\UnitRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,7 +32,8 @@ class IcalController extends RestController {
 	public function __construct(
 		Policy $policy,
 		private IcalService $service,
-		private IcalFeedRepository $feeds
+		private IcalFeedRepository $feeds,
+		private UnitRepository $units
 	) {
 		parent::__construct( $policy );
 	}
@@ -37,6 +41,29 @@ class IcalController extends RestController {
 	public function register_routes(): void {
 		$property = $this->require_cap_for_property( self::CAP, 'id' );
 		$feed     = $this->require_cap_for_record( self::CAP, fn( int $id ) => $this->feeds->find( $id ) );
+		$unit     = $this->require_cap_for_record( self::CAP, fn( int $id ) => $this->units->find( $id ) );
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/properties/(?P<id>\d+)/ical/feeds/bulk',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => function ( \WP_REST_Request $r ) {
+					$items = self::body( $r )['items'] ?? array();
+					return self::respond( $this->service->add_feeds( (int) $r['id'], is_array( $items ) ? $items : array(), get_current_user_id() ) );
+				},
+				'permission_callback' => $property,
+			)
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/ical/units/(?P<id>\d+)/link',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->service->rotate_unit( (int) $r['id'] ) ),
+				'permission_callback' => $unit,
+			)
+		);
 
 		register_rest_route(
 			self::REST_NAMESPACE,

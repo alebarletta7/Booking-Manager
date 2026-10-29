@@ -26,6 +26,7 @@ function bkng_uninstall_site() {
 	foreach ( array( 'bkng_daily', 'bkng_hourly', 'bkng_notifications', 'bkng_reminders', 'bkng_payments_reconcile', 'bkng_ical_sync', 'bkng_license_check', 'bkng_license_retry' ) as $hook ) {
 		wp_clear_scheduled_hook( $hook );
 	}
+	wp_unschedule_hook( 'bkng_ical_reconcile' ); // Single events with a property id.
 
 	$settings = get_option( 'bkng_settings', array() );
 	if ( empty( $settings['delete_data_on_uninstall'] ) ) {

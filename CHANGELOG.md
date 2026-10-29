@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.1.12] — 29 ottobre 2026
+
+### Novità
+
+- «Booking e Airbnb»: nuovo pulsante «Collega i calendari di tutte le camere». In un solo modulo si incollano i link «Esporta calendario» di ogni camera (anche più di uno per camera) e il portale viene riconosciuto dall'indirizzo: non serve più sceglierlo. L'esito è indicato riga per riga.
+- «Copia tutti i link» copia in una volta i link da dare ai portali, uno per camera. Lo stesso link vale per tutti i portali.
+- Riquadro «Sincronizzazione automatica»: ogni quanto vengono letti i calendari, ultimo controllo automatico, calendari a posto e da controllare, e un avviso se il cron di WordPress non sta girando, con le istruzioni per il cron di sistema.
+- Per ogni calendario: stato (Collegato, In ritardo, Da confermare, Non raggiungibile), ultima sincronizzazione riuscita, prossima lettura e indirizzo mascherato.
+- Per ogni camera: occupazioni in arrivo per fonte (prenotazioni dirette, Airbnb, Booking.com, chiusure manuali) e ultima lettura del suo link da parte di un portale.
+- «Nuovo link» per una sola camera, se il suo link è finito in mani sbagliate: le altre camere tengono il loro.
+- Comando `wp booking-manager ical sync` / `status` per i siti con cron di sistema.
+
+### Modifiche
+
+- Gli eventi letti da ogni calendario sono registrati per fonte. Dopo ogni lettura la camera viene ricostruita da tutti i suoi calendari insieme. Se due calendari chiudono le stesse notti e uno le toglie, l'altro le tiene chiuse subito, senza aspettare la sua prossima lettura.
+- Niente più cicli tra portali: una nostra chiusura che torna indietro da un portale come «non disponibile» viene riconosciuta e ignorata. Così, quando Booking.com annulla una prenotazione, la camera non resta chiusa per colpa della copia mostrata da Airbnb.
+- Le date non vengono mai liberate da un calendario non scaricato, troncato, con eventi illeggibili o che non è un calendario. Un calendario che arriva improvvisamente vuoto libera le date solo se la lettura successiva lo conferma.
+- Dopo un errore, i tentativi successivi sono sempre più distanziati (15, 30, 60 minuti, fino a 4 ore). Due letture dello stesso calendario non partono mai insieme.
+- Quando una prenotazione diretta viene annullata o cambiata, le chiusure dei portali saltate prima vengono applicate subito, senza scaricare di nuovo i calendari.
+- Una prenotazione Airbnb su notti già tenute da un altro portale è segnalata nel registro come possibile doppia prenotazione.
+- Le sospensioni temporanee del modulo di prenotazione (pochi minuti) non vengono più esportate ai portali.
+- Sicurezza: gli indirizzi dei calendari dei portali (contengono la chiave privata dell'annuncio) sono cifrati nel database e non vengono mai mostrati per intero. Si accettano solo indirizzi https (o webcal). I calendari già collegati vengono cifrati e conservati durante l'aggiornamento.
+
 ## [0.1.11] — 27 ottobre 2026
 
 ### Novità

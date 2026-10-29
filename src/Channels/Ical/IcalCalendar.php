@@ -40,6 +40,19 @@ final class IcalCalendar {
 	 * @return array<int, array{uid: string, from: string, to: string, summary: string}> from = first night, to = departure day (Y-m-d)
 	 */
 	public static function parse( string $ics ): array {
+		return self::read( $ics )['events'];
+	}
+
+	/**
+	 * The events, and whether the calendar can be trusted: a calendar cut off (no
+	 * END:VCALENDAR, e.g. a download stopped half way) or with events that cannot be read
+	 * must never free dates.
+	 *
+	 * @return array{events: array<int, array{uid: string, from: string, to: string, summary: string}>, complete: bool, invalid: int}
+	 */
+	public static function read( string $ics ): array {
+		$complete = 1 === preg_match( '/^BEGIN:VCALENDAR\s*$/mi', $ics ) && 1 === preg_match( '/^END:VCALENDAR\s*$/mi', $ics );
+		$invalid  = 0;
 		// Unfold: a line starting with a space or a tab continues the previous one.
 		$text   = (string) preg_replace( "/\r?\n[ \t]/", '', str_replace( "\r\n", "\n", $ics ) );
 		$events = array();
@@ -55,6 +68,8 @@ final class IcalCalendar {
 					$done = self::event( $event, count( $events ) );
 					if ( $done ) {
 						$events[] = $done;
+					} elseif ( ! self::skippable( $event ) ) {
+						++$invalid;
 					}
 				}
 				$event = null;
@@ -63,13 +78,72 @@ final class IcalCalendar {
 			if ( ! is_array( $event ) || ! str_contains( $line, ':' ) ) {
 				continue;
 			}
+			if ( 'BEGIN:VALARM' === strtoupper( $line ) || 'END:VALARM' === strtoupper( $line ) ) {
+				continue;
+			}
 			[ $head, $value ] = explode( ':', $line, 2 );
 			$name             = strtoupper( (string) strtok( $head, ';' ) );
 			if ( ! isset( $event[ $name ] ) ) {
 				$event[ $name ] = $value;
 			}
 		}
-		return $events;
+		// The same reservation twice (some portals repeat it): one event, the widest dates.
+		$by_uid = array();
+		foreach ( $events as $e ) {
+			if ( isset( $by_uid[ $e['uid'] ] ) ) {
+				$by_uid[ $e['uid'] ]['from'] = min( $by_uid[ $e['uid'] ]['from'], $e['from'] );
+				$by_uid[ $e['uid'] ]['to']   = max( $by_uid[ $e['uid'] ]['to'], $e['to'] );
+				continue;
+			}
+			$by_uid[ $e['uid'] ] = $e;
+		}
+		return array(
+			'events'   => array_values( $by_uid ),
+			'complete' => $complete,
+			'invalid'  => $invalid,
+		);
+	}
+
+	/**
+	 * Events dropped on purpose (cancelled, zero nights) are not reading errors.
+	 *
+	 * @param array<string, string> $e
+	 */
+	private static function skippable( array $e ): bool {
+		if ( 'CANCELLED' === strtoupper( trim( (string) ( $e['STATUS'] ?? '' ) ) ) ) {
+			return true;
+		}
+		$from = self::date( (string) ( $e['DTSTART'] ?? '' ) );
+		$to   = self::date( (string) ( $e['DTEND'] ?? '' ) );
+		return null !== $from && null !== $to && $to <= $from;
+	}
+
+	/** The portal of a calendar address, from its host. */
+	public static function detect_channel( string $url ): string {
+		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		$map  = array(
+			'airbnb'  => '/(^|\.)airbnb\.[a-z.]+$/',
+			'booking' => '/(^|\.)booking\.com$/',
+			'vrbo'    => '/(^|\.)(vrbo|homeaway)\.[a-z.]+$/',
+			'expedia' => '/(^|\.)expedia\.[a-z.]+$/',
+		);
+		foreach ( $map as $channel => $pattern ) {
+			if ( preg_match( $pattern, $host ) ) {
+				return $channel;
+			}
+		}
+		return 'other';
+	}
+
+	/** A calendar address without its private part (query string): for the screens. */
+	public static function hint( string $url ): string {
+		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+		if ( strlen( $path ) > 40 ) {
+			$path = substr( $path, 0, 18 ) . '…' . substr( $path, -18 );
+		}
+		$query = (string) wp_parse_url( $url, PHP_URL_QUERY );
+		return mb_substr( $host . $path . ( '' !== $query ? '?…' : '' ), 0, 190 );
 	}
 
 	/**

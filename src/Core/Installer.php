@@ -156,6 +156,7 @@ final class Installer {
 		foreach ( array( self::DAILY_HOOK, self::HOURLY_HOOK, self::NOTIFICATIONS_HOOK, self::REMINDERS_HOOK, self::PAYMENTS_HOOK, self::ICAL_HOOK ) as $hook ) {
 			wp_clear_scheduled_hook( $hook );
 		}
+		wp_unschedule_hook( \BookingManager\Channels\Ical\IcalService::RECONCILE_HOOK );
 		LicenseScheduler::clear();
 	}
 }
