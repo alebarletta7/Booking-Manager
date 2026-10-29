@@ -54,7 +54,7 @@ Booking Manager **non include connettori** e non imita l'API di nessun portale: 
 - **in uscita**: dopo ogni cambio di disponibilità della struttura viene chiamato `push_availability( $property_id, $room_type_ids, $from, $to )` di ogni connettore attivo;
 - **mappature**: **Struttura → Canali** abbina le tipologie ai codici del canale (`PUT /properties/{id}/channels/{canale}/mappings`).
 
-Indipendente da questi connettori, la voce **Booking e Airbnb** collega già le camere ai portali con i calendari iCal (solo date, ogni 15 minuti: vedi ARCHITETTURA.md). Un connettore implementa `Channels\ChannelConnector` (`key()`, `label()`, `unavailable( $property )`, `push_availability(…)`) e si registra con `bkng_channel_connectors`.
+Un connettore implementa `Channels\ChannelConnector` (`key()`, `label()`, `unavailable( $property )`, `push_availability(…)`) e si registra con `bkng_channel_connectors`.
 
 ## WhatsApp
 

@@ -49,10 +49,7 @@ class DashboardService {
 		$guests_in   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(adults + children), 0) FROM {$rooms} WHERE property_id = %d AND stay_status = 'in_house'", $property_id ) );
 		$pending     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$bookings} WHERE property_id = %d AND status IN (%s, %s)", $property_id, BookingStatus::PENDING, BookingStatus::OPTION ) );
 		$occupied    = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$rooms} WHERE property_id = %d AND occupies = 1 AND arrival <= %s AND departure > %s", $property_id, $today, $today ) );
-		$blocked     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$blocks} b JOIN {$units} u ON u.id = b.unit_id AND u.status = 'active' WHERE b.property_id = %d AND b.status = 'active' AND b.kind <> 'channel' AND b.date_from <= %s AND b.date_to > %s", $property_id, $today, $today ) );
-		// Closed by a portal's calendar (Booking.com, Airbnb…): mostly sold there, so counted as occupied.
-		$portals     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$blocks} b JOIN {$units} u ON u.id = b.unit_id AND u.status = 'active' WHERE b.property_id = %d AND b.status = 'active' AND b.kind = 'channel' AND b.date_from <= %s AND b.date_to > %s", $property_id, $today, $today ) );
-		$occupied   += $portals;
+		$blocked     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$blocks} b JOIN {$units} u ON u.id = b.unit_id AND u.status = 'active' WHERE b.property_id = %d AND b.status = 'active' AND b.date_from <= %s AND b.date_to > %s", $property_id, $today, $today ) );
 		$sold_30     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(DATEDIFF(LEAST(departure, %s), GREATEST(arrival, %s))), 0) FROM {$rooms} WHERE property_id = %d AND occupies = 1 AND arrival < %s AND departure > %s", $in30, $today, $property_id, $in30, $today ) );
 		$future      = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$bookings} WHERE property_id = %d AND status IN ({$occupy}) AND arrival > %s", $property_id, $today ) );
 		$balance     = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(balance), 0) FROM {$bookings} WHERE property_id = %d AND status IN ({$occupy}) AND balance > 0", $property_id ) );
@@ -79,7 +76,6 @@ class DashboardService {
 			'rooms_total'          => $total_units,
 			'rooms_out_of_service' => $blocked,
 			'rooms_occupied'       => $occupied,
-			'rooms_from_portals'   => $portals,
 			'rooms_free'           => max( 0, $sellable - $occupied ),
 			'occupancy_today'      => $sellable > 0 ? round( 100 * $occupied / $sellable, 1 ) : 0.0,
 			'occupancy_30_days'    => $total_units > 0 ? round( 100 * $sold_30 / ( $total_units * 30 ), 1 ) : 0.0,

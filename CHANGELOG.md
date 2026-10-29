@@ -1,38 +1,5 @@
 # Changelog
 
-## [0.1.12] — 29 ottobre 2026
-
-### Novità
-
-- «Booking e Airbnb»: nuovo pulsante «Collega i calendari di tutte le camere». In un solo modulo si incollano i link «Esporta calendario» di ogni camera (anche più di uno per camera) e il portale viene riconosciuto dall'indirizzo: non serve più sceglierlo. L'esito è indicato riga per riga.
-- «Copia tutti i link» copia in una volta i link da dare ai portali, uno per camera. Lo stesso link vale per tutti i portali.
-- Riquadro «Sincronizzazione automatica»: ogni quanto vengono letti i calendari, ultimo controllo automatico, calendari a posto e da controllare, e un avviso se il cron di WordPress non sta girando, con le istruzioni per il cron di sistema.
-- Per ogni calendario: stato (Collegato, In ritardo, Da confermare, Non raggiungibile), ultima sincronizzazione riuscita, prossima lettura e indirizzo mascherato.
-- Per ogni camera: occupazioni in arrivo per fonte (prenotazioni dirette, Airbnb, Booking.com, chiusure manuali) e ultima lettura del suo link da parte di un portale.
-- «Nuovo link» per una sola camera, se il suo link è finito in mani sbagliate: le altre camere tengono il loro.
-- Comando `wp booking-manager ical sync` / `status` per i siti con cron di sistema.
-
-### Modifiche
-
-- Gli eventi letti da ogni calendario sono registrati per fonte. Dopo ogni lettura la camera viene ricostruita da tutti i suoi calendari insieme. Se due calendari chiudono le stesse notti e uno le toglie, l'altro le tiene chiuse subito, senza aspettare la sua prossima lettura.
-- Niente più cicli tra portali: una nostra chiusura che torna indietro da un portale come «non disponibile» viene riconosciuta e ignorata. Così, quando Booking.com annulla una prenotazione, la camera non resta chiusa per colpa della copia mostrata da Airbnb.
-- Le date non vengono mai liberate da un calendario non scaricato, troncato, con eventi illeggibili o che non è un calendario. Un calendario che arriva improvvisamente vuoto libera le date solo se la lettura successiva lo conferma.
-- Dopo un errore, i tentativi successivi sono sempre più distanziati (15, 30, 60 minuti, fino a 4 ore). Due letture dello stesso calendario non partono mai insieme.
-- Quando una prenotazione diretta viene annullata o cambiata, le chiusure dei portali saltate prima vengono applicate subito, senza scaricare di nuovo i calendari.
-- Una prenotazione Airbnb su notti già tenute da un altro portale è segnalata nel registro come possibile doppia prenotazione.
-- Le sospensioni temporanee del modulo di prenotazione (pochi minuti) non vengono più esportate ai portali.
-- Sicurezza: gli indirizzi dei calendari dei portali (contengono la chiave privata dell'annuncio) sono cifrati nel database e non vengono mai mostrati per intero. Si accettano solo indirizzi https (o webcal). I calendari già collegati vengono cifrati e conservati durante l'aggiornamento.
-
-## [0.1.11] — 27 ottobre 2026
-
-### Novità
-
-- Collegamento con Booking.com, Airbnb, Vrbo, Expedia e altri portali tramite i calendari iCal (il collegamento che i portali offrono a tutti, senza contratto da partner). Nuova voce «Booking e Airbnb» nel gruppo «Gestione».
-- Ogni camera ha il suo «Link da dare ai portali», con il pulsante «Copia»: si incolla sul portale in «Importa calendario» e il portale chiude le date già vendute qui (prenotazioni, chiusure e notti in cui la tipologia è piena). Passano solo le date: nessun nome, prezzo o contatto.
-- «Collega un calendario»: si sceglie il portale e si incolla il link «Esporta calendario» del portale. Il calendario viene letto subito e poi ogni 15 minuti (o con «Sincronizza ora»): le prenotazioni e le chiusure del portale chiudono la camera qui, quindi il modulo del sito e il gestionale non vendono più quelle notti; se il portale le toglie, le notti tornano libere.
-- Per ogni calendario: stato, ultima lettura, periodi chiusi, «Sincronizza» e «Scollega». Se un portale non risponde le date già chiuse restano chiuse e l'errore viene mostrato. Il registro segnala anche una prenotazione Airbnb su notti già occupate qui (possibile doppia prenotazione).
-- Planning: le date chiuse da un portale sono in blu con il nome del portale (per esempio «Airbnb · prenotazione»). Dashboard: contano come camere occupate.
-
 ## [0.1.10] — 27 ottobre 2026
 
 ### Modifiche

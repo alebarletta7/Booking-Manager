@@ -86,23 +86,9 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 
 - ogni ora (`bkng_hourly`): scadenza delle opzioni in attesa di pagamento; stato delle approvazioni dei testi WhatsApp;
 - controllo dei pagamenti online rimasti aperti (`bkng_payments_reconcile`);
-- ogni 15 minuti (`bkng_ical_sync`): lettura dei calendari iCal di Booking.com, Airbnb e degli altri portali in scadenza; subito dopo un cambio di prenotazione (`bkng_ical_reconcile`): ricalcolo delle camere dagli eventi salvati;
 - coda messaggi (`bkng_notifications`) e promemoria prima dell'arrivo (`bkng_reminders`);
 - ogni giorno (`bkng_daily`): chiusura automatica dei soggiorni finiti, pulizia degli holds scaduti, conservazione dei dati secondo **Impostazioni → Conservazione dei dati** (anonimizzazione degli ospiti senza soggiorni, pulizia di registro attività, messaggi, sincronizzazioni e check-in).
 - Licenza: controllo periodico con il server (`LicenseScheduler`).
-
-## Booking.com e Airbnb (iCal)
-
-`Channels\Ical\IcalService` collega ogni camera ai portali con i calendari iCal, l'unico collegamento che Booking.com e Airbnb offrono senza contratto da partner. iCal non è in tempo reale: i portali leggono il nostro link quando vogliono (di solito ogni poche ore), noi leggiamo i loro ogni 15 minuti.
-
-- **Uscita**: un solo link per camera, valido per tutti i portali, `/?bkng_ical=ID.CHIAVE` (HMAC con l'opzione `bkng_ical_key` e, per una camera a cui è stato dato un nuovo link, la sua parte in `bkng_ical_unit_salts`). Restituisce le notti in cui la camera non si può vendere, da 30 giorni fa a due anni avanti: soggiorni assegnati, chiusure manuali, chiusure importate dagli altri portali e le notti in cui la tipologia ha meno camere libere che camere vuote (soggiorni non ancora assegnati), che chiudono le camere vuote dall'ultima in ordine. Gli holds del modulo (pochi minuti) non vengono esportati. Solo date, mai dati dell'ospite. Ogni lettura da parte di un portale viene registrata in `bkng_ical_exports` (camera, notte, ora).
-- **Entrata**: `bkng_ical_feeds` tiene i calendari dei portali per camera: indirizzo cifrato con SecretBox (contiene la chiave privata dell'annuncio), hash per riconoscere i doppioni, indirizzo mascherato per lo schermo, ultima lettura, ultima lettura riuscita, prossima lettura, errori di fila, letture vuote da confermare, blocco breve contro due letture insieme. Gli eventi dell'ultima lettura buona di ogni calendario sono in `bkng_ical_events` (una riga per evento, per fonte).
-- **Ricalcolo per camera** (`reconcile`): dopo ogni lettura la camera viene ricostruita dagli eventi di tutti i suoi calendari, dentro una transazione con la tipologia bloccata. Ogni notte va a un solo evento (quello che già la chiudeva, poi le prenotazioni, poi il calendario collegato prima) e diventa un blocco `kind = 'channel'` di `bkng_unit_blocks` con `source` = portale, `feed_id` ed `external_uid`. Le chiusure manuali hanno `source = 'manual'`; le prenotazioni dirette restano in `bkng_booking_rooms`. Le notti già occupate qui vengono saltate.
-- **Anti-ciclo**: una chiusura (non una prenotazione) mai tenuta da quel calendario, che cade solo su notti che il nostro link ha esportato come chiuse nelle ultime 72 ore, è una nostra data tornata indietro dal portale e viene ignorata. Senza questa regola una prenotazione Booking.com mandata ad Airbnb tornerebbe da Airbnb e terrebbe la camera chiusa anche dopo l'annullamento su Booking.com. Un calendario che cambia UID ma chiude già quelle notti le tiene.
-- **Mai liberare per errore**: download fallito, errore HTTP, pagina che non è un calendario, calendario senza `END:VCALENDAR` (troncato) o con eventi illeggibili: nessuna modifica, nuovo tentativo dopo 15, 30, 60… minuti (al massimo 4 ore). Un calendario che arriva vuoto quando prima aveva date libera le date solo se la lettura successiva lo conferma.
-- **Doppie prenotazioni possibili**: un «Reserved» di Airbnb su notti occupate qui o da un altro portale finisce in `bkng_sync_log` una sola volta.
-- **Cron**: `bkng_ical_sync` ogni 15 minuti legge i calendari in scadenza (al massimo 40 per giro, 40 secondi) e registra l'ora del giro (`bkng_ical_cron_at`); la schermata avvisa se non gira da 45 minuti. Dopo un cambio o un annullamento di una prenotazione `bkng_ical_reconcile` ricostruisce le camere della struttura dagli eventi salvati, senza scaricare di nuovo. Comando `wp booking-manager ical sync|status` per i cron di sistema.
-- Il planning mostra le chiusure dei portali in blu con il nome del portale e non le fa rimuovere (tornerebbero alla lettura successiva); la dashboard le conta come camere occupate.
 
 ## WhatsApp
 

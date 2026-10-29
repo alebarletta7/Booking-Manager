@@ -75,9 +75,6 @@ final class Schema {
 			// Channels (prepared for OTAs and channel managers).
 			'channel_refs',
 			'sync_log',
-			'ical_feeds',
-			'ical_events',
-			'ical_exports',
 			// Cross-cutting.
 			'audit_log',
 		);

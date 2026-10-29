@@ -4,7 +4,7 @@ Tags: booking, b&b, hotel, prenotazioni, affittacamere
 Requires at least: 6.6
 Tested up to: 6.6
 Requires PHP: 8.1
-Stable tag: 0.1.12
+Stable tag: 0.1.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,28 +27,7 @@ Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
 2. Apri Booking Manager e inserisci la chiave di licenza.
 3. Segui la configurazione guidata.
 
-== Sincronizzazione con Booking.com e Airbnb ==
-
-La voce «Booking e Airbnb» collega le camere ai portali con i calendari iCal (solo date, nessun abbonamento). iCal non è in tempo reale: i portali leggono il link della camera quando vogliono (di solito ogni poche ore).
-
-1. Per ogni camera copia il «Link da dare ai portali» («Copia tutti i link» li copia tutti) e incollalo nel portale in «Importa calendario».
-2. Copia dal portale il link «Esporta calendario» e incollalo in «Collega i calendari di tutte le camere»: il portale si riconosce dall'indirizzo.
-
-Il plugin legge i calendari ogni 15 minuti con il cron di WordPress, che parte solo quando il sito riceve visite. In produzione è meglio un cron di sistema ogni 5 minuti:
-
-* con WP-CLI: `*/5 * * * * cd /percorso/del/sito && wp cron event run --due-now --quiet` (oppure solo i calendari: `wp booking-manager ical sync`);
-* senza WP-CLI: `*/5 * * * * curl -s https://tuosito.it/wp-cron.php?doing_wp_cron > /dev/null`;
-* poi, facoltativo, `define( 'DISABLE_WP_CRON', true );` in wp-config.php.
-
-La schermata avvisa se il controllo automatico non gira da più di 45 minuti. `wp booking-manager ical status` mostra lo stato di ogni calendario.
-
 == Changelog ==
-
-= 0.1.12 =
-* Sincronizzazione con Booking.com e Airbnb più affidabile: eventi registrati per fonte e camera ricalcolata da tutti i suoi calendari, nessun ciclo tra portali, date mai liberate da un calendario non leggibile, troncato o arrivato vuoto, nuovi tentativi sempre più distanziati, stato e ultima sincronizzazione riuscita. Meno link da gestire: portale riconosciuto dall'indirizzo, «Collega i calendari di tutte le camere», «Copia tutti i link». Indirizzi dei portali cifrati, solo https, nuovo link per una singola camera, comando WP-CLI.
-
-= 0.1.11 =
-* Booking.com, Airbnb e altri portali: nuova voce «Booking e Airbnb». Ogni camera ha il suo link di calendario (iCal) da dare ai portali, e i calendari dei portali vengono letti ogni 15 minuti per chiudere le date vendute lì.
 
 = 0.1.10 =
 * Menu: «Messaggi» diventa «Email», con «WhatsApp» subito sotto; il registro delle email mostra solo le email.

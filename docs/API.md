@@ -169,22 +169,6 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | GET | `/properties/{property_id}/channels` |
 | PUT | `/properties/{property_id}/channels/{channel}/mappings` |
 
-### Booking.com e Airbnb: calendari iCal (`bkng_manage_integrations`)
-
-| Metodi | Rotta |
-|---|---|
-| GET | `/properties/{property_id}/ical` (camere con il link per i portali, calendari collegati, registro) |
-| POST | `/properties/{property_id}/ical/feeds` (`unit_id`, `channel` booking/airbnb/vrbo/expedia/other, `url`): collega e legge subito |
-| POST | `/properties/{property_id}/ical/feeds/bulk` (`items[]` di `{unit_id, url, channel?}`, al massimo 200): esito riga per riga |
-| POST | `/properties/{property_id}/ical/sync` (legge tutti i calendari della struttura) |
-| POST | `/ical/feeds/{id}/sync` |
-| DELETE | `/ical/feeds/{id}` (libera le notti chiuse solo da quel calendario) |
-| POST | `/ical/units/{unit_id}/link` (nuovo link per la camera: il vecchio smette di funzionare) |
-
-`channel` è facoltativo: senza, il portale viene riconosciuto dall'indirizzo (airbnb.*, booking.com, vrbo.com, expedia.*; altrimenti «Altro portale»). L'indirizzo deve essere https (o webcal) e non viene mai restituito: l'API mostra `url_hint` senza la parte privata. Ogni calendario ha `state` (`pending`, `ok`, `late`, `warning`, `error`), `last_success_at`, `next_sync_at` e `failures`; ogni camera ha `sources` (periodi e notti in arrivo per fonte: prenotazioni dirette, Airbnb, Booking.com…, chiusure manuali) e `last_export` (ultima lettura del suo link da parte di un portale); `cron` dice se il controllo automatico gira.
-
-Il calendario di una camera per i portali è `/?bkng_ical=ID.CHIAVE` (`text/calendar`, solo date «Non disponibile», nessun dato dell'ospite; chiave sbagliata → 404).
-
 ### Staff, ruoli, registro, Cloudflare
 
 | Metodi | Rotta |
