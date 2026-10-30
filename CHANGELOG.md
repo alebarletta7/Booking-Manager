@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.13] — 30 ottobre 2026
+
+### Novità
+
+- Struttura → Prenotazioni e modulo online: nuovo campo «Immagine di copertina del modulo», la foto in alto nella pagina di prenotazione. Se resta vuoto il modulo usa, come prima, la prima foto delle camere.
+
+### Modifiche
+
+- Struttura: tolta la scheda «Canali». Il collegamento ai portali si fa dalla voce «Channex» del menu.
+
 ## [0.1.12] — 29 ottobre 2026
 
 ### Correzioni

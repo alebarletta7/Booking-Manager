@@ -257,6 +257,19 @@ final class RestApiTest extends TestCase {
 		$this->assertSame( self::day( 5 ), $form['first_free'], 'the two nights already booked are skipped' );
 	}
 
+	public function test_the_form_shows_the_chosen_cover_photo(): void {
+		$this->admin();
+		$p    = $this->property();
+		$this->room_type( $p['id'], 1 );
+		$form = $this->service( \BookingManager\Frontend\PublicBookingService::class )->property( $p['slug'] );
+		$this->assertNull( $form['cover'], 'no choice: the rooms\' first photo' );
+
+		$image = self::factory()->attachment->create_object( 'cover.jpg', 0, array( 'post_mime_type' => 'image/jpeg' ) );
+		$p     = $this->property( array( 'settings' => array( 'form_cover_id' => $image ) ) );
+		$form  = $this->service( \BookingManager\Frontend\PublicBookingService::class )->property( $p['slug'] );
+		$this->assertStringEndsWith( 'cover.jpg', (string) $form['cover'] );
+	}
+
 	public function test_free_cancellation_sold_as_an_option(): void {
 		wp_set_current_user( 0 );
 		$p     = $this->property( array( 'booking_mode' => 'direct' ) );

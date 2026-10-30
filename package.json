@@ -1,6 +1,6 @@
 {
 	"name": "booking-manager",
-	"version": "0.1.12",
+	"version": "0.1.13",
 	"private": true,
 	"description": "Interfaccia di Booking Manager (app di amministrazione e modulo pubblico).",
 	"license": "GPL-2.0-or-later",

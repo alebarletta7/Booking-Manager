@@ -54,7 +54,7 @@ Booking Manager **non include connettori** e non imita l'API di nessun portale: 
 
 - **in entrata**: `ChannelService::import_reservation( $canale, $property_id, $prenotazione )` (campi: `external_id`, `modified`, `status` confirmed/cancelled, `arrival`, `departure`, `guest`, `rooms[]` con `external_room_type_id`, `adults`, `children`, `price_total`) importa una prenotazione una sola volta (idempotente), la collega con `bkng_channel_refs` e registra ogni tentativo in `bkng_sync_log`; non manda email all'ospite; ciò che non entra (camera piena, tipologia non mappata) viene registrato e riprovato;
 - **in uscita**: dopo ogni cambio di disponibilità della struttura viene chiamato `push_availability( $property_id, $room_type_ids, $from, $to )` di ogni connettore attivo;
-- **mappature**: **Struttura → Canali** abbina le tipologie ai codici del canale (`PUT /properties/{id}/channels/{canale}/mappings`).
+- **mappature**: `PUT /properties/{id}/channels/{canale}/mappings` abbina le tipologie ai codici del canale (la scheda «Canali» in Struttura è stata tolta nella 0.1.13: Channex ha la sua pagina).
 
 Channex è integrato nel plugin (vedi [ARCHITETTURA.md](ARCHITETTURA.md#channex)) e usa le azioni `bkng_availability_changed`, `bkng_rates_changed` e quelle delle prenotazioni per sapere quali notti rimandare.
 
