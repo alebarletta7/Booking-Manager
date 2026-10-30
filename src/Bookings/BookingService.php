@@ -62,13 +62,15 @@ class BookingService {
 	 * Creates a booking.
 	 *
 	 * @param array<string, mixed> $input property_id, rooms[], guest{}, guests[], status, extras[], customer_notes, internal_notes, arrival_time, idempotency_key, hold_token, override_restrictions, external_source, external_ref, privacy_accepted, marketing_consent, whatsapp_opt_out, notify_guest (false: no e-mail to the guest)
-	 * @param array{channel?: string, user_id?: int, can_override?: bool, can_price?: bool, awaiting_payment_minutes?: int} $ctx channel: staff | online | import; awaiting_payment_minutes: online booking kept as an option until paid
+	 * @param array{channel?: string, user_id?: int, can_override?: bool, can_price?: bool, awaiting_payment_minutes?: int, accept_overbooking?: bool} $ctx channel: staff | online | import; awaiting_payment_minutes: online booking kept as an option until paid; accept_overbooking (import only): a reservation the channel already confirmed is saved even without a free room (rooms left unassigned, payload "overbooked": true)
 	 * @return array<string, mixed>|\WP_Error the booking payload
 	 */
 	public function create( array $input, array $ctx ): array|\WP_Error {
-		$channel = (string) ( $ctx['channel'] ?? 'staff' );
-		$online  = 'online' === $channel;
-		$user_id = (int) ( $ctx['user_id'] ?? 0 );
+		$channel    = (string) ( $ctx['channel'] ?? 'staff' );
+		$online     = 'online' === $channel;
+		$user_id    = (int) ( $ctx['user_id'] ?? 0 );
+		$overbook   = 'import' === $channel && ! empty( $ctx['accept_overbooking'] );
+		$overbooked = false;
 
 		if ( ! $this->license->allows( $online ? LicenseGate::OP_BOOKING_ONLINE : LicenseGate::OP_BOOKING_STAFF ) ) {
 			return new \WP_Error( 'bkng_license_required', $online ? __( 'Le prenotazioni online non sono disponibili in questo momento. Contatta la struttura.', 'booking-manager' ) : __( 'La licenza non permette di registrare nuove prenotazioni.', 'booking-manager' ), array( 'status' => 403 ) );
@@ -148,11 +150,14 @@ class BookingService {
 
 		$option_hours = (int) $property['settings']['option_hours'];
 		$result       = Abort::run(
-			function () use ( $property, $lines, $guest, $input, $status, $source, $extras, $key, $hold_id, $user_id, $online, $option_hours, $channel, $pay_minutes ) {
+			function () use ( $property, $lines, $guest, $input, $status, $source, $extras, $key, $hold_id, $user_id, $online, $option_hours, $channel, $pay_minutes, $overbook, &$overbooked ) {
 				$this->ledger->lock_types( array_column( $lines, 'room_type_id' ) );
 				$free = $this->stays->check_free( $lines, array(), $hold_id );
 				if ( $free instanceof \WP_Error ) {
-					throw new Abort( $free );
+					if ( ! $overbook ) {
+						throw new Abort( $free );
+					}
+					$overbooked = true;
 				}
 				$priced   = $this->stays->price( $property, $lines, $extras );
 				$guest_id = $this->guests->find_or_create( $guest );
@@ -285,7 +290,7 @@ class BookingService {
 		if ( BookingStatus::CONFIRMED === $booking['status'] ) {
 			Hooks::dispatch( Hooks::BOOKING_CONFIRMED, (int) $booking['id'], $this->context( $booking ) + array( 'notify' => $notify ) );
 		}
-		return $this->payload( $booking );
+		return $this->payload( $booking ) + ( $overbooked ? array( 'overbooked' => true ) : array() );
 	}
 
 	/**
@@ -294,7 +299,7 @@ class BookingService {
 	 * unless keep_price is set (then the total stays as it was).
 	 *
 	 * @param array<string, mixed> $input version, rooms[], extras[], keep_price, override_restrictions
-	 * @param array{user_id?: int, can_override?: bool, can_price?: bool} $ctx
+	 * @param array{user_id?: int, can_override?: bool, can_price?: bool, accept_overbooking?: bool} $ctx accept_overbooking: an imported booking changed by its channel (see create())
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function change_stay( int $id, array $input, array $ctx ): array|\WP_Error {
@@ -350,11 +355,13 @@ class BookingService {
 			}
 		}
 		$extras  = array_key_exists( 'extras', $input ) ? array_values( array_filter( array_map( 'intval', (array) $input['extras'] ) ) ) : array_map( 'intval', (array) $booking['extras'] );
-		$keep    = ! empty( $input['keep_price'] );
-		$user_id = (int) ( $ctx['user_id'] ?? 0 );
+		$keep       = ! empty( $input['keep_price'] );
+		$user_id    = (int) ( $ctx['user_id'] ?? 0 );
+		$overbook   = 'import' === $booking['source'] && ! empty( $ctx['accept_overbooking'] );
+		$overbooked = false;
 
 		$result = Abort::run(
-			function () use ( $id, $version, $property, $lines, $current, $by_id, $extras, $keep, $user_id ) {
+			function () use ( $id, $version, $property, $lines, $current, $by_id, $extras, $keep, $user_id, $overbook, &$overbooked ) {
 				$locked = $this->repo->lock( $id );
 				if ( ! $locked || (int) $locked['version'] !== $version ) {
 					throw new Abort( self::conflict() );
@@ -364,7 +371,10 @@ class BookingService {
 				$exclude = array_column( $current, 'id' );
 				$free    = $this->stays->check_free( $lines, $exclude );
 				if ( $free instanceof \WP_Error ) {
-					throw new Abort( $free );
+					if ( ! $overbook ) {
+						throw new Abort( $free );
+					}
+					$overbooked = true;
 				}
 				foreach ( $current as $room ) {
 					$this->ledger->release_room( (int) $room['id'] );
@@ -373,6 +383,10 @@ class BookingService {
 				foreach ( $lines as $i => $line ) {
 					if ( null === $line['unit_id'] && $line['id'] && null !== $by_id[ $line['id'] ]['unit_id'] && $by_id[ $line['id'] ]['room_type_id'] === $line['room_type_id'] ) {
 						$lines[ $i ]['unit_id'] = $by_id[ $line['id'] ]['unit_id'];
+					}
+					if ( $overbooked ) {
+						// Not enough rooms: only rooms free for the whole stay are given, the rest waits for the staff.
+						$lines[ $i ]['unit_id'] = null;
 					}
 				}
 				$priced = $this->stays->price( $property, $lines, $extras );
@@ -468,11 +482,15 @@ class BookingService {
 			Hooks::BOOKING_UPDATED,
 			$id,
 			$this->context( $after ) + array(
-				'change' => 'stay',
-				'notify' => 'import' !== $after['source'] && false !== ( $input['notify_guest'] ?? true ),
+				'change'                 => 'stay',
+				'notify'                 => 'import' !== $after['source'] && false !== ( $input['notify_guest'] ?? true ),
+				// What the stay was: channels send the freed nights again.
+				'previous_arrival'       => $booking['arrival'],
+				'previous_departure'     => $booking['departure'],
+				'previous_room_type_ids' => array_values( array_unique( array_map( 'intval', array_column( $current, 'room_type_id' ) ) ) ),
 			)
 		);
-		return $this->payload( $after );
+		return $this->payload( $after ) + ( $overbooked ? array( 'overbooked' => true ) : array() );
 	}
 
 	/**

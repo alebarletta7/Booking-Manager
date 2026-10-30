@@ -75,6 +75,12 @@ final class Schema {
 			// Channels (prepared for OTAs and channel managers).
 			'channel_refs',
 			'sync_log',
+			// Channex (Migration_20261029_000001_Channex).
+			'cx_dirty',
+			'cx_state',
+			'cx_tasks',
+			'cx_revisions',
+			'cx_webhook_log',
 			// Cross-cutting.
 			'audit_log',
 		);

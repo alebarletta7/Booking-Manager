@@ -53,6 +53,75 @@ class ChannelRefRepository {
 		);
 	}
 
+	/**
+	 * Every link of a property for a channel, with its meta.
+	 *
+	 * @return array<int, array{entity_type: string, entity_id: int, external_id: string, meta: array<string, mixed>}>
+	 */
+	public function links( int $property_id, string $channel ): array {
+		global $wpdb;
+		$t = Schema::table( 'channel_refs' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table name.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT entity_type, entity_id, external_id, meta FROM {$t} WHERE property_id = %d AND channel = %s ORDER BY id", $property_id, $channel ), ARRAY_A );
+		return array_map(
+			static fn( array $r ) => array(
+				'entity_type' => (string) $r['entity_type'],
+				'entity_id'   => (int) $r['entity_id'],
+				'external_id' => (string) $r['external_id'],
+				'meta'        => self::meta( $r['meta'] ),
+			),
+			$rows
+		);
+	}
+
+	/** The link of a channel's id: property, our id and meta, or null. */
+	public function find_external( string $channel, string $entity_type, string $external_id ): ?array {
+		global $wpdb;
+		$t = Schema::table( 'channel_refs' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table name.
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT property_id, entity_id, meta FROM {$t} WHERE channel = %s AND entity_type = %s AND external_id = %s", $channel, $entity_type, $external_id ), ARRAY_A );
+		if ( ! $row ) {
+			return null;
+		}
+		return array(
+			'property_id' => (int) $row['property_id'],
+			'entity_id'   => (int) $row['entity_id'],
+			'meta'        => self::meta( $row['meta'] ),
+		);
+	}
+
+	/** @return array<string, mixed> */
+	private static function meta( $json ): array {
+		$meta = json_decode( (string) $json, true );
+		return is_array( $meta ) ? $meta : array();
+	}
+
+	/** @return array<int, string> property id => channel's id, for one kind of link (e.g. the properties linked to a channel) */
+	public function by_property( string $channel, string $entity_type ): array {
+		global $wpdb;
+		$t = Schema::table( 'channel_refs' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table name.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT property_id, external_id FROM {$t} WHERE channel = %s AND entity_type = %s ORDER BY property_id", $channel, $entity_type ), ARRAY_A );
+		$out  = array();
+		foreach ( $rows as $row ) {
+			$out[ (int) $row['property_id'] ] = (string) $row['external_id'];
+		}
+		return $out;
+	}
+
+	/** Removes the links of some kinds of a property for a channel (bookings are never touched here). */
+	public function unlink_types( int $property_id, string $channel, array $entity_types ): void {
+		global $wpdb;
+		$t     = Schema::table( 'channel_refs' );
+		$types = array_values( array_diff( array_map( 'strval', $entity_types ), array( self::BOOKING ) ) );
+		if ( ! $types ) {
+			return;
+		}
+		$marks = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- internal table name, placeholders built above.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$t} WHERE property_id = %d AND channel = %s AND entity_type IN ({$marks})", array_merge( array( $property_id, $channel ), $types ) ) );
+	}
+
 	/** @return array<int, array<string, mixed>> links of a property for a channel */
 	public function for_property( int $property_id, string $channel, string $entity_type ): array {
 		global $wpdb;

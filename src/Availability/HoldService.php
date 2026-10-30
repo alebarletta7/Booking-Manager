@@ -14,6 +14,7 @@ declare( strict_types=1 );
 
 namespace BookingManager\Availability;
 
+use BookingManager\Core\Hooks;
 use BookingManager\Database\Schema;
 use BookingManager\Database\Transaction;
 
@@ -34,7 +35,7 @@ class HoldService {
 	 * @return array{token: string, expires_at: string, id: int}|\WP_Error
 	 */
 	public function create( int $property_id, int $type_id, string $arrival, string $departure, int $quantity, int $minutes ): array|\WP_Error {
-		return Transaction::run_retrying(
+		$hold = Transaction::run_retrying(
 			function () use ( $property_id, $type_id, $arrival, $departure, $quantity, $minutes ) {
 				global $wpdb;
 				$this->ledger->lock_types( array( $type_id ) );
@@ -65,6 +66,11 @@ class HoldService {
 				);
 			}
 		);
+		if ( is_array( $hold ) ) {
+			// Channels see the rooms on hold as sold while the visitor completes the form.
+			Hooks::availability_changed( $property_id, array( $type_id ), $arrival, $departure );
+		}
+		return $hold;
 	}
 
 	/** @return array<string, mixed>|null an active, unexpired hold */
@@ -102,7 +108,8 @@ class HoldService {
 		if ( ! preg_match( '/^[a-f0-9]{32}$/', $token ) ) {
 			return;
 		}
-		$wpdb->update(
+		$hold = $this->find_active( $token );
+		$done = $wpdb->update(
 			Schema::table( 'holds' ),
 			array( 'status' => self::RELEASED ),
 			array(
@@ -110,6 +117,36 @@ class HoldService {
 				'status'     => self::ACTIVE,
 			)
 		);
+		if ( $hold && $done ) {
+			Hooks::availability_changed( $hold['property_id'], array( $hold['room_type_id'] ), (string) $hold['arrival'], (string) $hold['departure'] );
+		}
+	}
+
+	/**
+	 * Marks the holds that ran out since the last call and returns them, so channels get
+	 * the rooms back at once (the daily expire() only keeps the table small).
+	 *
+	 * @return array<int, array{property_id: int, room_type_id: int, arrival: string, departure: string}>
+	 */
+	public function expire_due(): array {
+		global $wpdb;
+		$table = Schema::table( 'holds' );
+		$now   = gmdate( 'Y-m-d H:i:s' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, property_id, room_type_id, arrival, departure FROM {$table} WHERE status = %s AND expires_at <= %s ORDER BY id LIMIT 500", self::ACTIVE, $now ), ARRAY_A );
+		$out  = array();
+		foreach ( $rows as $row ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+			if ( $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s WHERE id = %d AND status = %s", self::EXPIRED, (int) $row['id'], self::ACTIVE ) ) ) {
+				$out[] = array(
+					'property_id'  => (int) $row['property_id'],
+					'room_type_id' => (int) $row['room_type_id'],
+					'arrival'      => (string) $row['arrival'],
+					'departure'    => (string) $row['departure'],
+				);
+			}
+		}
+		return $out;
 	}
 
 	/** Daily: marks expired holds (they already stopped counting). */

@@ -257,6 +257,19 @@ final class RestApiTest extends TestCase {
 		$this->assertSame( self::day( 5 ), $form['first_free'], 'the two nights already booked are skipped' );
 	}
 
+	public function test_the_form_shows_the_chosen_cover_photo(): void {
+		$this->admin();
+		$p    = $this->property();
+		$this->room_type( $p['id'], 1 );
+		$form = $this->service( \BookingManager\Frontend\PublicBookingService::class )->property( $p['slug'] );
+		$this->assertNull( $form['cover'], 'no choice: the rooms\' first photo' );
+
+		$image = self::factory()->attachment->create_object( 'cover.jpg', 0, array( 'post_mime_type' => 'image/jpeg' ) );
+		$p     = $this->property( array( 'settings' => array( 'form_cover_id' => $image ) ) );
+		$form  = $this->service( \BookingManager\Frontend\PublicBookingService::class )->property( $p['slug'] );
+		$this->assertStringEndsWith( 'cover.jpg', (string) $form['cover'] );
+	}
+
 	public function test_free_cancellation_sold_as_an_option(): void {
 		wp_set_current_user( 0 );
 		$p     = $this->property( array( 'booking_mode' => 'direct' ) );
@@ -366,8 +379,8 @@ final class RestApiTest extends TestCase {
 			return $out;
 		}
 		$path = preg_replace(
-			array( '/\(\?P<\w+>\\\\d\+\)/', '/\(\?P<\w+>\[a-z0-9\\\\-\]\+\)/', '/\(\?P<\w+>\[A-Za-z0-9\]\{6,16\}\)/', '/\(\?P<\w+>\[a-z_\]\+\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,20\}\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,40\}\)/', '/\(\?P<\w+>\[a-z_\]\{3,30\}\)/' ),
-			array( '12', 'villa-test', 'ABCDEFGH', 'bkng_admin', 'stripe', 'channel_x', 'guest_confirmed' ),
+			array( '/\(\?P<\w+>\\\\d\+\)/', '/\(\?P<\w+>\[a-z0-9\\\\-\]\+\)/', '/\(\?P<\w+>\[A-Za-z0-9\]\{6,16\}\)/', '/\(\?P<\w+>\[a-z_\]\+\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,20\}\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,40\}\)/', '/\(\?P<\w+>\[a-z_\]\{3,30\}\)/', '/\(\?P<\w+>\[0-9a-fA-F-\]\{36\}\)/' ),
+			array( '12', 'villa-test', 'ABCDEFGH', 'bkng_admin', 'stripe', 'channel_x', 'guest_confirmed', '0b9a4c1e-2f3d-4e5f-8a7b-6c5d4e3f2a1b' ),
 			$route
 		);
 		return array( (string) $path );

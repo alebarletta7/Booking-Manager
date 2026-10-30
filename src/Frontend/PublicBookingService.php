@@ -133,6 +133,7 @@ class PublicBookingService {
 			'children_max_age'  => (int) $s['children_max_age'],
 			'show_prices'       => (bool) $s['show_prices'],
 			'color'             => (string) $s['form_color'],
+			'cover'             => $this->cover( (int) $s['form_cover_id'] ),
 			// Closing sentence of the e-mails, also under the booking just sent.
 			'signoff'           => (string) $s['email_signoff'],
 			'request_only'      => 'direct' !== $property['booking_mode'],
@@ -714,5 +715,14 @@ class PublicBookingService {
 
 	private static function too_many(): \WP_Error {
 		return new \WP_Error( 'bkng_rate_limited', __( 'Troppe richieste in poco tempo. Riprova più tardi.', 'booking-manager' ), array( 'status' => 429 ) );
+	}
+
+	/** URL of the photo chosen for the top of the form, or null (the rooms' first photo then). */
+	private function cover( int $id ): ?string {
+		if ( $id <= 0 || ! wp_attachment_is_image( $id ) ) {
+			return null;
+		}
+		$url = wp_get_attachment_image_url( $id, 'full' );
+		return $url ? (string) $url : null;
 	}
 }

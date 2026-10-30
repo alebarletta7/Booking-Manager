@@ -106,12 +106,12 @@ class NotificationService {
 		if ( ! $booking ) {
 			return;
 		}
-		if ( 'public_form' === $booking['source'] ) {
-			$this->queue_staff( NotificationTemplates::STAFF_NEW, $booking );
-		}
-		// An online option waiting for its payment is on the payment page: the e-mail comes
-		// with the confirmation.
+		// An online option waiting for its payment is on the payment page: the e-mails, to
+		// the guest and to the property, come with the confirmation.
 		$awaiting_payment = BookingStatus::OPTION === $booking['status'] && 'public_form' === $booking['source'];
+		if ( 'public_form' === $booking['source'] && ! $awaiting_payment ) {
+			$this->queue_staff( NotificationTemplates::STAFF_NEW, $booking, 'new' );
+		}
 		if ( ! empty( $ctx['notify'] ) && ! $awaiting_payment && in_array( $booking['status'], array( BookingStatus::PENDING, BookingStatus::OPTION ), true ) ) {
 			$this->queue_guest( NotificationTemplates::GUEST_RECEIVED, $booking );
 		}
@@ -123,6 +123,11 @@ class NotificationService {
 		// Not when a no-show marked by mistake is restored or a check-in undone.
 		if ( $booking && ! empty( $ctx['notify'] ) && ! in_array( $ctx['previous_status'] ?? '', array( BookingStatus::NO_SHOW, BookingStatus::IN_HOUSE ), true ) ) {
 			$this->queue_guest( NotificationTemplates::GUEST_CONFIRMED, $booking );
+		}
+		// An online booking paid now: the property hears of it only now. Once per booking, so
+		// a request already announced when it arrived is not announced again.
+		if ( $booking && 'public_form' === $booking['source'] && BookingStatus::OPTION === ( $ctx['previous_status'] ?? '' ) ) {
+			$this->queue_staff( NotificationTemplates::STAFF_NEW, $booking, 'new' );
 		}
 	}
 
@@ -247,14 +252,14 @@ class NotificationService {
 	}
 
 	/** @param array<string, mixed> $booking */
-	public function queue_staff( string $key, array $booking ): bool {
+	public function queue_staff( string $key, array $booking, string $version = '' ): bool {
 		$property = $this->properties->find( (int) $booking['property_id'] );
 		if ( ! $property || empty( $property['settings']['notify_staff'] ) || empty( $property['settings']['email_enabled'] ) ) {
 			return false;
 		}
 		$to = trim( (string) $property['settings']['notify_email'] );
 		$to = '' === $to ? (string) $property['email'] : $to;
-		return is_email( $to ) && $this->queue( 'email', $key, 'staff', $to, $booking, '' );
+		return is_email( $to ) && $this->queue( 'email', $key, 'staff', $to, $booking, $version );
 	}
 
 	/** @param array<string, mixed> $booking */

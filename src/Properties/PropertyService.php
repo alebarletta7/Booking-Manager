@@ -144,6 +144,10 @@ class PropertyService {
 					'new'         => $diff,
 				)
 			);
+			// The stay length of the whole property is a rule channels show too.
+			if ( array_intersect_key( $diff, array_flip( array( 'min_stay', 'max_stay' ) ) ) ) {
+				\BookingManager\Core\Hooks::rates_changed( $id );
+			}
 		}
 		return self::payload( (array) $this->repo->find( $id ) );
 	}

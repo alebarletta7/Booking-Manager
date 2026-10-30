@@ -162,6 +162,22 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 
 `GET/POST /booking-manager/public/v1/whatsapp/webhook` è chiamata da Meta: verifica con il token, aggiornamenti firmati con la chiave segreta dell'app.
 
+### Channex (`bkng_manage_integrations`)
+
+| Metodi | Rotta |
+|---|---|
+| GET | `/channex` (impostazioni senza segreti, strutture collegate, avvisi, indirizzo del webhook) |
+| PUT | `/channex/settings` (`active`, `environment` staging/production, `base_url`, `api_key`, `webhook_secret`, `nightly`; i segreti lasciati vuoti restano quelli salvati) |
+| POST | `/channex/test` (prova la chiave: proprietà viste da Channex) |
+| POST | `/channex/webhook`, `/channex/webhook/test`, `/channex/signing-key` |
+| POST | `/channex/alerts/read` |
+| GET | `/properties/{property_id}/channex` (mappatura, opzioni di Channex, stato, attività, prenotazioni ricevute) |
+| PUT | `/properties/{property_id}/channex/mapping` (`property`, `room_types`, `rate_plans`; avvia la sincronizzazione completa) |
+| POST | `/properties/{property_id}/channex/push`, `/pull`, `/full-sync` |
+| POST | `/channex/revisions/{revision}/retry`, `/resolve` |
+
+`POST /booking-manager/public/v1/channex/webhook` è chiamata da Channex: risponde 401 senza l'intestazione `X-Bkng-Webhook-Token` giusta o una firma valida (`x-hmac-signature-256` su `{x-hmac-timestamp}.{corpo}`, tolleranza 5 minuti) e non importa nulla da sola: avvia la lettura del feed.
+
 ### Canali
 
 | Metodi | Rotta |

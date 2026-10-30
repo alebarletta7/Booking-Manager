@@ -56,6 +56,49 @@ final class Hooks {
 	public const NOTIFICATION_SENT   = 'bkng_notification_sent';
 	public const NOTIFICATION_FAILED = 'bkng_notification_failed';
 
+	// What a channel manager must send again (entity id: the property). Context:
+	// room_type_ids (empty: every type), rate_plan_ids (rates only; empty: every plan),
+	// from / to (Y-m-d, [from, to); null: from today on, for as far as channels sell).
+	public const AVAILABILITY_CHANGED = 'bkng_availability_changed';
+	public const RATES_CHANGED        = 'bkng_rates_changed';
+
+	/**
+	 * Availability of some room types changed (rooms added or archived, out-of-service
+	 * periods, holds of the public form). Bookings have their own hooks above.
+	 *
+	 * @param int[] $type_ids
+	 */
+	public static function availability_changed( int $property_id, array $type_ids, ?string $from = null, ?string $to = null ): void {
+		self::dispatch(
+			self::AVAILABILITY_CHANGED,
+			$property_id,
+			array(
+				'room_type_ids' => array_values( array_unique( array_map( 'intval', $type_ids ) ) ),
+				'from'          => $from,
+				'to'            => $to,
+			)
+		);
+	}
+
+	/**
+	 * Prices or stay rules changed for some types and plans.
+	 *
+	 * @param int[] $type_ids
+	 * @param int[] $plan_ids
+	 */
+	public static function rates_changed( int $property_id, array $type_ids = array(), array $plan_ids = array(), ?string $from = null, ?string $to = null ): void {
+		self::dispatch(
+			self::RATES_CHANGED,
+			$property_id,
+			array(
+				'room_type_ids' => array_values( array_unique( array_map( 'intval', $type_ids ) ) ),
+				'rate_plan_ids' => array_values( array_unique( array_map( 'intval', $plan_ids ) ) ),
+				'from'          => $from,
+				'to'            => $to,
+			)
+		);
+	}
+
 	/**
 	 * Fires one of the actions above. A listener that throws never breaks the operation
 	 * that already happened (the booking is saved before any hook runs).

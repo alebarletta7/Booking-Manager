@@ -30,7 +30,7 @@ src/<Dominio>/*Repository  Accesso al database ($wpdb, query preparate)
 
 ## Dati
 
-28 tabelle `wp_bkng_*`, create e aggiornate da migrazioni (`Database\Migrations\Migration_YYYYMMDD_NNNNNN`), registrate in `bkng_migrations`:
+33 tabelle `wp_bkng_*`, create e aggiornate da migrazioni (`Database\Migrations\Migration_YYYYMMDD_NNNNNN`), registrate in `bkng_migrations`:
 
 - strutture e accesso: `properties`, `user_properties`;
 - inventario: `room_types`, `units`, `unit_blocks`, `unit_nights`, `unit_status_log`;
@@ -39,7 +39,8 @@ src/<Dominio>/*Repository  Accesso al database ($wpdb, query preparate)
 - prenotazioni: `bookings`, `booking_rooms`, `booking_guests`, `checkins`;
 - pagamenti: `payment_accounts`, `payments`, `payment_transactions`, `webhook_events`;
 - messaggi: `notifications`, `templates`;
-- canali (predisposti): `channel_refs`, `sync_log`;
+- canali: `channel_refs`, `sync_log`;
+- Channex: `cx_dirty`, `cx_state`, `cx_tasks`, `cx_revisions`, `cx_webhook_log`;
 - trasversale: `audit_log`.
 
 Convenzioni:
@@ -89,6 +90,19 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 - coda messaggi (`bkng_notifications`) e promemoria prima dell'arrivo (`bkng_reminders`);
 - ogni giorno (`bkng_daily`): chiusura automatica dei soggiorni finiti, pulizia degli holds scaduti, conservazione dei dati secondo **Impostazioni → Conservazione dei dati** (anonimizzazione degli ospiti senza soggiorni, pulizia di registro attività, messaggi, sincronizzazioni e check-in).
 - Licenza: controllo periodico con il server (`LicenseScheduler`).
+- Channex: ogni minuto (`bkng_channex_tick`) invio delle notti cambiate e lettura del feed; ogni notte alle 03:00 (`bkng_channex_nightly`) sincronizzazione completa o controllo delle differenze.
+
+## Channex
+
+Il plugin resta l'unica fonte di verità: Channex riceve ciò che il plugin calcola e manda le prenotazioni dei portali, che il plugin salva con le sue regole.
+
+- **Configurazione**: `Channels\Channex\ChannexSettings` (opzione `bkng_channex`, `autoload = no`; chiave API e chiave del webhook cifrate con `Core\SecretBox`; la chiave del webhook è generata dal sito e Channex la rimanda nell'intestazione `X-Bkng-Webhook-Token`, impostata alla creazione del webhook; è accettata anche una firma HMAC `x-hmac-signature-256`). Le costanti `BKNG_CHANNEX_API_KEY`, `BKNG_CHANNEX_WEBHOOK_SECRET` e `BKNG_CHANNEX_BASE_URL` in `wp-config.php` hanno la precedenza. I segreti non tornano mai dall'API e non finiscono nei registri.
+- **Mappatura**: in `bkng_channel_refs` con canale `channex` (proprietà, tipologie, coppie tipologia × tariffa; tariffa 0 = prezzo base della tipologia).
+- **Uscita (ARI)**: non ci sono tabelle di inventario; i valori si calcolano al momento dell'invio. `AriProjector` legge le camere libere da `Availability\Ledger`, il prezzo da `PricingEngine` e le regole da `restrictions` e dalle impostazioni della struttura. Ogni modifica (`bkng_availability_changed`, `bkng_rates_changed`, azioni delle prenotazioni) segna le notti in `cx_dirty` (una riga per tipo, tipologia, tariffa e notte, con `dirty_seq`). `ChannexSync` prende una fotografia della coda, unisce le notti uguali in intervalli, manda **una** chiamata `availability` e **una** `restrictions` per struttura e cancella solo le righe con lo stesso `dirty_seq`: una notte cambiata durante l'invio parte con la chiamata dopo. Almeno 6 secondi tra due chiamate dello stesso tipo (10 al minuto), pausa crescente su 429/5xx (1, 2, 4… fino a 30 minuti), sospensione su 401. Stato in `cx_state`, attività di Channex in `cx_tasks`.
+- **Sincronizzazione completa**: 500 giorni in 2 chiamate, alla mappatura, dal pulsante o la notte se mai fatta; altrimenti la notte `reconcile` rilegge la disponibilità da Channex e rimette in coda le notti diverse.
+- **Entrata**: `ChannexBookings` legge `GET /booking_revisions/feed` (webhook firmato HMAC-SHA256 su `{timestamp}.{corpo}` che anticipa la lettura; altrimenti ogni 2 minuti), salva ogni revisione in `cx_revisions` senza i dati di pagamento, la applica con `BookingService` (`create`, `change_stay`, `set_status`) dentro una transazione e un `DbLock`, e solo dopo manda l'ack. Una revisione già applicata riceve solo l'ack. Le prenotazioni dei portali possono andare in overbooking (`accept_overbooking`): sono già vendute, quindi si salvano e parte un avviso.
+- **Avvisi**: `ChannexAlerts` (opzione `bkng_channex_alerts`, avviso nel gestionale ed email all'amministratore al massimo una all'ora).
+- **Endpoint `secure-*` di Channex**: mai usati; i dati della carta non vengono letti né salvati.
 
 ## WhatsApp
 

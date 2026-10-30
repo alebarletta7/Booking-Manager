@@ -12,7 +12,7 @@ import {
 	TextareaControl,
 	ToggleControl,
 } from '@wordpress/components';
-import { useId, useState } from '@wordpress/element';
+import { useEffect, useId, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import {
@@ -458,5 +458,67 @@ export function FormModal( {
 				</div>
 			</form>
 		</Modal>
+	);
+}
+
+/** One image of the media library: its thumbnail, «Scegli» and «Rimuovi». */
+export function ImageField( { label, help, id, onChange, empty } ) {
+	const [ url, setUrl ] = useState( '' );
+	useEffect( () => {
+		setUrl( '' );
+		if ( id > 0 && window.wp?.media?.attachment ) {
+			const a = window.wp.media.attachment( id );
+			a.fetch().then( () =>
+				setUrl(
+					a.get( 'sizes' )?.thumbnail?.url || a.get( 'url' ) || ''
+				)
+			);
+		}
+	}, [ id ] );
+	const pick = () => {
+		if ( ! window.wp?.media ) {
+			return;
+		}
+		const frame = window.wp.media( {
+			title: label,
+			library: { type: 'image' },
+			multiple: false,
+			button: { text: __( 'Usa questa immagine', 'booking-manager' ) },
+		} );
+		frame.on( 'select', () => {
+			const a = frame.state().get( 'selection' ).first().toJSON();
+			setUrl( a.sizes?.thumbnail?.url || a.url );
+			onChange( a.id );
+		} );
+		frame.open();
+	};
+	return (
+		<div className="bkng-image-field">
+			<p className="bkng-strong">{ label }</p>
+			<div className="bkng-image-field__row">
+				<span className="bkng-image-field__thumb">
+					{ id > 0 && url ? (
+						<img src={ url } alt="" />
+					) : (
+						<span className="bkng-small bkng-muted">{ empty }</span>
+					) }
+				</span>
+				<Button variant="secondary" onClick={ pick }>
+					{ id > 0
+						? __( 'Cambia', 'booking-manager' )
+						: __( 'Scegli', 'booking-manager' ) }
+				</Button>
+				{ id > 0 && (
+					<Button
+						variant="tertiary"
+						isDestructive
+						onClick={ () => onChange( 0 ) }
+					>
+						{ __( 'Rimuovi', 'booking-manager' ) }
+					</Button>
+				) }
+			</div>
+			{ help && <p className="bkng-help">{ help }</p> }
+		</div>
 	);
 }
