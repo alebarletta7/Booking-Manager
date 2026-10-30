@@ -59,6 +59,7 @@ final class PaymentsTest extends TestCase {
 		$p = $this->property(
 			array(
 				'booking_mode' => 'direct',
+				'email'        => 'info@hotel.example',
 				'settings'     => array( 'online_payment' => 'full' ),
 			)
 		);
@@ -138,6 +139,7 @@ final class PaymentsTest extends TestCase {
 		$booking = (array) $this->service( BookingRepository::class )->find_by_code( $result['booking']['code'] );
 		$payment = $this->service( PaymentRepository::class )->for_booking( (int) $booking['id'] )[0];
 		$account = (int) $payment['payment_account_id'];
+		$this->assertSame( array(), $this->templates( (int) $booking['id'] ), 'nothing to the property (nor the guest) before the payment' );
 
 		// A forged notification changes nothing.
 		$this->assertWPError( $this->webhook( $account, array( 'id' => 'ev_x', 'type' => 'paid', 'session' => $payment['external_id'], 'amount' => 20000 ), 'wrong' ) );
@@ -155,6 +157,7 @@ final class PaymentsTest extends TestCase {
 		$this->assertSame( 20000, $after['paid'] );
 		$this->assertCount( 1, $this->service( PaymentRepository::class )->for_booking( (int) $booking['id'] ) );
 		$this->assertSame( array(), FakeProvider::$refunds );
+		$this->assertSame( array( 'guest_confirmed', 'staff_new' ), $this->templates( (int) $booking['id'] ), 'the property hears of it once paid' );
 	}
 
 	public function test_a_request_accepted_waits_for_the_payment_before_the_confirmation(): void {
@@ -178,7 +181,7 @@ final class PaymentsTest extends TestCase {
 		$this->assertIsArray( $accepted );
 		$this->assertSame( 'option', $accepted['status'], 'accepted: rooms held while the guest pays' );
 		$this->assertNotNull( $accepted['option_expires_at'] );
-		$this->assertSame( array( 'guest_received', 'guest_accepted' ), $this->templates( (int) $booking['id'] ), 'no confirmation before the payment' );
+		$this->assertSame( array( 'staff_new', 'guest_received', 'guest_accepted' ), $this->templates( (int) $booking['id'] ), 'no confirmation before the payment' );
 
 		reset_phpmailer_instance();
 		$this->service( \BookingManager\Notifications\NotificationService::class )->send( $this->notification( (int) $booking['id'], 'guest_accepted' ) );
@@ -193,7 +196,7 @@ final class PaymentsTest extends TestCase {
 		$payment = $this->service( PaymentRepository::class )->for_booking( (int) $booking['id'] )[0];
 		$this->webhook( (int) $payment['payment_account_id'], array( 'id' => 'ev_acc', 'type' => 'paid', 'session' => $payment['external_id'], 'amount' => 20000 ) );
 		$this->assertSame( 'confirmed', $this->booking( (int) $booking['id'] )['status'], 'the payment confirms it' );
-		$this->assertSame( array( 'guest_received', 'guest_accepted', 'guest_confirmed' ), $this->templates( (int) $booking['id'] ), 'then, and only then, the confirmation' );
+		$this->assertSame( array( 'staff_new', 'guest_received', 'guest_accepted', 'guest_confirmed' ), $this->templates( (int) $booking['id'] ), 'then, and only then, the confirmation; the request was already announced to the property' );
 
 		reset_phpmailer_instance();
 		$this->service( \BookingManager\Notifications\NotificationService::class )->send( $this->notification( (int) $booking['id'], 'guest_confirmed' ) );
