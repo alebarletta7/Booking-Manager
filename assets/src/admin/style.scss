@@ -338,19 +338,6 @@ html.wp-toolbar:has(body.bkng-operational) {
 	}
 }
 
-// A bar of buttons and labelled fields (planning, filters, test forms): everything sits on
-// the line of the fields, buttons as tall as the fields.
-.bkng-page__actions:has(input, select),
-.bkng-row:has(input, select),
-.bkng-card__actions:has(input, select),
-.bkng-filters {
-	align-items: flex-end;
-
-	> .components-button {
-		min-height: 40px;
-	}
-}
-
 .bkng-card {
 	background: #fff;
 	border: 1px solid $line;
@@ -1779,3 +1766,19 @@ html.wp-toolbar:has(body.bkng-operational) {
 		white-space: pre-wrap;
 	}
 }
+
+// A bar of buttons and labelled fields (planning, filters, test forms):
+// everything sits on the line of the fields, buttons as tall as the fields.
+// Last in the file: it wins over the button sizes above.
+/* stylelint-disable no-descending-specificity */
+.bkng-page__actions:has(input, select),
+.bkng-row:has(input, select),
+.bkng-card__actions:has(input, select),
+.bkng-filters {
+	align-items: flex-end;
+
+	> .components-button {
+		min-height: 40px;
+	}
+}
+/* stylelint-enable no-descending-specificity */
