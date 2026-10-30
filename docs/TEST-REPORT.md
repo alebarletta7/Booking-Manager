@@ -1,4 +1,4 @@
-# Report dei test — Booking Manager 0.1.13 (Fase 2)
+# Report dei test — Booking Manager 0.1.14 (Fase 2)
 
 Data: 30 ottobre 2026 · ramo `fase-2/sviluppo`
 
@@ -18,7 +18,7 @@ Limite dell'ambiente: la rete in uscita blocca `api.stripe.com`, `xpaysandbox.ne
 
 ## 1. Test automatici (PHPUnit)
 
-`vendor/bin/phpunit` → **SUPERATO: 117 test, 1.510 verifiche, 0 errori.**
+`vendor/bin/phpunit` → **SUPERATO: 117 test, 1.512 verifiche, 0 errori.**
 
 | Gruppo | Test | Cosa verifica |
 |---|---:|---|

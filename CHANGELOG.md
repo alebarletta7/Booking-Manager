@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.14] — 30 ottobre 2026
+
+### Modifiche
+
+- Prenotazioni online con pagamento: l'email «Nuova prenotazione online» alla struttura parte solo quando il pagamento è arrivato e la prenotazione è confermata, non più appena l'ospite apre la pagina di pagamento. Se il pagamento non arriva e l'opzione scade, la struttura non riceve nulla. Per le richieste da confermare l'email arriva come prima, all'invio della richiesta, e non viene ripetuta al pagamento.
+- Gestionale: pulsanti e campi con etichetta sulla stessa riga ora sono allineati e della stessa altezza (Planning «Dal» e «Giorni», filtri, registro WhatsApp e le altre barre).
+
 ## [0.1.13] — 30 ottobre 2026
 
 ### Novità
