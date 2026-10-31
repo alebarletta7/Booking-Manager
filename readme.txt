@@ -4,7 +4,7 @@ Tags: booking, b&b, hotel, prenotazioni, affittacamere
 Requires at least: 6.6
 Tested up to: 6.6
 Requires PHP: 8.1
-Stable tag: 0.1.14
+Stable tag: 0.1.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,9 @@ Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
 3. Segui la configurazione guidata.
 
 == Changelog ==
+
+= 0.1.15 =
+* Modulo di prenotazione: se nessuna camera basta per tutti gli ospiti, propone le combinazioni di camere libere (es. due doppie per 4, tripla + doppia per 5) da prenotare insieme.
 
 = 0.1.14 =
 * Email «Nuova prenotazione online» alla struttura solo dopo il pagamento; campi e pulsanti allineati nelle barre del gestionale.

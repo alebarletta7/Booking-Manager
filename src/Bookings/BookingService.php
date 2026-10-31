@@ -140,11 +140,12 @@ class BookingService {
 
 		$extras  = array_values( array_filter( array_map( 'intval', (array) ( $input['extras'] ?? array() ) ) ) );
 		$hold    = null;
-		$hold_id = 0;
+		$hold_id = array();
 		if ( ! empty( $input['hold_token'] ) ) {
 			$hold = $this->holds->find_active( (string) $input['hold_token'] );
 			if ( $hold && (int) $hold['property_id'] === (int) $property['id'] ) {
-				$hold_id = (int) $hold['id'];
+				// Every row of the token: rooms of different types held together.
+				$hold_id = $hold['ids'];
 			}
 		}
 

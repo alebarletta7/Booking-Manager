@@ -258,12 +258,42 @@ class PublicBookingService {
 				'rates'        => $rates,
 			);
 		}
+		// No single room for the whole group: the rooms that together can host it.
+		$combos = array();
+		if ( ! $offers && ! isset( $found['rules']['dates'] ) && ! isset( $found['rules']['arrival'] ) ) {
+			foreach ( $this->availability->combinations( $property, $arrival, $departure, $adults, $children, true ) as $combo ) {
+				$combos[] = array(
+					'rooms' => $combo['rooms'],
+					'rates' => array_map(
+						static fn( array $rate ) => array(
+							'rate_plan_id' => $rate['rate_plan_id'],
+							'name'         => $rate['name'],
+							'description'  => $rate['description'],
+							'meal_plan'    => $rate['meal_plan'],
+							'cancellation' => $rate['cancellation'],
+							'free_cancel'  => ! in_array(
+								false,
+								array_map( static fn( $c ) => is_array( $c ) && 0 === Policies::cancellation_penalty( $c, $arrival, $today, 100, 100 ), $rate['cancellations'] ),
+								true
+							),
+							'deposit'      => $rate['deposit'],
+							'total'        => $show ? (int) $rate['total'] : null,
+							'tax'          => $show ? (int) $rate['tax'] : null,
+							'nights'       => (int) $rate['nights'],
+						),
+						$combo['rates']
+					),
+				);
+			}
+		}
 		return array(
 			'arrival'   => $arrival,
 			'departure' => $departure,
 			'adults'    => $adults,
 			'children'  => $children,
 			'offers'    => $offers,
+			// Rooms to book together when no single room fits the guests (2+2 for four…).
+			'combos'    => $combos,
 			// Why nothing is offered (minimum stay, closed to arrival…), in words for the guest.
 			'rules'     => array_values( $found['rules'] ),
 		);
@@ -272,7 +302,7 @@ class PublicBookingService {
 	/**
 	 * Holds the chosen rooms while the guest fills in the details.
 	 *
-	 * @param array<string, mixed> $input room_type_id, arrival, departure, quantity
+	 * @param array<string, mixed> $input arrival, departure, and room_type_id + quantity or rooms[]
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function hold( string $slug, array $input, string $ip ): array|\WP_Error {
@@ -283,18 +313,37 @@ class PublicBookingService {
 		if ( ! RateLimiter::hit( 'public_hold', RateLimiter::ip_key( $ip ), self::HOLD_LIMIT, HOUR_IN_SECONDS ) ) {
 			return self::too_many();
 		}
-		$type      = $this->types->find( (int) ( $input['room_type_id'] ?? 0 ) );
 		$arrival   = Validation::date( $input['arrival'] ?? null );
 		$departure = Validation::date( $input['departure'] ?? null );
-		$quantity  = Validation::int_between( $input['quantity'] ?? 1, 1, (int) $property['settings']['max_rooms_per_booking'] );
-		if ( ! $type || (int) $type['property_id'] !== (int) $property['id'] || 'active' !== $type['status'] || ! $type['online_enabled'] ) {
-			return Validation::error( array( 'room_type_id' => __( 'Camera non valida.', 'booking-manager' ) ) );
+		// One type ($input room_type_id + quantity) or several together (rooms: [{room_type_id, quantity}]).
+		$wanted = is_array( $input['rooms'] ?? null )
+			? array_slice( $input['rooms'], 0, 50 )
+			: array(
+				array(
+					'room_type_id' => $input['room_type_id'] ?? 0,
+					'quantity'     => $input['quantity'] ?? 1,
+				),
+			);
+		$by_type = array();
+		foreach ( $wanted as $room ) {
+			$type = is_array( $room ) ? $this->types->find( (int) ( $room['room_type_id'] ?? 0 ) ) : null;
+			if ( ! $type || (int) $type['property_id'] !== (int) $property['id'] || 'active' !== $type['status'] || ! $type['online_enabled'] ) {
+				return Validation::error( array( 'room_type_id' => __( 'Camera non valida.', 'booking-manager' ) ) );
+			}
+			$qty = Validation::int_between( $room['quantity'] ?? 1, 1, 50 );
+			if ( null === $qty ) {
+				return Validation::error( array( 'quantity' => __( 'Numero di camere non valido.', 'booking-manager' ) ) );
+			}
+			$by_type[ (int) $type['id'] ] = ( $by_type[ (int) $type['id'] ] ?? 0 ) + $qty;
 		}
-		if ( null === $arrival || null === $departure || ! AvailabilityService::valid_range( $arrival, $departure, Dates::MAX_NIGHTS ) || null === $quantity ) {
+		if ( ! $by_type || array_sum( $by_type ) > (int) $property['settings']['max_rooms_per_booking'] ) {
+			return Validation::error( array( 'quantity' => __( 'Numero di camere non valido.', 'booking-manager' ) ) );
+		}
+		if ( null === $arrival || null === $departure || ! AvailabilityService::valid_range( $arrival, $departure, Dates::MAX_NIGHTS ) ) {
 			return Validation::error( array( 'dates' => __( 'Scegli date di arrivo e partenza valide.', 'booking-manager' ) ) );
 		}
 		$minutes = (int) $property['settings']['hold_minutes'];
-		$hold    = $this->holds->create( (int) $property['id'], (int) $type['id'], $arrival, $departure, $quantity, $minutes );
+		$hold    = $this->holds->create_set( (int) $property['id'], $by_type, $arrival, $departure, $minutes );
 		if ( $hold instanceof \WP_Error ) {
 			return $hold;
 		}
