@@ -14,6 +14,7 @@ declare( strict_types=1 );
 namespace BookingManager\Guests;
 
 use BookingManager\Database\Schema;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -102,6 +103,7 @@ class GuestRepository {
 		$now               = gmdate( 'Y-m-d H:i:s' );
 		$row               = self::with_hashes( array_intersect_key( $data, array_flip( self::FIELDS ) ) );
 		$row['uuid']       = wp_generate_uuid4();
+		$row              = Tenancy::with_tenant( $row, null, $data['tenant_id'] ?? null );
 		$row['created_at'] = $now;
 		$row['updated_at'] = $now;
 		$wpdb->insert( Schema::table( 'guests' ), $row );
@@ -151,23 +153,30 @@ class GuestRepository {
 		);
 	}
 
+	/** tenant_id of a guest card (the default tenant for a card still without one), or null. */
+	private function tenant_of( int $guest_id ): ?int {
+		global $wpdb;
+		$table = Schema::table( 'guests' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		$id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT tenant_id FROM {$table} WHERE id = %d", $guest_id ) );
+		return $id > 0 ? $id : Tenancy::stamp();
+	}
+
 	/** @param array<string, mixed> $data */
 	public function add_consent( array $data ): void {
 		global $wpdb;
-		$wpdb->insert(
-			Schema::table( 'guest_consents' ),
-			array(
-				'guest_id'     => (int) $data['guest_id'],
-				'property_id'  => $data['property_id'] ?? null,
-				'purpose'      => (string) $data['purpose'],
-				'granted'      => ! empty( $data['granted'] ) ? 1 : 0,
-				'text_version' => $data['text_version'] ?? null,
-				'source'       => (string) ( $data['source'] ?? 'staff' ),
-				'booking_id'   => $data['booking_id'] ?? null,
-				'created_by'   => $data['created_by'] ?? null,
-				'created_at'   => gmdate( 'Y-m-d H:i:s' ),
-			)
+		$row = array(
+			'guest_id'     => (int) $data['guest_id'],
+			'property_id'  => $data['property_id'] ?? null,
+			'purpose'      => (string) $data['purpose'],
+			'granted'      => ! empty( $data['granted'] ) ? 1 : 0,
+			'text_version' => $data['text_version'] ?? null,
+			'source'       => (string) ( $data['source'] ?? 'staff' ),
+			'booking_id'   => $data['booking_id'] ?? null,
+			'created_by'   => $data['created_by'] ?? null,
+			'created_at'   => gmdate( 'Y-m-d H:i:s' ),
 		);
+		$wpdb->insert( Schema::table( 'guest_consents' ), Tenancy::ready() ? $row + array( 'tenant_id' => $this->tenant_of( (int) $data['guest_id'] ) ) : $row );
 	}
 
 	/** The guest's last answer for a purpose (true granted, false refused), null when never asked. */

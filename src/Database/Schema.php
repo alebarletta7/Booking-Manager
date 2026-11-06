@@ -41,6 +41,10 @@ final class Schema {
 	public static function tables(): array {
 		return array(
 			'migrations',
+			// Platform customers (Migration_20261106_000001_Tenants).
+			'tenants',
+			'tenant_users',
+			'tenant_domains',
 			// Properties & access.
 			'properties',
 			'user_properties',

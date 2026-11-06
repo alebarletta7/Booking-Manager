@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0] — 6 novembre 2026
+
+Primo passo della piattaforma centrale con più clienti (vedi [docs/SAAS.md](docs/SAAS.md)). Il gestionale, il modulo di prenotazione, le email e i pagamenti funzionano esattamente come prima.
+
+### Novità
+
+- Clienti della piattaforma (tenant) sopra le strutture: tre tabelle nuove (`bkng_tenants`, `bkng_tenant_users`, `bkng_tenant_domains`) e la colonna `tenant_id` solo dove i dati non dipendono da una struttura (strutture, ospiti, consensi, registro attività, coda messaggi). Tutto il resto resta per struttura come prima.
+- Comandi WP-CLI `wp booking-manager tenant status | migrate | verify | rollback`. `migrate --dry-run` mostra cosa farebbe; `migrate --backup-done` collega i dati esistenti al cliente predefinito (nome dalla ragione sociale della prima struttura, dominio del sito già autorizzato) e lo staff del plugin a quel cliente; gli amministratori di WordPress restano amministratori della piattaforma. Nessuna riga viene cancellata, duplicata o rinumerata; importi e stati non cambiano. `verify` confronta righe, importi e stati con l'istantanea presa prima e controlla che ogni dato abbia il suo cliente. `rollback --yes` rimette tutto come prima senza cancellare nulla.
+- Su una nuova installazione il primo cliente viene creato subito (non c'è niente da migrare).
+
+### Modifiche
+
+- L'aggiornamento del database aggiunge solo tabelle e colonne vuote: finché non si esegue `migrate`, il plugin funziona come la 0.1.15.
+- Il registro dei messaggi salva anche l'oggetto dell'email (colonna `subject`, usata dai prossimi passi).
+
 ## [0.1.15] — 31 ottobre 2026
 
 ### Novità

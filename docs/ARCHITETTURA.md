@@ -30,8 +30,9 @@ src/<Dominio>/*Repository  Accesso al database ($wpdb, query preparate)
 
 ## Dati
 
-33 tabelle `wp_bkng_*`, create e aggiornate da migrazioni (`Database\Migrations\Migration_YYYYMMDD_NNNNNN`), registrate in `bkng_migrations`:
+36 tabelle `wp_bkng_*`, create e aggiornate da migrazioni (`Database\Migrations\Migration_YYYYMMDD_NNNNNN`), registrate in `bkng_migrations`:
 
+- clienti della piattaforma: `tenants`, `tenant_users`, `tenant_domains` (vedi [SAAS.md](SAAS.md));
 - strutture e accesso: `properties`, `user_properties`;
 - inventario: `room_types`, `units`, `unit_blocks`, `unit_nights`, `unit_status_log`;
 - tariffe e disponibilità: `rate_plans`, `rate_prices`, `rate_adjustments`, `restrictions`, `holds`;
@@ -123,4 +124,4 @@ Il plugin resta l'unica fonte di verità: Channex riceve ciò che il plugin calc
 - **Gestionale**: app React in una pagina di amministrazione (`#/` router con hash), palette verde (#173F2E barra laterale, #1F5C43 primario, #2F8A5F accento, #E3F0E8 tenue, #F2F6F3 sfondo). «Modalità operativa» nasconde il menu di WordPress per la reception su tablet.
 - **Modulo pubblico**: shortcode `[booking_manager_prenota struttura="slug"]` (la configurazione guidata crea la pagina; `intestazione="no"` toglie il banner con la foto). Ricerca per date e ospiti, poi filtri (tipologia, capacità, servizi, prezzo a notte, solo disponibili, cancellazione gratuita) e ordinamento applicati alle camere già trovate, senza nuove richieste; schede con galleria e foto ingrandibili. Usa i font del tema. Il colore principale è quello scelto in **Struttura → Prenotazioni e modulo online → Colore del modulo**; se manca, il colore «primary» del tema (`--wp--preset--color--primary`), altrimenti il verde di Booking Manager. Pulsanti e campi hanno stili propri, con selettori più forti di quelli dei temi (es. Astra stilizza ogni `<button>`), così il modulo resta uguale su ogni tema. Script leggero (~48 KB, solo `wp-element` e `wp-i18n`).
 
-Altri documenti: [LICENZA.md](LICENZA.md), [PAGAMENTI.md](PAGAMENTI.md), [CLOUDFLARE.md](CLOUDFLARE.md), [HOOKS.md](HOOKS.md), [API.md](API.md), [SVILUPPO.md](SVILUPPO.md), [TEST-REPORT.md](TEST-REPORT.md).
+Altri documenti: [SAAS.md](SAAS.md), [LICENZA.md](LICENZA.md), [PAGAMENTI.md](PAGAMENTI.md), [CLOUDFLARE.md](CLOUDFLARE.md), [HOOKS.md](HOOKS.md), [API.md](API.md), [SVILUPPO.md](SVILUPPO.md), [TEST-REPORT.md](TEST-REPORT.md).

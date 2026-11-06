@@ -14,6 +14,7 @@ namespace BookingManager\Audit;
 
 use BookingManager\Core\Settings;
 use BookingManager\Database\Schema;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -85,7 +86,8 @@ class AuditLogger {
 			return null;
 		}
 
-		$ok = $wpdb->insert( Schema::table( 'audit_log' ), $row );
+		$row = Tenancy::with_tenant( $row, $row['property_id'], $args['tenant_id'] ?? null );
+		$ok  = $wpdb->insert( Schema::table( 'audit_log' ), $row );
 		if ( false === $ok ) {
 			self::report_failure( (string) $wpdb->last_error, $args );
 			return null;

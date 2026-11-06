@@ -82,3 +82,5 @@ Nuova classe in `src/Database/Migrations/Migration_YYYYMMDD_NNNNNN_Nome.php`, ag
 ## Sito locale per le prove visive
 
 Su un sito di prova si possono puntare un server licenze di test con le costanti di [LICENZA.md](LICENZA.md) (solo su indirizzi locali). Non esistono dati dimostrativi: la configurazione guidata crea la prima struttura.
+
+La migrazione dei clienti (0.2.0) aggiunge solo tabelle e colonne; i dati esistenti si collegano al primo cliente con `wp booking-manager tenant migrate` (vedi [SAAS.md](SAAS.md)).
