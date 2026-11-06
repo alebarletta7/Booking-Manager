@@ -36,6 +36,8 @@ final class PropertySettings {
 			'show_prices'           => true,
 			// Main colour of the form (#rrggbb); empty: the theme's colours.
 			'form_color'            => '',
+			// Photo at the top of the public form (media library id); 0 = the first photo of the rooms.
+			'form_cover_id'         => 0,
 			// The guest may cancel from the link in the e-mail (the rate's cancellation
 			// terms decide what is refunded; a non-refundable rate can never be cancelled online).
 			'guest_cancel_online'   => true,

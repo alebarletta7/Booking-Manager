@@ -116,7 +116,7 @@ final class RestrictionChecker {
 	}
 
 	/** @param array<string, mixed> $r */
-	private static function applies( array $r, ?int $room_type_id, ?int $rate_plan_id ): bool {
+	public static function applies( array $r, ?int $room_type_id, ?int $rate_plan_id ): bool {
 		$type = isset( $r['room_type_id'] ) && '' !== (string) $r['room_type_id'] ? (int) $r['room_type_id'] : null;
 		$plan = isset( $r['rate_plan_id'] ) && '' !== (string) $r['rate_plan_id'] ? (int) $r['rate_plan_id'] : null;
 		if ( null !== $type && null !== $room_type_id && $type !== $room_type_id ) {

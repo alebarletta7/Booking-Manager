@@ -34,8 +34,9 @@ const MAX_GUESTS = 20;
 /* ------------------------------------------------------------------ Banner */
 
 export function Hero( { property } ) {
-	const image = property.room_types.find( ( t ) => t.images?.length )
-		?.images[ 0 ];
+	const image = property.cover
+		? { url: property.cover }
+		: property.room_types.find( ( t ) => t.images?.length )?.images[ 0 ];
 	return (
 		<header
 			className={ 'bkng-p-hero' + ( image ? ' has-image' : '' ) }
@@ -925,7 +926,14 @@ function RoomSheet( { property, stay, item, quote, onChoose, busy, onClose } ) {
 	);
 }
 
-function RateRow( { rate, name, checked, onChange, property, quantity } ) {
+export function RateRow( {
+	rate,
+	name,
+	checked,
+	onChange,
+	property,
+	quantity,
+} ) {
 	const id = 'bkng-p-r-' + useId();
 	return (
 		<li className={ checked ? 'is-checked' : '' }>

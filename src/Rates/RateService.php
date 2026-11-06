@@ -14,6 +14,7 @@ namespace BookingManager\Rates;
 use BookingManager\Audit\AuditLogger;
 use BookingManager\Availability\RestrictionRepository;
 use BookingManager\Core\Dates;
+use BookingManager\Core\Hooks;
 use BookingManager\Core\Validation;
 use BookingManager\Inventory\RoomTypeRepository;
 use BookingManager\Properties\PropertyRepository;
@@ -55,6 +56,7 @@ class RateService {
 			$this->repo->clear_default( $property_id, $id );
 		}
 		$this->log( 'rate_plan.created', 'rate_plan', $id, $property_id );
+		Hooks::rates_changed( $property_id, array(), array( $id ) );
 		return (array) $this->repo->find_plan( $id );
 	}
 
@@ -79,6 +81,7 @@ class RateService {
 			$this->repo->clear_default( (int) $plan['property_id'], $id );
 		}
 		$this->log( 'rate_plan.updated', 'rate_plan', $id, (int) $plan['property_id'] );
+		Hooks::rates_changed( (int) $plan['property_id'], array(), array( $id ) );
 		return (array) $this->repo->find_plan( $id );
 	}
 
@@ -90,6 +93,7 @@ class RateService {
 		}
 		$this->repo->set_plan_status( $id, 'archived' );
 		$this->log( 'rate_plan.archived', 'rate_plan', $id, (int) $plan['property_id'] );
+		Hooks::rates_changed( (int) $plan['property_id'], array(), array( $id ) );
 		return (array) $this->repo->find_plan( $id );
 	}
 
@@ -221,6 +225,11 @@ class RateService {
 			$id = $this->repo->create_price( $property_id, $data );
 		}
 		$this->log( 'rate_price.saved', 'rate_price', $id, $property_id, $data );
+		// A period without plan prices every plan of the type; a changed period frees its old dates too.
+		if ( $current ) {
+			Hooks::rates_changed( $property_id, array( (int) $current['room_type_id'] ), array(), (string) $current['date_from'], Dates::add_days( (string) $current['date_to'], 1 ) );
+		}
+		Hooks::rates_changed( $property_id, array( (int) $type['id'] ), array(), $from, Dates::add_days( $to, 1 ) );
 		return (array) $this->repo->find_price( $id );
 	}
 
@@ -232,6 +241,7 @@ class RateService {
 		}
 		$this->repo->delete_price( $id );
 		$this->log( 'rate_price.deleted', 'rate_price', $id, (int) $price['property_id'], $price );
+		Hooks::rates_changed( (int) $price['property_id'], array( (int) $price['room_type_id'] ), array(), (string) $price['date_from'], Dates::add_days( (string) $price['date_to'], 1 ) );
 		return true;
 	}
 
@@ -393,6 +403,10 @@ class RateService {
 			$id = $this->restrictions->create( $property_id, $data, $user_id );
 		}
 		$this->log( 'restriction.saved', 'restriction', $id, $property_id, $data );
+		if ( $current ) {
+			self::restriction_changed( $property_id, $current );
+		}
+		self::restriction_changed( $property_id, $data );
 		return (array) $this->restrictions->find( $id );
 	}
 
@@ -404,7 +418,24 @@ class RateService {
 		}
 		$this->restrictions->delete( $id );
 		$this->log( 'restriction.deleted', 'restriction', $id, (int) $row['property_id'], $row );
+		self::restriction_changed( (int) $row['property_id'], $row );
 		return true;
+	}
+
+	/**
+	 * A rule changed: its dates (the departure rules act on date_to, so one day more),
+	 * for its type and plan or for all of them.
+	 *
+	 * @param array<string, mixed> $rule
+	 */
+	private static function restriction_changed( int $property_id, array $rule ): void {
+		Hooks::rates_changed(
+			$property_id,
+			empty( $rule['room_type_id'] ) ? array() : array( (int) $rule['room_type_id'] ),
+			empty( $rule['rate_plan_id'] ) ? array() : array( (int) $rule['rate_plan_id'] ),
+			(string) $rule['date_from'],
+			Dates::add_days( (string) $rule['date_to'], 1 )
+		);
 	}
 
 	/**

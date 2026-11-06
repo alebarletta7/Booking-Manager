@@ -58,10 +58,11 @@ class Ledger {
 	/**
 	 * Rooms of a type used on each night of [from, to).
 	 *
-	 * @param int[] $exclude_rooms booking_rooms ids not to count (the stay being changed)
+	 * @param int[]     $exclude_rooms booking_rooms ids not to count (the stay being changed)
+	 * @param int|int[] $exclude_hold  holds not to count (the visitor's own, while booking)
 	 * @return array<string, array{booked: int, blocked: int, held: int}> night => usage
 	 */
-	public function usage( int $type_id, string $from, string $to, array $exclude_rooms = array(), int $exclude_hold = 0 ): array {
+	public function usage( int $type_id, string $from, string $to, array $exclude_rooms = array(), int|array $exclude_hold = 0 ): array {
 		global $wpdb;
 		$usage = array();
 		foreach ( Dates::nights( $from, $to ) as $night ) {
@@ -88,8 +89,10 @@ class Ledger {
 		self::add( $usage, $rows, 'date_from', 'date_to', 'blocked' );
 
 		$holds = Schema::table( 'holds' );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
-		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT arrival, departure, quantity FROM {$holds} WHERE room_type_id = %d AND status = 'active' AND expires_at > %s AND arrival < %s AND departure > %s AND id <> %d", $type_id, gmdate( 'Y-m-d H:i:s' ), $to, $from, $exclude_hold ), ARRAY_A );
+		$mine  = implode( ',', array_map( 'intval', (array) $exclude_hold ) );
+		$mine  = '' !== $mine ? $mine : '0';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal, ids are integers.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT arrival, departure, quantity FROM {$holds} WHERE room_type_id = %d AND status = 'active' AND expires_at > %s AND arrival < %s AND departure > %s AND id NOT IN ({$mine})", $type_id, gmdate( 'Y-m-d H:i:s' ), $to, $from ), ARRAY_A );
 		self::add( $usage, $rows, 'arrival', 'departure', 'held', 'quantity' );
 
 		return $usage;
@@ -101,7 +104,7 @@ class Ledger {
 	 * @param int[] $exclude_rooms
 	 * @return array<string, int> night => free rooms (never below 0)
 	 */
-	public function free_by_night( int $type_id, string $from, string $to, array $exclude_rooms = array(), int $exclude_hold = 0 ): array {
+	public function free_by_night( int $type_id, string $from, string $to, array $exclude_rooms = array(), int|array $exclude_hold = 0 ): array {
 		$capacity = $this->capacity( $type_id );
 		$out      = array();
 		foreach ( $this->usage( $type_id, $from, $to, $exclude_rooms, $exclude_hold ) as $night => $u ) {
@@ -111,7 +114,7 @@ class Ledger {
 	}
 
 	/** Rooms of a type free on every night of [from, to). */
-	public function free( int $type_id, string $from, string $to, array $exclude_rooms = array(), int $exclude_hold = 0 ): int {
+	public function free( int $type_id, string $from, string $to, array $exclude_rooms = array(), int|array $exclude_hold = 0 ): int {
 		$nights = $this->free_by_night( $type_id, $from, $to, $exclude_rooms, $exclude_hold );
 		return $nights ? min( $nights ) : 0;
 	}

@@ -25,6 +25,7 @@ use BookingManager\Audit\AuditLogger;
 use BookingManager\Availability\Ledger;
 use BookingManager\Core\Clock;
 use BookingManager\Core\Dates;
+use BookingManager\Core\Hooks;
 use BookingManager\Core\Validation;
 use BookingManager\Database\Abort;
 use BookingManager\Database\Schema;
@@ -99,6 +100,8 @@ class InventoryService {
 		}
 		$this->types->update( $id, $data );
 		$this->log( 'room_type.updated', 'room_type', $id, (int) $type['property_id'], $data );
+		// Base price, extra guests: the rates a channel shows for this type.
+		Hooks::rates_changed( (int) $type['property_id'], array( $id ) );
 		return self::type_payload( (array) $this->types->find( $id ) );
 	}
 
@@ -136,6 +139,7 @@ class InventoryService {
 			return $result;
 		}
 		$this->log( 'room_type.archived', 'room_type', $id, (int) $type['property_id'] );
+		Hooks::availability_changed( (int) $type['property_id'], array( $id ) );
 		return self::type_payload( (array) $this->types->find( $id ) );
 	}
 
@@ -271,6 +275,7 @@ class InventoryService {
 		}
 		$id = $this->units->create( $property_id, $data );
 		$this->log( 'unit.created', 'unit', $id, $property_id, $data + array( 'own_type' => $own_type ) );
+		Hooks::availability_changed( $property_id, array( (int) $data['room_type_id'] ) );
 		return self::unit_payload( (array) $this->units->find( $id ) );
 	}
 
@@ -343,6 +348,7 @@ class InventoryService {
 		if ( $ids instanceof \WP_Error ) {
 			return $ids;
 		}
+		Hooks::availability_changed( $property_id, array( (int) $type['id'] ) );
 		return array_map( fn( $id ) => self::unit_payload( (array) $this->units->find( $id ) ), $ids );
 	}
 
@@ -381,6 +387,9 @@ class InventoryService {
 			$this->types->update( $new_type, array( 'name' => $data['name'] ) );
 		}
 		$this->log( 'unit.updated', 'unit', $id, (int) $unit['property_id'], $data + array( 'room_type_id' => $new_type ) );
+		if ( $new_type !== (int) $unit['room_type_id'] ) {
+			Hooks::availability_changed( (int) $unit['property_id'], array( (int) $unit['room_type_id'], $new_type ) );
+		}
 		return self::unit_payload( (array) $this->units->find( $id ) );
 	}
 
@@ -418,6 +427,7 @@ class InventoryService {
 			return $result;
 		}
 		$this->log( 'unit.archived', 'unit', $id, (int) $unit['property_id'] );
+		Hooks::availability_changed( (int) $unit['property_id'], array( (int) $unit['room_type_id'] ) );
 		return self::unit_payload( (array) $this->units->find( $id ) );
 	}
 
@@ -437,6 +447,7 @@ class InventoryService {
 		}
 		$this->units->set_status( $id, 'active' );
 		$this->log( 'unit.restored', 'unit', $id, (int) $unit['property_id'] );
+		Hooks::availability_changed( (int) $unit['property_id'], array( (int) $unit['room_type_id'] ) );
 		return self::unit_payload( (array) $this->units->find( $id ) );
 	}
 
@@ -629,6 +640,7 @@ class InventoryService {
 				'kind' => $kind,
 			)
 		);
+		Hooks::availability_changed( (int) $unit['property_id'], array( (int) $unit['room_type_id'] ), $from, $to );
 		return (array) $this->units->find_block( (int) $result );
 	}
 
@@ -641,6 +653,7 @@ class InventoryService {
 		$this->ledger->release_block( $block_id );
 		$this->units->cancel_block( $block_id );
 		$this->log( 'unit.unblocked', 'unit', (int) $block['unit_id'], (int) $block['property_id'], array( 'block_id' => $block_id ) );
+		Hooks::availability_changed( (int) $block['property_id'], array( (int) $block['room_type_id'] ), (string) $block['date_from'], (string) $block['date_to'] );
 		return true;
 	}
 

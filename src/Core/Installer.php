@@ -15,6 +15,7 @@ namespace BookingManager\Core;
 
 use BookingManager\Access\RoleManager;
 use BookingManager\Admin\AdminApp;
+use BookingManager\Channels\Channex\ChannexSync;
 use BookingManager\Database\Migrator;
 use BookingManager\Licensing\LicenseScheduler;
 use BookingManager\Properties\PropertyRepository;
@@ -117,10 +118,16 @@ final class Installer {
 			self::PAYMENTS_HOOK      => array( 15 * MINUTE_IN_SECONDS, self::QUARTER_SCHEDULE ),
 			LicenseScheduler::HOOK   => array( 15 * MINUTE_IN_SECONDS, 'hourly' ),
 		);
+		$tasks[ ChannexSync::TICK_HOOK ] = array( MINUTE_IN_SECONDS, self::MINUTE_SCHEDULE );
 		foreach ( $tasks as $hook => [ $delay, $recurrence ] ) {
 			if ( ! wp_next_scheduled( $hook ) ) {
 				wp_schedule_event( time() + $delay, $recurrence, $hook );
 			}
+		}
+		// Channex: reconciliation and full sync at night (3:00 of the site), when portals are quiet.
+		if ( ! wp_next_scheduled( ChannexSync::NIGHTLY_HOOK ) ) {
+			$night = new \DateTimeImmutable( 'tomorrow 03:00', wp_timezone() );
+			wp_schedule_event( $night->getTimestamp(), 'daily', ChannexSync::NIGHTLY_HOOK );
 		}
 	}
 
@@ -149,7 +156,7 @@ final class Installer {
 	}
 
 	private static function deactivate_site(): void {
-		foreach ( array( self::DAILY_HOOK, self::HOURLY_HOOK, self::NOTIFICATIONS_HOOK, self::REMINDERS_HOOK, self::PAYMENTS_HOOK ) as $hook ) {
+		foreach ( array( self::DAILY_HOOK, self::HOURLY_HOOK, self::NOTIFICATIONS_HOOK, self::REMINDERS_HOOK, self::PAYMENTS_HOOK, ChannexSync::TICK_HOOK, ChannexSync::NIGHTLY_HOOK ) as $hook ) {
 			wp_clear_scheduled_hook( $hook );
 		}
 		LicenseScheduler::clear();

@@ -98,6 +98,18 @@ use BookingManager\Rest\ChannelsController;
 use BookingManager\Channels\ChannelRefRepository;
 use BookingManager\Channels\ChannelService;
 use BookingManager\Channels\SyncLogRepository;
+use BookingManager\Channels\Channex\AriProjector;
+use BookingManager\Channels\Channex\ChannexAdmin;
+use BookingManager\Channels\Channex\ChannexAlerts;
+use BookingManager\Channels\Channex\ChannexBookings;
+use BookingManager\Channels\Channex\ChannexClient;
+use BookingManager\Channels\Channex\ChannexLog;
+use BookingManager\Channels\Channex\ChannexMap;
+use BookingManager\Channels\Channex\ChannexQueue;
+use BookingManager\Channels\Channex\ChannexRevisions;
+use BookingManager\Channels\Channex\ChannexSettings;
+use BookingManager\Channels\Channex\ChannexSync;
+use BookingManager\Rest\ChannexController;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
@@ -338,6 +350,64 @@ final class Plugin {
 		$c->set( SyncLogRepository::class, fn() => new SyncLogRepository() );
 		$c->set( ChannelService::class, fn( Container $c ) => new ChannelService( $c->get( ChannelRefRepository::class ), $c->get( SyncLogRepository::class ), $c->get( BookingService::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ) ) );
 
+		// Channex (towards Booking.com and the other portals): deltas out, reservations in.
+		$c->set( ChannexSettings::class, fn( Container $c ) => new ChannexSettings( $c->get( SecretBox::class ) ) );
+		$c->set( ChannexClient::class, fn( Container $c ) => new ChannexClient( $c->get( ChannexSettings::class ) ) );
+		$c->set( ChannexMap::class, fn( Container $c ) => new ChannexMap( $c->get( ChannelRefRepository::class ) ) );
+		$c->set( ChannexQueue::class, fn() => new ChannexQueue() );
+		$c->set( ChannexLog::class, fn() => new ChannexLog() );
+		$c->set( ChannexRevisions::class, fn() => new ChannexRevisions() );
+		$c->set( ChannexAlerts::class, fn() => new ChannexAlerts() );
+		$c->set( AriProjector::class, fn( Container $c ) => new AriProjector( $c->get( Ledger::class ), $c->get( RoomTypeRepository::class ), $c->get( RateRepository::class ), $c->get( RestrictionRepository::class ) ) );
+		$c->set(
+			ChannexSync::class,
+			fn( Container $c ) => new ChannexSync(
+				$c->get( ChannexSettings::class ),
+				$c->get( ChannexClient::class ),
+				$c->get( ChannexMap::class ),
+				$c->get( ChannexQueue::class ),
+				$c->get( ChannexLog::class ),
+				$c->get( ChannexAlerts::class ),
+				$c->get( AriProjector::class ),
+				$c->get( PropertyRepository::class ),
+				$c->get( BookingRepository::class ),
+				$c->get( HoldService::class ),
+				$c->get( Clock::class )
+			)
+		);
+		$c->set(
+			ChannexBookings::class,
+			fn( Container $c ) => new ChannexBookings(
+				$c->get( ChannexSettings::class ),
+				$c->get( ChannexClient::class ),
+				$c->get( ChannexMap::class ),
+				$c->get( ChannexRevisions::class ),
+				$c->get( ChannexLog::class ),
+				$c->get( ChannexAlerts::class ),
+				$c->get( ChannelRefRepository::class ),
+				$c->get( BookingService::class ),
+				$c->get( BookingRepository::class ),
+				$c->get( RoomTypeRepository::class )
+			)
+		);
+		$c->set(
+			ChannexAdmin::class,
+			fn( Container $c ) => new ChannexAdmin(
+				$c->get( ChannexSettings::class ),
+				$c->get( ChannexClient::class ),
+				$c->get( ChannexMap::class ),
+				$c->get( ChannexSync::class ),
+				$c->get( ChannexBookings::class ),
+				$c->get( ChannexRevisions::class ),
+				$c->get( ChannexLog::class ),
+				$c->get( ChannexAlerts::class ),
+				$c->get( PropertyRepository::class ),
+				$c->get( RoomTypeRepository::class ),
+				$c->get( RateRepository::class ),
+				$c->get( AuditLogger::class )
+			)
+		);
+
 		// REST controllers.
 		$p = fn( Container $c ) => $c->get( Policy::class );
 		$c->set( MeController::class, fn( Container $c ) => new MeController( $p( $c ), $c->get( PropertyScope::class ), $c->get( PropertyRepository::class ), $c->get( Clock::class ) ) );
@@ -359,6 +429,7 @@ final class Plugin {
 		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ) ) );
 		$c->set( WhatsAppController::class, fn( Container $c ) => new WhatsAppController( $p( $c ), $c->get( WhatsAppService::class ) ) );
 		$c->set( ChannelsController::class, fn( Container $c ) => new ChannelsController( $p( $c ), $c->get( ChannelService::class ), $c->get( RoomTypeRepository::class ) ) );
+		$c->set( ChannexController::class, fn( Container $c ) => new ChannexController( $p( $c ), $c->get( ChannexAdmin::class ), $c->get( ChannexBookings::class ), $c->get( ChannexRevisions::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
 		$c->set( StaffEntry::class, fn() => new StaffEntry() );
@@ -421,6 +492,7 @@ final class Plugin {
 			NotificationsController::class,
 			WhatsAppController::class,
 			ChannelsController::class,
+			ChannexController::class,
 			PublicController::class,
 		);
 	}
@@ -444,6 +516,13 @@ final class Plugin {
 		$c->get( NotificationService::class )->hooks();
 		$c->get( WhatsAppService::class )->hooks();
 		$c->get( ChannelService::class )->hooks();
+		// Channex: changes queued and sent, reservations read (webhook, feed every 2 minutes).
+		$c->get( ChannexSync::class )->hooks();
+		$c->get( ChannexBookings::class )->hooks();
+		add_action( ChannexSync::TICK_HOOK, fn() => $c->get( ChannexSync::class )->tick( fn( int $property_id ) => $c->get( ChannexBookings::class )->pull( $property_id ) ) );
+		add_action( ChannexSync::NIGHTLY_HOOK, fn() => $c->get( ChannexSync::class )->nightly() );
+		add_action( ChannexAdmin::FULL_SYNC_HOOK, fn( int $property_id ) => $c->get( ChannexSync::class )->full_sync( $property_id ) );
+		add_action( 'admin_notices', fn() => $c->get( ChannexAlerts::class )->admin_notice() );
 		add_action( Installer::NOTIFICATIONS_HOOK, fn() => $c->get( NotificationService::class )->run() );
 		add_action( Installer::REMINDERS_HOOK, fn() => $c->get( NotificationService::class )->queue_reminders() );
 
@@ -472,6 +551,7 @@ final class Plugin {
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( GuestService::class )->anonymize_inactive( (int) $c->get( Settings::class )->get( 'guest_retention_months' ), time() ) );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( NotificationService::class )->purge( (int) $c->get( Settings::class )->get( 'notification_retention_months' ) ) );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( SyncLogRepository::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );
+		add_action( Installer::DAILY_HOOK, fn() => $c->get( ChannexLog::class )->purge( (int) $c->get( Settings::class )->get( 'audit_retention_months' ), time() ) );
 		add_action( Installer::DAILY_HOOK, fn() => $c->get( CheckinRepository::class )->purge( (int) $c->get( Settings::class )->get( 'checkin_retention_months' ), time() ) );
 
 		add_action(

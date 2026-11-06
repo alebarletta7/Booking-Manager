@@ -18,6 +18,7 @@ import {
 	ErrorNotice,
 	FormModal,
 	Grid,
+	ImageField,
 	Loading,
 	MoneyField,
 	NumberField,
@@ -39,8 +40,6 @@ const KINDS = {
 	guesthouse: __( 'Guest house', 'booking-manager' ),
 	hotel: __( 'Hotel', 'booking-manager' ),
 };
-
-const LOG_TONES = { ok: 'ok', error: 'bad' };
 
 const kindOptions = Object.entries( KINDS ).map( ( [ value, label ] ) => ( {
 	value,
@@ -445,6 +444,22 @@ function BookingTab( { data, onSaved } ) {
 									) }
 								</p>
 							</div>
+							<ImageField
+								label={ __(
+									'Immagine di copertina del modulo',
+									'booking-manager'
+								) }
+								help={ __(
+									'La foto in alto nella pagina di prenotazione. Se non ne scegli una, il modulo usa la prima foto delle camere.',
+									'booking-manager'
+								) }
+								empty={ __(
+									'Foto delle camere',
+									'booking-manager'
+								) }
+								id={ s.form_cover_id || 0 }
+								onChange={ set( 'form_cover_id' ) }
+							/>
 							<Toggle
 								label={ __(
 									"L'ospite può annullare dal link nell'email (secondo le condizioni della tariffa)",
@@ -1189,109 +1204,6 @@ function PaymentsTab( { data, onSaved } ) {
 	);
 }
 
-/* ------------------------------------------------------------------ Channels */
-
-function ChannelsTab( { data } ) {
-	const overview = useLoad(
-		() => get( '/properties/' + data.id + '/channels' ),
-		[ data.id ]
-	);
-	if ( overview.loading ) {
-		return <Loading />;
-	}
-	if ( overview.error ) {
-		return (
-			<ErrorNotice error={ overview.error } onRetry={ overview.reload } />
-		);
-	}
-	const o = overview.data;
-	return (
-		<>
-			<Card title={ __( 'Canali di vendita (OTA)', 'booking-manager' ) }>
-				<p className="bkng-help">
-					{ __(
-						'Booking Manager è predisposto per ricevere prenotazioni dai portali e inviare la disponibilità tramite un channel manager. Il collegamento richiede un connettore dedicato (componente aggiuntivo) con le credenziali ufficiali del canale: nessun canale è collegato in automatico.',
-						'booking-manager'
-					) }
-				</p>
-				{ ! o.connectors.length && (
-					<Empty
-						title={ __(
-							'Nessun connettore installato',
-							'booking-manager'
-						) }
-						text={ __(
-							'Quando un connettore è attivo, qui compaiono stato e abbinamenti delle tipologie.',
-							'booking-manager'
-						) }
-					/>
-				) }
-				<ul className="bkng-list">
-					{ o.connectors.map( ( c ) => (
-						<li key={ c.key }>
-							<div className="bkng-list__main">
-								<span className="bkng-strong">{ c.label }</span>
-								<div className="bkng-small bkng-muted">
-									{ c.ready
-										? __( 'Pronto', 'booking-manager' )
-										: c.reason }
-								</div>
-							</div>
-							<span className="bkng-small">
-								{ sprintf(
-									/* translators: %d: mapped room types. */ __(
-										'%d tipologie abbinate',
-										'booking-manager'
-									),
-									c.room_types.length
-								) }
-							</span>
-						</li>
-					) ) }
-				</ul>
-			</Card>
-			{ o.log.length > 0 && (
-				<Card title={ __( 'Ultimi scambi', 'booking-manager' ) }>
-					<ul className="bkng-list">
-						{ o.log.map( ( l, i ) => (
-							<li key={ i }>
-								<span className="bkng-small bkng-muted bkng-nowrap">
-									{ dateTime( l.at ) }
-								</span>
-								<div className="bkng-list__main">
-									{ l.channel } ·{ ' ' }
-									{ l.direction === 'in'
-										? __( 'ricevuta', 'booking-manager' )
-										: __(
-												'inviata',
-												'booking-manager'
-										  ) }{ ' ' }
-									{ l.external_id
-										? '· ' + l.external_id
-										: '' }
-									{ l.message && (
-										<div className="bkng-small">
-											{ l.message }
-										</div>
-									) }
-								</div>
-								<span
-									className={
-										'bkng-badge is-' +
-										( LOG_TONES[ l.status ] || 'warn' )
-									}
-								>
-									{ l.status }
-								</span>
-							</li>
-						) ) }
-					</ul>
-				</Card>
-			) }
-		</>
-	);
-}
-
 export default function PropertySettings() {
 	const { property, refreshMe, select } = useProperty();
 	const [ tab, setTab ] = useState( 'details' );
@@ -1358,10 +1270,6 @@ export default function PropertySettings() {
 		],
 		[ 'messages', __( 'Email', 'booking-manager' ) ],
 		[ 'housekeeping', __( 'Housekeeping', 'booking-manager' ) ],
-		can( 'bkng_manage_integrations' ) && [
-			'channels',
-			__( 'Canali', 'booking-manager' ),
-		],
 	].filter( Boolean );
 
 	return (
@@ -1403,7 +1311,6 @@ export default function PropertySettings() {
 					onSaved={ saved }
 				/>
 			) }
-			{ tab === 'channels' && <ChannelsTab data={ data } /> }
 			{ boot.me?.is_wp_admin && (
 				<p className="bkng-help">
 					{ sprintf(
