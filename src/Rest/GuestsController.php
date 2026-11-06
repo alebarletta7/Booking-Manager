@@ -23,6 +23,7 @@ use BookingManager\Access\Policy;
 use BookingManager\Bookings\BookingRepository;
 use BookingManager\Guests\GuestRepository;
 use BookingManager\Guests\GuestService;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -131,7 +132,7 @@ class GuestsController extends RestController {
 			}
 			$id    = (int) $request['id'];
 			$guest = $this->repo->find( $id );
-			if ( ! $guest || ( null !== $guest['anonymized_at'] && ! $all_properties ) || ! $this->visible_properties( $id ) ) {
+			if ( ! $guest || ( null !== $guest['anonymized_at'] && ! $all_properties ) || ! $this->visible_properties( $id ) || ! $this->same_tenant( $guest ) ) {
 				return GuestService::not_found();
 			}
 			if ( $all_properties && ! $this->policy->can( 'bkng_access_all_properties' ) ) {
@@ -139,6 +140,22 @@ class GuestsController extends RestController {
 			}
 			return true;
 		};
+	}
+
+	/**
+	 * A guest card belongs to one customer: staff of another customer never opens it,
+	 * even through a booking moved between properties. Platform administrators see all.
+	 *
+	 * @param array<string, mixed> $guest
+	 */
+	private function same_tenant( array $guest ): bool {
+		$scope = $this->policy->scope();
+		$user  = get_current_user_id();
+		if ( ! Tenancy::migrated() || $scope->is_platform( $user ) ) {
+			return true;
+		}
+		$tenant = $scope->tenant_of( $user );
+		return $tenant > 0 && ( (int) $guest['tenant_id'] === $tenant || ( 0 === (int) $guest['tenant_id'] && Tenancy::default_id() === $tenant ) );
 	}
 
 	/** @return int[] properties of the guest's bookings that the caller can open with this capability */

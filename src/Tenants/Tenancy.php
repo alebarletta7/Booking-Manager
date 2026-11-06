@@ -34,6 +34,9 @@ final class Tenancy {
 
 	private static ?bool $ready = null;
 
+	/** @var array<int, int> user id => tenant id */
+	private static array $users = array();
+
 	/** @var array<int, int> property id => tenant id (0 = none) */
 	private static array $properties = array();
 
@@ -60,6 +63,20 @@ final class Tenancy {
 			self::$properties[ $property_id ] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT tenant_id FROM {$table} WHERE id = %d", $property_id ) );
 		}
 		return self::$properties[ $property_id ] > 0 ? self::$properties[ $property_id ] : self::default_id();
+	}
+
+	/** Customer of a user (0 = platform administrator or not linked). */
+	public static function of_user( int $user_id ): int {
+		if ( $user_id <= 0 || ! self::ready() ) {
+			return 0;
+		}
+		if ( ! array_key_exists( $user_id, self::$users ) ) {
+			global $wpdb;
+			$table                    = Schema::table( 'tenant_users' );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+			self::$users[ $user_id ] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT tenant_id FROM {$table} WHERE user_id = %d", $user_id ) );
+		}
+		return self::$users[ $user_id ];
 	}
 
 	/** tenant_id to write: the property's tenant, else the default tenant, else NULL. */
@@ -99,6 +116,7 @@ final class Tenancy {
 
 	public static function flush(): void {
 		self::$properties = array();
+		self::$users      = array();
 		self::$ready      = null;
 	}
 }

@@ -34,6 +34,21 @@ class RoleManager {
 	public function hooks(): void {
 		// A WordPress administrator always has every plugin capability: never locked out.
 		add_filter( 'user_has_cap', array( $this, 'grant_admins' ), 10, 4 );
+		// Platform capabilities never reach anybody but WordPress administrators.
+		add_filter( 'user_has_cap', array( self::class, 'strip_platform_caps' ), 11, 1 );
+	}
+
+	/**
+	 * @param array<string, bool> $allcaps
+	 * @return array<string, bool>
+	 */
+	public static function strip_platform_caps( array $allcaps ): array {
+		if ( empty( $allcaps['manage_options'] ) ) {
+			foreach ( Capabilities::PLATFORM as $cap ) {
+				unset( $allcaps[ $cap ] );
+			}
+		}
+		return $allcaps;
 	}
 
 	/**
@@ -70,6 +85,10 @@ class RoleManager {
 				continue;
 			}
 			foreach ( $all as $cap ) {
+				// The customers' administrator never receives platform capabilities.
+				if ( Capabilities::ROLE_ADMIN === $slug && in_array( $cap, Capabilities::PLATFORM, true ) ) {
+					continue;
+				}
 				if ( ! $role->has_cap( $cap ) ) {
 					$role->add_cap( $cap );
 				}
@@ -147,6 +166,14 @@ class RoleManager {
 			return new \WP_Error( 'bkng_forbidden', __( 'Non hai il permesso di gestire i ruoli.', 'booking-manager' ), array( 'status' => 403 ) );
 		}
 		foreach ( $caps as $cap ) {
+			if ( is_string( $cap ) && in_array( $cap, Capabilities::PLATFORM, true ) ) {
+				return new \WP_Error(
+					'bkng_cap_platform',
+					/* translators: %s: capability name. */
+					sprintf( __( 'Il permesso "%s" è riservato alla piattaforma e non si assegna ai ruoli.', 'booking-manager' ), $cap ),
+					array( 'status' => 403 )
+				);
+			}
 			if ( ! is_string( $cap ) || ! Capabilities::exists( $cap ) ) {
 				return new \WP_Error(
 					'bkng_cap_not_allowed',

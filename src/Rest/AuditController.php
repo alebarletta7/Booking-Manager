@@ -83,6 +83,6 @@ class AuditController extends RestController {
 		}
 		$property_id = (int) $request->get_param( 'property_id' );
 		$tz       = (string) ( $this->properties->find( $property_id )['timezone'] ?? 'UTC' );
-		return self::paged( $this->reader->search( $property_id, $filters, $tz ), $filters['per_page'] );
+		return self::paged( $this->reader->search( $property_id, $filters, $tz, $this->policy->scope()->is_platform( get_current_user_id() ) ), $filters['per_page'] );
 	}
 }

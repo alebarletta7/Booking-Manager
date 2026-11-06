@@ -47,7 +47,9 @@ class ChannexController extends RestController {
 
 	public function register_routes(): void {
 		$ns     = self::REST_NAMESPACE;
-		$manage = $this->require_cap( 'bkng_manage_integrations' );
+		// The Channex account, webhook and keys are one for the whole site until each
+		// property gets its own connection (0.2.6): only the platform touches them.
+		$manage = $this->require_cap( 'bkng_platform_manage' );
 		$global = array(
 			'/channex'               => array( \WP_REST_Server::READABLE, fn() => $this->admin->overview() ),
 			'/channex/settings'      => array( 'PUT', fn( \WP_REST_Request $r ) => $this->admin->save_settings( self::body( $r ) ) ),

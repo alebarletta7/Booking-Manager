@@ -48,7 +48,7 @@ final class TenantMigrationTest extends TestCase {
 
 		$this->assertSame( (string) $default, self::column( 'properties', 'tenant_id', (int) $property['id'] ) );
 		$this->assertSame( (string) $default, self::column( 'guests', 'tenant_id', (int) $booking['guest_id'] ) );
-		$this->assertSame( 0, $this->count_null( 'audit_log' ) );
+		$this->assertSame( 0, $this->count_null( 'audit_log', 'property_id IS NOT NULL' ) );
 		$this->assertSame( 0, $this->count_null( 'notifications' ) );
 	}
 
@@ -105,7 +105,7 @@ final class TenantMigrationTest extends TestCase {
 		$this->assertSame( (string) $tenant_before, self::column( 'properties', 'tenant_id', (int) $property['id'] ) );
 		$this->assertSame( (string) $tenant_before, self::column( 'guests', 'tenant_id', (int) $two['guest_id'] ) );
 		foreach ( TenantMigration::tables() as $short ) {
-			$this->assertSame( 0, $this->count_null( $short ), $short );
+			$this->assertSame( 0, $this->count_null( $short, 'audit_log' === $short ? 'property_id IS NOT NULL' : '' ), $short );
 		}
 		$repo = new TenantRepository();
 		$this->assertSame( $tenant_before, $repo->tenant_of_user( $staff ) );
@@ -147,10 +147,11 @@ final class TenantMigrationTest extends TestCase {
 		$this->assertSame( 'Villa Test', self::column( 'properties', 'name', (int) $property['id'] ) );
 	}
 
-	private function count_null( string $short ): int {
+	private function count_null( string $short, string $and = '' ): int {
 		global $wpdb;
 		$table = Schema::table( $short );
+		$and   = '' !== $and ? ' AND ' . $and : '';
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE tenant_id IS NULL" );
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE tenant_id IS NULL{$and}" );
 	}
 }

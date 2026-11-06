@@ -36,6 +36,7 @@ use BookingManager\Inventory\UnitRepository;
 use BookingManager\Licensing\LicenseGate;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -161,7 +162,7 @@ class BookingService {
 					$overbooked = true;
 				}
 				$priced   = $this->stays->price( $property, $lines, $extras );
-				$guest_id = $this->guests->find_or_create( $guest );
+				$guest_id = $this->guests->find_or_create( $guest, Tenancy::of_property( (int) $property['id'] ) );
 				$first    = $lines[0];
 				$arrival  = min( array_column( $lines, 'arrival' ) );
 				$depart   = max( array_column( $lines, 'departure' ) );

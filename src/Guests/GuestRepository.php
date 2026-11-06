@@ -47,22 +47,28 @@ class GuestRepository {
 		return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT property_id FROM {$table} WHERE guest_id = %d", $id ) ) );
 	}
 
-	/** @return array<int, array<string, mixed>> guests with this e-mail hash (newest first). */
-	public function by_email_hash( string $hash ): array {
-		return $this->by( 'email_hash', $hash );
+	/**
+	 * Guests with this e-mail hash (newest first), only of customer $tenant_id when it is
+	 * given: a guest card is never shared between two customers.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function by_email_hash( string $hash, int $tenant_id = 0 ): array {
+		return $this->by( 'email_hash', $hash, $tenant_id );
 	}
 
 	/** @return array<int, array<string, mixed>> */
-	public function by_phone_hash( string $hash ): array {
-		return $this->by( 'phone_hash', $hash );
+	public function by_phone_hash( string $hash, int $tenant_id = 0 ): array {
+		return $this->by( 'phone_hash', $hash, $tenant_id );
 	}
 
 	/** @return array<int, array<string, mixed>> */
-	private function by( string $column, string $hash ): array {
+	private function by( string $column, string $hash, int $tenant_id ): array {
 		global $wpdb;
-		$table = Schema::table( 'guests' );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table and column names.
-		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$column} = %s AND anonymized_at IS NULL ORDER BY id DESC LIMIT 20", $hash ), ARRAY_A );
+		$table  = Schema::table( 'guests' );
+		$tenant = $tenant_id > 0 ? $wpdb->prepare( ' AND tenant_id = %d', $tenant_id ) : '';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- internal table and column names, tenant prepared above.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$column} = %s AND anonymized_at IS NULL{$tenant} ORDER BY id DESC LIMIT 20", $hash ), ARRAY_A );
 		return array_map( array( self::class, 'hydrate' ), $rows );
 	}
 
@@ -226,6 +232,7 @@ class GuestRepository {
 		$row['id']          = (int) $row['id'];
 		$row['stays_count'] = (int) $row['stays_count'];
 		$row['version']     = (int) $row['version'];
+		$row['tenant_id']   = isset( $row['tenant_id'] ) ? (int) $row['tenant_id'] : 0;
 		return $row;
 	}
 }

@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.1] — 6 novembre 2026
+
+Secondo passo della piattaforma con più clienti: isolamento dei dati (vedi [docs/SAAS.md](docs/SAAS.md)). Su un sito con un solo cliente il gestionale funziona come prima, salvo le voci riservate alla piattaforma elencate sotto.
+
+### Novità
+
+- Ogni utente dello staff appartiene a un cliente e vede solo le strutture di quel cliente (tutte con il permesso «Accedere a tutte le strutture», altrimenti quelle assegnate). Un ID di un altro cliente, anche scritto a mano nella richiesta, dà «non trovato».
+- Ospiti separati per cliente: la stessa email in due clienti crea due schede distinte; ricerca e duplicati restano dentro il cliente.
+- Registro attività: le voci senza struttura (staff, ospiti) si vedono solo nel cliente a cui appartengono; quelle della piattaforma solo agli amministratori della piattaforma.
+- Staff: l'elenco non mostra gli amministratori di WordPress né le persone di altri clienti; la ricerca tra gli utenti del sito è riservata alla piattaforma; chi viene aggiunto entra nel cliente di chi lo aggiunge.
+- Libreria media: i file caricati dallo staff di un cliente portano il suo segno e la scelta delle immagini mostra solo i suoi file (quelli caricati prima della 0.2.0 appartengono al primo cliente). Copertina, logo, banner e foto delle camere non accettano file di un altro cliente.
+- Su un sito con un solo cliente, chi riceve un ruolo di Booking Manager dalla pagina Utenti di WordPress entra in quel cliente, come prima.
+- Nuovo permesso «Amministrare la piattaforma (tutti i clienti)» (`bkng_platform_manage`), sempre e solo degli amministratori di WordPress.
+
+### Modifiche
+
+- Riservati agli amministratori di WordPress (amministratori della piattaforma): Impostazioni generali, Ruoli e permessi, WhatsApp (collegamento Meta e modelli) e Channex (chiave API e webhook unici del sito). L'«Amministratore Booking Manager» che non è amministratore di WordPress non vede più queste voci. WhatsApp e Channex tornano disponibili ai clienti, ognuno con i propri dati, nella 0.2.6.
+- Test automatici: ogni rotta del gestionale viene chiamata con gli ID di un altro cliente e deve rifiutare.
+
 ## [0.2.0] — 6 novembre 2026
 
 Primo passo della piattaforma centrale con più clienti (vedi [docs/SAAS.md](docs/SAAS.md)). Il gestionale, il modulo di prenotazione, le email e i pagamenti funzionano esattamente come prima.

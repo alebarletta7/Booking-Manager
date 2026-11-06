@@ -73,6 +73,7 @@ class TenantRepository {
 	public function add_user( int $tenant_id, int $user_id, ?int $by = null ): bool {
 		global $wpdb;
 		$table = Schema::table( 'tenant_users' );
+		Tenancy::flush();
 		return 1 === (int) $wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.

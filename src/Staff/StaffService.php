@@ -23,16 +23,45 @@ use BookingManager\Access\RoleManager;
 use BookingManager\Access\PropertyScope;
 use BookingManager\Audit\AuditLogger;
 use BookingManager\Core\Validation;
+use BookingManager\Tenants\Tenancy;
+use BookingManager\Tenants\TenantRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 class StaffService {
 
+	private TenantRepository $tenants;
+
 	public function __construct(
 		private RoleManager $roles,
 		private PropertyScope $scope,
-		private AuditLogger $audit
-	) {}
+		private AuditLogger $audit,
+		?TenantRepository $tenants = null
+	) {
+		$this->tenants = $tenants ?? new TenantRepository();
+	}
+
+	/**
+	 * The actor works inside a customer (not a platform administrator) and the data
+	 * belongs to customers: staff screens then show and change only that customer's people.
+	 */
+	private function confined( \WP_User $actor ): bool {
+		return Tenancy::migrated() && ! $this->scope->is_platform( $actor->ID );
+	}
+
+	/** Same customer as the actor (always true for platform administrators). */
+	private function same_tenant( \WP_User $actor, int $user_id ): bool {
+		if ( ! $this->confined( $actor ) ) {
+			return true;
+		}
+		$mine = $this->scope->tenant_of( $actor->ID );
+		return $mine > 0 && $this->scope->tenant_of( $user_id ) === $mine;
+	}
+
+	/** May the actor act on this user at all? (Permission check of the /staff/{id} routes.) */
+	public function reaches( \WP_User $actor, int $user_id ): bool {
+		return $this->same_tenant( $actor, $user_id );
+	}
 
 	/** @return array<int, array<string, mixed>> Plugin roles with their labels. */
 	public function roles(): array {
@@ -45,7 +74,8 @@ class StaffService {
 			$out[] = array(
 				'slug'  => $slug,
 				'label' => $label,
-				'caps'  => array_values( array_filter( array_keys( array_filter( get_role( $slug )->capabilities ) ), array( Capabilities::class, 'exists' ) ) ),
+				// Platform permissions are never effective for a plugin role (RoleManager).
+				'caps'  => array_values( array_diff( array_filter( array_keys( array_filter( get_role( $slug )->capabilities ) ), array( Capabilities::class, 'exists' ) ), Capabilities::PLATFORM ) ),
 			);
 		}
 		return $out;
@@ -61,6 +91,10 @@ class StaffService {
 			)
 		);
 		$mine  = $this->scope->allowed_ids( $actor->ID );
+		if ( $this->confined( $actor ) ) {
+			// Never the platform administrators nor people of other customers.
+			$users = array_filter( $users, fn( \WP_User $u ) => $u->ID === $actor->ID || ( ! RoleManager::is_full_admin( $u ) && $this->same_tenant( $actor, $u->ID ) ) );
+		}
 		if ( null !== $mine ) {
 			$users = array_filter( $users, fn( \WP_User $u ) => $u->ID === $actor->ID || self::shares_property( $this->properties_of( $u ), $mine ) );
 		}
@@ -75,6 +109,12 @@ class StaffService {
 	public function candidates( string $search ): array {
 		$search = trim( $search );
 		if ( mb_strlen( $search ) < 2 ) {
+			return array();
+		}
+		// Searching every account of the site is for the platform: a customer's staff
+		// would see the e-mail addresses of other customers' people.
+		$actor = wp_get_current_user();
+		if ( ! $actor->exists() || $this->confined( $actor ) ) {
 			return array();
 		}
 		$users = get_users(
@@ -119,11 +159,19 @@ class StaffService {
 		if ( $properties instanceof \WP_Error ) {
 			return $properties;
 		}
+		$tenant = $this->tenant_for( $actor, $properties );
+		if ( $tenant instanceof \WP_Error ) {
+			return $tenant;
+		}
 
 		if ( ! empty( $input['user_id'] ) ) {
 			$user = get_userdata( (int) $input['user_id'] );
-			if ( ! $user ) {
+			if ( ! $user || ( $this->confined( $actor ) && ! $this->same_tenant( $actor, $user->ID ) ) ) {
 				return Validation::error( array( 'user_id' => __( 'Utente non trovato.', 'booking-manager' ) ) );
+			}
+			$current = $this->scope->tenant_of( $user->ID );
+			if ( $tenant > 0 && $current > 0 && $current !== $tenant ) {
+				return Validation::error( array( 'user_id' => __( 'Questo utente lavora per un altro cliente.', 'booking-manager' ) ) );
 			}
 			if ( $this->is_staff( $user ) ) {
 				return Validation::error( array( 'user_id' => __( 'Questo utente fa già parte dello staff.', 'booking-manager' ) ) );
@@ -136,7 +184,13 @@ class StaffService {
 				return Validation::error( array( 'email' => __( 'Indirizzo email non valido.', 'booking-manager' ) ) );
 			}
 			if ( email_exists( $email ) ) {
-				return Validation::error( array( 'email' => __( 'Esiste già un utente con questa email: cercalo per nome o email.', 'booking-manager' ) ) );
+				return Validation::error(
+					array(
+						'email' => $this->confined( $actor )
+							? __( 'Esiste già un utente con questa email: chiedi all\'amministratore della piattaforma di aggiungerlo.', 'booking-manager' )
+							: __( 'Esiste già un utente con questa email: cercalo per nome o email.', 'booking-manager' ),
+					)
+				);
 			}
 			if ( '' === $first ) {
 				return Validation::error( array( 'first_name' => __( 'Nome obbligatorio.', 'booking-manager' ) ) );
@@ -155,10 +209,19 @@ class StaffService {
 			if ( is_wp_error( $user_id ) ) {
 				return new \WP_Error( 'bkng_user_create_failed', $user_id->get_error_message(), array( 'status' => 400 ) );
 			}
+			if ( $tenant > 0 ) {
+				$this->tenants->add_user( $tenant, (int) $user_id, $actor->ID );
+				$this->scope->flush();
+			}
 			wp_new_user_notification( $user_id, null, 'user' );
 			$user = get_userdata( $user_id );
 		}
 
+		// Linked to the customer before the role: the role must never reach another one.
+		if ( $tenant > 0 ) {
+			$this->tenants->add_user( $tenant, $user->ID, $actor->ID );
+			$this->scope->flush();
+		}
 		$this->set_role( $user, $role );
 		foreach ( $properties as $property_id ) {
 			$this->scope->assign( $user->ID, $property_id, $actor->ID );
@@ -168,6 +231,7 @@ class StaffService {
 				'action'      => 'staff.added',
 				'entity_type' => 'user',
 				'entity_id'   => $user->ID,
+				'tenant_id'   => $this->scope->tenant_of( $user->ID ),
 				'new'         => array(
 					'role'   => $role,
 					'properties' => $properties,
@@ -205,6 +269,12 @@ class StaffService {
 			if ( $properties instanceof \WP_Error ) {
 				return $properties;
 			}
+			$tenant = $this->scope->tenant_of( $user->ID );
+			foreach ( $properties as $property_id ) {
+				if ( Tenancy::migrated() && $tenant > 0 && Tenancy::of_property( $property_id ) !== $tenant ) {
+					return Validation::error( array( 'properties' => __( 'Puoi assegnare solo strutture del cliente per cui lavora l\'operatore.', 'booking-manager' ) ) );
+				}
+			}
 			// Only the properties the actor manages change; others stay as they are.
 			$managed = $this->scope->allowed_ids( $actor->ID );
 			$current = (array) $this->current_assignments( $user->ID );
@@ -224,6 +294,7 @@ class StaffService {
 				'action'      => 'staff.updated',
 				'entity_type' => 'user',
 				'entity_id'   => $user_id,
+				'tenant_id'   => $this->scope->tenant_of( $user_id ),
 				'old'         => $old,
 				'new'         => array(
 					'role'   => $this->plugin_role( $user ),
@@ -260,6 +331,7 @@ class StaffService {
 				'action'      => 'staff.removed',
 				'entity_type' => 'user',
 				'entity_id'   => $user_id,
+				'tenant_id'   => $this->scope->tenant_of( $user_id ),
 				'old'         => array( 'role' => $old ),
 			)
 		);
@@ -339,6 +411,9 @@ class StaffService {
 		if ( RoleManager::is_full_admin( $user ) ) {
 			return new \WP_Error( 'bkng_role_protected', __( 'Gli amministratori di WordPress hanno sempre accesso completo e non si modificano da qui.', 'booking-manager' ), array( 'status' => 403 ) );
 		}
+		if ( ! $this->same_tenant( $actor, $user->ID ) ) {
+			return new \WP_Error( 'bkng_not_found', __( 'Operatore non trovato.', 'booking-manager' ), array( 'status' => 404 ) );
+		}
 		$mine = $this->scope->allowed_ids( $actor->ID );
 		if ( null !== $mine && ! self::properties_within( $this->properties_of( $user ), $mine ) ) {
 			$visible = self::shares_property( $this->properties_of( $user ), $mine );
@@ -377,7 +452,31 @@ class StaffService {
 	 * @return int[]|null
 	 */
 	private function properties_of( \WP_User $user ): ?array {
-		return $this->scope->has_all( $user->ID ) || RoleManager::is_full_admin( $user ) ? null : $this->current_assignments( $user->ID );
+		if ( RoleManager::is_full_admin( $user ) ) {
+			return null;
+		}
+		// Inside a customer "every property" means every property of that customer.
+		return Tenancy::migrated() ? $this->scope->allowed_ids( $user->ID ) : ( $this->scope->has_all( $user->ID ) ? null : $this->current_assignments( $user->ID ) );
+	}
+
+	/**
+	 * Customer a new staff member joins: the actor's; for a platform administrator the
+	 * customer of the chosen properties (all of the same one), else the default one.
+	 *
+	 * @param int[] $properties
+	 */
+	private function tenant_for( \WP_User $actor, array $properties ): int|\WP_Error {
+		if ( ! Tenancy::migrated() ) {
+			return 0;
+		}
+		if ( $this->confined( $actor ) ) {
+			return $this->scope->tenant_of( $actor->ID );
+		}
+		$tenants = array_values( array_unique( array_map( array( Tenancy::class, 'of_property' ), $properties ) ) );
+		if ( count( $tenants ) > 1 ) {
+			return Validation::error( array( 'properties' => __( 'Le strutture scelte appartengono a clienti diversi: un operatore lavora per un solo cliente.', 'booking-manager' ) ) );
+		}
+		return $tenants ? (int) $tenants[0] : Tenancy::default_id();
 	}
 
 	/**
@@ -478,7 +577,7 @@ class StaffService {
 			'role_label'   => $admin ? __( 'Amministratore WordPress', 'booking-manager' ) : ( Capabilities::role_names()[ $role ] ?? '' ),
 			'all_properties'   => $all,
 			'properties'       => $all ? array() : $this->current_assignments( $user->ID ),
-			'editable'     => ! $admin && $user->ID !== $actor->ID && ( ! $role || true === $this->roles->can_assign_role( $actor, $role ) ) && self::properties_within( $all ? null : $this->current_assignments( $user->ID ), $this->scope->allowed_ids( $actor->ID ) ),
+			'editable'     => ! $admin && $user->ID !== $actor->ID && $this->same_tenant( $actor, $user->ID ) && ( ! $role || true === $this->roles->can_assign_role( $actor, $role ) ) && self::properties_within( $this->properties_of( $user ), $this->scope->allowed_ids( $actor->ID ) ),
 			'is_me'        => $user->ID === $actor->ID,
 		);
 	}

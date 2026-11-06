@@ -60,6 +60,16 @@ class StaffController extends RestController {
 				),
 			)
 		);
+		// Another customer's people do not exist for a customer's staff (404).
+		$own = function ( \WP_REST_Request $r ) use ( $cap, $actor ) {
+			$allowed = $cap( $r );
+			if ( true !== $allowed ) {
+				return $allowed;
+			}
+			return $this->staff->reaches( $actor(), (int) $r['id'] )
+				? true
+				: new \WP_Error( 'bkng_not_found', __( 'Operatore non trovato.', 'booking-manager' ), array( 'status' => 404 ) );
+		};
 		register_rest_route(
 			self::REST_NAMESPACE,
 			'/staff/(?P<id>\d+)',
@@ -67,12 +77,12 @@ class StaffController extends RestController {
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->staff->update( $actor(), (int) $r['id'], (array) $r->get_json_params() ) ),
-					'permission_callback' => $cap,
+					'permission_callback' => $own,
 				),
 				array(
 					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->staff->remove( $actor(), (int) $r['id'] ) ),
-					'permission_callback' => $cap,
+					'permission_callback' => $own,
 				),
 			)
 		);

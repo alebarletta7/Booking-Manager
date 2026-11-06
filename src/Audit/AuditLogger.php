@@ -86,7 +86,15 @@ class AuditLogger {
 			return null;
 		}
 
-		$row = Tenancy::with_tenant( $row, $row['property_id'], $args['tenant_id'] ?? null );
+		if ( Tenancy::ready() ) {
+			// The customer of the entry: given, else the property's, else the acting
+			// user's; NULL = the platform itself (licence, customers, settings).
+			$tenant = isset( $args['tenant_id'] ) ? (int) $args['tenant_id'] : 0;
+			if ( $tenant <= 0 ) {
+				$tenant = null !== $row['property_id'] ? Tenancy::of_property( (int) $row['property_id'] ) : Tenancy::of_user( (int) $user_id );
+			}
+			$row['tenant_id'] = $tenant > 0 ? $tenant : null;
+		}
 		$ok  = $wpdb->insert( Schema::table( 'audit_log' ), $row );
 		if ( false === $ok ) {
 			self::report_failure( (string) $wpdb->last_error, $args );

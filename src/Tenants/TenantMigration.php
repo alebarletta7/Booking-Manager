@@ -36,6 +36,9 @@ class TenantMigration {
 	/** The snapshot taken before the data migration. */
 	public const SNAPSHOT_OPTION = 'bkng_tenancy_snapshot';
 
+	/** Last audit entry written before the first migration (see fill()). */
+	public const AUDIT_LEGACY_OPTION = 'bkng_tenancy_audit_legacy_max';
+
 	private const BATCH = 1000;
 
 	public function __construct(
@@ -188,7 +191,8 @@ class TenantMigration {
 			$problems[] = 'cliente predefinito mancante.';
 		}
 		foreach ( self::tables() as $short ) {
-			$null                       = $this->count_null( $short );
+			// Entries of the platform itself (licence, customers) stay without a customer.
+			$null                       = 'audit_log' === $short ? $this->count_null( $short, 'property_id IS NOT NULL' ) : $this->count_null( $short );
 			$checks[ 'null_' . $short ] = $null;
 			if ( $null > 0 ) {
 				$problems[] = sprintf( '%d righe di %s senza cliente', $null, $short );
@@ -305,19 +309,32 @@ class TenantMigration {
 		global $wpdb;
 		$table = Schema::table( $short );
 		$total = 0;
+		$where = 'tenant_id IS NULL';
+		if ( 'audit_log' === $short ) {
+			// Entries without a property written before the first migration are the
+			// default customer's; later ones without a customer belong to the platform.
+			$legacy = get_option( self::AUDIT_LEGACY_OPTION, null );
+			if ( null === $legacy ) {
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+				$legacy = (int) $wpdb->get_var( "SELECT COALESCE(MAX(id), 0) FROM {$table}" );
+				update_option( self::AUDIT_LEGACY_OPTION, $legacy, false );
+			}
+			$where .= $wpdb->prepare( ' AND (property_id IS NOT NULL OR id <= %d)', (int) $legacy );
+		}
 		do {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
-			$n      = (int) $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET tenant_id = %d WHERE tenant_id IS NULL LIMIT %d", $tenant_id, self::BATCH ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table name is internal, condition prepared above.
+			$n      = (int) $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET tenant_id = %d WHERE {$where} LIMIT %d", $tenant_id, self::BATCH ) );
 			$total += max( 0, $n );
 		} while ( $n >= self::BATCH );
 		return $total;
 	}
 
-	private function count_null( string $short ): int {
+	private function count_null( string $short, string $and = '' ): int {
 		global $wpdb;
 		$table = Schema::table( $short );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE tenant_id IS NULL" );
+		$and   = '' !== $and ? ' AND ' . $and : '';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table name and condition.
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE tenant_id IS NULL{$and}" );
 	}
 
 	private function has_column( string $short, string $column ): bool {

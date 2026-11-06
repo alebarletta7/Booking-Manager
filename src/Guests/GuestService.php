@@ -85,9 +85,9 @@ class GuestService {
 	 *
 	 * @param array<string, mixed> $data validated fields
 	 */
-	public function find_or_create( array $data ): int {
+	public function find_or_create( array $data, int $tenant_id = 0 ): int {
 		if ( ! empty( $data['email'] ) ) {
-			foreach ( $this->repo->by_email_hash( GuestRepository::hash_email( (string) $data['email'] ) ) as $guest ) {
+			foreach ( $this->repo->by_email_hash( GuestRepository::hash_email( (string) $data['email'] ), $tenant_id ) as $guest ) {
 				if ( 0 === strcasecmp( (string) $guest['last_name'], (string) $data['last_name'] ) ) {
 					$fill = array();
 					foreach ( array( 'first_name', 'phone', 'country', 'language' ) as $key ) {
@@ -102,7 +102,7 @@ class GuestService {
 				}
 			}
 		}
-		return $this->repo->create( $data );
+		return $this->repo->create( $tenant_id > 0 ? array( 'tenant_id' => $tenant_id ) + $data : $data );
 	}
 
 	/**
@@ -117,12 +117,12 @@ class GuestService {
 		}
 		$out = array();
 		if ( ! empty( $guest['email_hash'] ) ) {
-			foreach ( $this->repo->by_email_hash( (string) $guest['email_hash'] ) as $other ) {
+			foreach ( $this->repo->by_email_hash( (string) $guest['email_hash'], (int) $guest['tenant_id'] ) as $other ) {
 				$out[ $other['id'] ] = array( $other, 'email' );
 			}
 		}
 		if ( ! empty( $guest['phone_hash'] ) ) {
-			foreach ( $this->repo->by_phone_hash( (string) $guest['phone_hash'] ) as $other ) {
+			foreach ( $this->repo->by_phone_hash( (string) $guest['phone_hash'], (int) $guest['tenant_id'] ) as $other ) {
 				$out[ $other['id'] ] ??= array( $other, 'phone' );
 			}
 		}
@@ -178,6 +178,7 @@ class GuestService {
 				'action'      => 'guest.updated',
 				'entity_type' => 'guest',
 				'entity_id'   => $id,
+				'tenant_id'   => (int) $guest['tenant_id'],
 				'new'         => array( 'fields' => array_keys( $data ) ),
 			)
 		);
@@ -203,6 +204,7 @@ class GuestService {
 				'action'      => 'guest.exported',
 				'entity_type' => 'guest',
 				'entity_id'   => $id,
+				'tenant_id'   => (int) $guest['tenant_id'],
 			)
 		);
 		return array(
@@ -234,6 +236,7 @@ class GuestService {
 				'action'      => 'guest.anonymized',
 				'entity_type' => 'guest',
 				'entity_id'   => $id,
+				'tenant_id'   => (int) $guest['tenant_id'],
 			)
 		);
 		return true;

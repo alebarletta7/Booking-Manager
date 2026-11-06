@@ -16,16 +16,24 @@ use BookingManager\Access\PropertyScope;
 use BookingManager\Audit\AuditLogger;
 use BookingManager\Core\Hooks;
 use BookingManager\Core\Validation;
+use BookingManager\Tenants\Tenancy;
+use BookingManager\Tenants\TenantAccess;
+use BookingManager\Tenants\TenantRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 class PropertyService {
 
+	private TenantRepository $tenants;
+
 	public function __construct(
 		private PropertyRepository $repo,
 		private PropertyScope $scope,
-		private AuditLogger $audit
-	) {}
+		private AuditLogger $audit,
+		?TenantRepository $tenants = null
+	) {
+		$this->tenants = $tenants ?? new TenantRepository();
+	}
 
 	/** @return array<string, string> */
 	public static function kind_labels(): array {
@@ -51,6 +59,18 @@ class PropertyService {
 		}
 		if ( isset( $input['settings'] ) && is_array( $input['settings'] ) ) {
 			$data['settings'] = $input['settings'];
+		}
+		// The customer of the new property: the creator's. A platform administrator may
+		// choose one (default: the default customer); nobody else can.
+		$tenant = $this->scope->tenant_of( $user_id );
+		if ( $user_id > 0 && $this->scope->is_platform( $user_id ) && ! empty( $input['tenant_id'] ) ) {
+			$tenant = (int) $input['tenant_id'];
+			if ( ! $this->tenants->find( $tenant ) ) {
+				return Validation::error( array( 'tenant_id' => __( 'Cliente inesistente.', 'booking-manager' ) ) );
+			}
+		}
+		if ( $tenant > 0 ) {
+			$data['tenant_id'] = $tenant;
 		}
 		$id = $this->repo->create( $data );
 		if ( $id <= 0 ) {
@@ -126,6 +146,12 @@ class PropertyService {
 		// The payment provider is chosen only once its account is connected and verified
 		// (PaymentAccountService::select()), never through the plain settings.
 		unset( $changes['payment_provider'], $changes['payment_mode'] );
+		// Pictures of the customer's own media library only.
+		foreach ( array( 'form_cover_id', 'email_logo_id', 'email_banner_id' ) as $key ) {
+			if ( isset( $changes[ $key ] ) && (int) $changes[ $key ] > 0 && ! TenantAccess::allows_attachment( (int) $changes[ $key ], Tenancy::of_property( $id ) ) ) {
+				return Validation::error( array( $key => __( 'Immagine non trovata.', 'booking-manager' ) ) );
+			}
+		}
 		$merged = PropertySettings::merge( $current['settings'], $changes );
 		$diff   = array();
 		foreach ( $merged as $key => $value ) {

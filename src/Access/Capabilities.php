@@ -88,8 +88,19 @@ final class Capabilities {
 			'bkng_manage_roles'             => array( 'group' => 'config', 'roles' => $a ),
 			'bkng_manage_settings'          => array( 'group' => 'config', 'roles' => $a ),
 			'bkng_manage_integrations'      => array( 'group' => 'config', 'roles' => $a ),
+			// Platform (0.2.1): only WordPress administrators, never a role of a customer.
+			'bkng_platform_manage'          => array( 'group' => 'config', 'roles' => array() ),
 		);
 	}
+
+	/**
+	 * Capabilities of the platform, not of a customer: settings for the whole site
+	 * (data retention, Cloudflare, Turnstile, WhatsApp until 0.2.6), the roles shared by
+	 * every customer, and the platform itself. Only WordPress administrators have them:
+	 * RoleManager::strip_platform_caps() removes them from everybody else at runtime,
+	 * whatever a role says in the database.
+	 */
+	public const PLATFORM = array( 'bkng_platform_manage', 'bkng_manage_settings', 'bkng_manage_roles' );
 
 	/** @return string[] */
 	public static function all(): array {
@@ -118,7 +129,7 @@ final class Capabilities {
 		}
 		$caps = array();
 		foreach ( self::definitions() as $cap => $def ) {
-			if ( in_array( $key, $def['roles'], true ) ) {
+			if ( in_array( $key, $def['roles'], true ) && ! in_array( $cap, self::PLATFORM, true ) ) {
 				$caps[] = $cap;
 			}
 		}
@@ -174,6 +185,7 @@ final class Capabilities {
 			'bkng_manage_roles'             => __( 'Gestire ruoli e permessi', 'booking-manager' ),
 			'bkng_manage_settings'          => __( 'Gestire le impostazioni generali', 'booking-manager' ),
 			'bkng_manage_integrations'      => __( 'Gestire integrazioni e canali', 'booking-manager' ),
+			'bkng_platform_manage'          => __( 'Amministrare la piattaforma (tutti i clienti)', 'booking-manager' ),
 		);
 	}
 
