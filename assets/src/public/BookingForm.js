@@ -16,6 +16,7 @@ import {
 	nightsLabel,
 } from './format';
 import { Captcha } from './Captcha';
+import { comboTitle, Combos } from './Combos';
 import { Hero, Results, SearchBar } from './Results';
 import { Icon } from './icons';
 import {
@@ -67,8 +68,15 @@ function Countdown( { expiresAt, onExpire } ) {
 }
 
 function Summary( { property, stay, choice } ) {
-	const total =
-		choice.rate.total !== null ? choice.rate.total * choice.quantity : null;
+	let total = null;
+	if ( choice.rate.total !== null ) {
+		// A combination's rate already adds up all its rooms.
+		total = choice.combo
+			? choice.rate.total
+			: choice.rate.total * choice.quantity;
+	}
+	const adults = choice.lines.reduce( ( n, l ) => n + l.adults, 0 );
+	const children = choice.lines.reduce( ( n, l ) => n + l.children, 0 );
 	return (
 		<aside className="bkng-p-card bkng-p-summary">
 			<h3>{ __( 'Il tuo soggiorno', 'booking-manager' ) }</h3>
@@ -82,16 +90,40 @@ function Summary( { property, stay, choice } ) {
 					{ nightsLabel(
 						nightsBetween( stay.arrival, stay.departure )
 					) }{ ' ' }
-					· { guestsLabel( stay.adults, stay.children ) }{ ' ' }
-					{ __( 'per camera', 'booking-manager' ) }
+					·{ ' ' }
+					{ choice.combo
+						? guestsLabel( adults, children )
+						: guestsLabel( stay.adults, stay.children ) +
+						  ' ' +
+						  __( 'per camera', 'booking-manager' ) }
 				</span>
 			</p>
-			<p>
-				{ choice.quantity > 1 ? choice.quantity + ' × ' : '' }
-				{ choice.type.name }
-				<br />
-				<span className="bkng-p-muted">{ choice.rate.name }</span>
-			</p>
+			{ choice.combo ? (
+				<>
+					<p>
+						{ comboTitle( choice.lines ) }
+						<br />
+						<span className="bkng-p-muted">
+							{ choice.rate.name }
+						</span>
+					</p>
+					<ul className="bkng-p-summary__extras">
+						{ choice.lines.map( ( l, i ) => (
+							<li key={ i }>
+								{ l.type.name }:{ ' ' }
+								{ guestsLabel( l.adults, l.children ) }
+							</li>
+						) ) }
+					</ul>
+				</>
+			) : (
+				<p>
+					{ choice.quantity > 1 ? choice.quantity + ' × ' : '' }
+					{ choice.type.name }
+					<br />
+					<span className="bkng-p-muted">{ choice.rate.name }</span>
+				</p>
+			) }
 			{ choice.extras?.length > 0 && (
 				<ul className="bkng-p-summary__extras">
 					{ ( property.extras || [] )
@@ -168,11 +200,11 @@ function GuestForm( {
 				{
 					arrival: stay.arrival,
 					departure: stay.departure,
-					rooms: Array.from( { length: choice.quantity }, () => ( {
-						room_type_id: choice.type.id,
+					rooms: choice.lines.map( ( l ) => ( {
+						room_type_id: l.type.id,
 						rate_plan_id: choice.rate.rate_plan_id,
-						adults: stay.adults,
-						children: stay.children,
+						adults: l.adults,
+						children: l.children,
 					} ) ),
 					extras,
 					guest,
@@ -642,7 +674,17 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 				quantity,
 			} );
 			setExtras( chosen );
-			setChoice( { type, rate, quantity, extras: chosen } );
+			setChoice( {
+				type,
+				rate,
+				quantity,
+				extras: chosen,
+				lines: Array.from( { length: quantity }, () => ( {
+					type,
+					adults: stay.adults,
+					children: stay.children,
+				} ) ),
+			} );
 			setHold( h );
 			setHolding( false );
 			scrollTop();
@@ -652,6 +694,49 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 		}
 		setHolding( false );
 		return false;
+	};
+
+	// Rooms of different types together (2+2 for four, 3+2 for five…): one hold for all.
+	const chooseCombo = async ( lines, rate ) => {
+		setHolding( true );
+		setError( null );
+		const counts = {};
+		lines.forEach( ( l ) => {
+			counts[ l.type.id ] = ( counts[ l.type.id ] || 0 ) + 1;
+		} );
+		try {
+			const h = await api.post( 'properties/' + slug + '/holds', {
+				arrival: results.arrival,
+				departure: results.departure,
+				rooms: Object.keys( counts ).map( ( id ) => ( {
+					room_type_id: Number( id ),
+					quantity: counts[ id ],
+				} ) ),
+			} );
+			setExtras( [] );
+			// The rooms were split for the dates and guests of the search.
+			setStay( ( st ) => ( {
+				...st,
+				arrival: results.arrival,
+				departure: results.departure,
+				adults: results.adults,
+				children: results.children,
+			} ) );
+			setChoice( {
+				combo: true,
+				rate,
+				quantity: lines.length,
+				extras: [],
+				lines,
+			} );
+			setHold( h );
+			scrollTop();
+		} catch ( err ) {
+			// Taken in the meantime: show what is free now, with the reason.
+			await search();
+			setError( err );
+		}
+		setHolding( false );
 	};
 
 	const back = () => {
@@ -757,30 +842,42 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 							searching={ searching }
 							quote={ quote }
 							empty={
-								<div className="bkng-p-card">
-									<p>
-										<strong>
+								results.combos?.length ? (
+									<Combos
+										property={ property }
+										stay={ results }
+										results={ results }
+										onChoose={ chooseCombo }
+										busy={ holding }
+									>
+										<Contacts property={ property } />
+									</Combos>
+								) : (
+									<div className="bkng-p-card">
+										<p>
+											<strong>
+												{ __(
+													'Nessuna camera disponibile per queste date.',
+													'booking-manager'
+												) }
+											</strong>
+										</p>
+										{ results.rules.length > 0 && (
+											<ul>
+												{ results.rules.map( ( r ) => (
+													<li key={ r }>{ r }</li>
+												) ) }
+											</ul>
+										) }
+										<p className="bkng-p-muted">
 											{ __(
-												'Nessuna camera disponibile per queste date.',
+												'Prova a cambiare le date o il numero di ospiti.',
 												'booking-manager'
 											) }
-										</strong>
-									</p>
-									{ results.rules.length > 0 && (
-										<ul>
-											{ results.rules.map( ( r ) => (
-												<li key={ r }>{ r }</li>
-											) ) }
-										</ul>
-									) }
-									<p className="bkng-p-muted">
-										{ __(
-											'Prova a cambiare le date o il numero di ospiti.',
-											'booking-manager'
-										) }
-									</p>
-									<Contacts property={ property } />
-								</div>
+										</p>
+										<Contacts property={ property } />
+									</div>
+								)
 							}
 						/>
 					) }

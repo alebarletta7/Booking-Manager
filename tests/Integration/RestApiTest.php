@@ -243,6 +243,82 @@ final class RestApiTest extends TestCase {
 	}
 
 	/**
+	 * Four guests and only doubles: the search says no room is big enough and proposes
+	 * two doubles; the two rooms are held together and booked in one go.
+	 */
+	public function test_a_group_gets_room_combinations_and_books_them_together(): void {
+		wp_set_current_user( 0 );
+		$p      = $this->property( array( 'booking_mode' => 'direct' ) );
+		$double = $this->room_type( $p['id'], 2, array( 'name' => 'Doppia', 'max_adults' => 2, 'max_children' => 0, 'max_occupancy' => 2 ) );
+		$triple = $this->room_type( $p['id'], 1, array( 'name' => 'Tripla', 'max_adults' => 3, 'max_children' => 0, 'max_occupancy' => 3, 'base_occupancy' => 3 ) );
+		$slug   = '/properties/' . $p['slug'];
+		$dates  = array( 'arrival' => self::day( 40 ), 'departure' => self::day( 42 ) );
+
+		$four = $this->call( 'GET', $slug . '/search', array(), $dates + array( 'adults' => 4 ), true )->get_data();
+		$this->assertSame( array(), $four['offers'] );
+		$this->assertSame( array( 2, 2 ), array_column( $four['combos'][0]['rooms'], 'adults' ) );
+		$this->assertSame( array( $double['type']['id'], $double['type']['id'] ), array_column( $four['combos'][0]['rooms'], 'room_type_id' ) );
+		$this->assertSame( 40000, $four['combos'][0]['rates'][0]['total'], 'two doubles for two nights' );
+
+		$five = $this->call( 'GET', $slug . '/search', array(), $dates + array( 'adults' => 5 ), true )->get_data();
+		$this->assertSame( array( $triple['type']['id'], $double['type']['id'] ), array_column( $five['combos'][0]['rooms'], 'room_type_id' ) );
+		$this->assertSame( array( 3, 2 ), array_column( $five['combos'][0]['rooms'], 'adults' ) );
+
+		// A guest count one room can host: no combinations.
+		$two = $this->call( 'GET', $slug . '/search', array(), $dates + array( 'adults' => 2 ), true )->get_data();
+		$this->assertNotEmpty( $two['offers'] );
+		$this->assertSame( array(), $two['combos'] );
+
+		$hold = $this->call(
+			'POST',
+			$slug . '/holds',
+			$dates + array(
+				'rooms' => array(
+					array( 'room_type_id' => $triple['type']['id'], 'quantity' => 1 ),
+					array( 'room_type_id' => $double['type']['id'], 'quantity' => 1 ),
+				),
+			),
+			array(),
+			true
+		);
+		$this->assertSame( 201, $hold->get_status(), wp_json_encode( $hold->get_data() ) );
+		// Held for this visitor: nobody else gets five people in now.
+		$other = $this->call( 'GET', $slug . '/search', array(), $dates + array( 'adults' => 5 ), true )->get_data();
+		$this->assertSame( array(), $other['combos'] );
+
+		$created = $this->call(
+			'POST',
+			$slug . '/bookings',
+			$dates + array(
+				'rooms'      => array(
+					array( 'room_type_id' => $triple['type']['id'], 'adults' => 3 ),
+					array( 'room_type_id' => $double['type']['id'], 'adults' => 2 ),
+				),
+				'guest'      => array( 'first_name' => 'Luca', 'last_name' => 'Bianchi', 'email' => 'luca@example.org' ),
+				'privacy'    => true,
+				'hold_token' => $hold->get_data()['token'],
+				'form_token' => FormToken::issue( time() - 60 ),
+				'request_id' => 'group5',
+			),
+			array(),
+			true
+		);
+		$this->assertSame( 201, $created->get_status(), wp_json_encode( $created->get_data() ) );
+		$booking = $created->get_data()['booking'];
+		$this->assertSame( 5, $booking['adults'] );
+		$this->assertCount( 2, $booking['rooms'] );
+
+		// The hold became the booking: one double is still free, the triple is not.
+		$ledger = $this->service( \BookingManager\Availability\Ledger::class );
+		$this->assertSame( 1, $ledger->free( $double['type']['id'], $dates['arrival'], $dates['departure'] ) );
+		$this->assertSame( 0, $ledger->free( $triple['type']['id'], $dates['arrival'], $dates['departure'] ) );
+
+		// More rooms than a booking may hold are refused.
+		$too_many = $this->call( 'POST', $slug . '/holds', $dates + array( 'rooms' => array( array( 'room_type_id' => $double['type']['id'], 'quantity' => 9 ) ) ), array(), true );
+		$this->assertSame( 400, $too_many->get_status() );
+	}
+
+	/**
 	 * A non-refundable rate is never cancelled from the guest link; with the optional
 	 * supplement «Cancellazione gratuita» (paid on top) it is, up to N days before arrival.
 	 */

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15] — 31 ottobre 2026
+
+### Novità
+
+- Modulo di prenotazione: quando nessuna camera può ospitare da sola tutto il gruppo, invece di «Nessuna camera disponibile per queste date» il modulo scrive «Nessuna camera da 4 ospiti disponibile per queste date» e propone le combinazioni di camere libere per quelle date: due doppie per 4 ospiti, una tripla e una doppia per 5, due triple o tre doppie per 6, e così via. Per ogni combinazione si vedono le camere con foto, come vengono divisi gli ospiti, le tariffe e il totale; «Prenota queste camere» le blocca tutte insieme e porta ai dati dell'ospite, con un'unica prenotazione.
+- Le combinazioni rispettano il numero massimo di camere per prenotazione (Struttura → Prenotazioni e modulo online), i limiti di adulti e bambini di ogni camera (almeno un adulto per camera), le regole di soggiorno e le tariffe pubblicate: si propongono solo le tariffe valide per tutte le camere della combinazione. Prima quelle con meno camere e meno posti letto vuoti, poi le più economiche; mai una camera in più del necessario.
+
 ## [0.1.14] — 30 ottobre 2026
 
 ### Modifiche

@@ -139,6 +139,96 @@ class AvailabilityService {
 		);
 	}
 
+	/**
+	 * When no single room can host the group: the free rooms that together can (2+2 for
+	 * four, 3+2 for five…), each room priced by search() with its own share of the guests.
+	 * Only the rate plans every room of a combination can use are offered, with the
+	 * totals added up. Fewest rooms first, then fewest empty beds, then the cheapest.
+	 *
+	 * @param array<string, mixed> $property
+	 * @return array<int, array{rooms: array<int, array{room_type_id: int, adults: int, children: int}>, rates: array<int, array<string, mixed>>}>
+	 */
+	public function combinations( array $property, string $arrival, string $departure, int $adults, int $children, bool $online, int $limit = 4 ): array {
+		$max_rooms = (int) ( $property['settings']['max_rooms_per_booking'] ?? 1 );
+		if ( $max_rooms < 2 || $adults < 2 ) {
+			return array();
+		}
+		$types = array();
+		foreach ( $this->types->for_property( (int) $property['id'] ) as $type ) {
+			if ( $online && ! $type['online_enabled'] ) {
+				continue;
+			}
+			$free = $this->ledger->free( (int) $type['id'], $arrival, $departure );
+			if ( $free > 0 ) {
+				$types[] = array(
+					'id'            => (int) $type['id'],
+					'max_adults'    => (int) $type['max_adults'],
+					'max_children'  => (int) $type['max_children'],
+					'max_occupancy' => (int) $type['max_occupancy'],
+					'free'          => $free,
+				);
+			}
+		}
+		// A few more than shown: some fall out on rates and rules.
+		$candidates = RoomCombiner::combine( $types, $adults, $children, $max_rooms, $limit * 3 );
+		$searches   = array();
+		$out        = array();
+		foreach ( $candidates as $candidate ) {
+			$per_room = array();
+			foreach ( $candidate['rooms'] as $room ) {
+				$key = $room['adults'] . '/' . $room['children'];
+				if ( ! isset( $searches[ $key ] ) ) {
+					$searches[ $key ] = $this->search( $property, $arrival, $departure, $room['adults'], $room['children'], $online );
+				}
+				$offer = null;
+				foreach ( $searches[ $key ]['offers'] as $o ) {
+					if ( (int) $o['room_type_id'] === (int) $room['room_type_id'] ) {
+						$offer = $o;
+						break;
+					}
+				}
+				if ( ! $offer ) {
+					continue 2;
+				}
+				$by_plan = array();
+				foreach ( $offer['rates'] as $rate ) {
+					$by_plan[ (string) $rate['rate_plan_id'] ] = $rate;
+				}
+				$per_room[] = $by_plan;
+			}
+			$rates = array();
+			foreach ( array_keys( $per_room[0] ) as $plan ) {
+				$all = array_column( $per_room, $plan );
+				if ( count( $all ) !== count( $per_room ) ) {
+					continue;
+				}
+				$rate          = $all[0];
+				$rate['total'] = array_sum( array_map( static fn( array $r ) => (int) $r['quote']['total'], $all ) );
+				$rate['tax']   = array_sum( array_map( static fn( array $r ) => (int) $r['quote']['tax'], $all ) );
+				$rate['nights'] = count( $rate['quote']['nightly'] );
+				// The terms of each room; the strictest decides "free cancellation".
+				$rate['cancellations'] = array_map( static fn( array $r ) => $r['cancellation'], $all );
+				$rates[]               = $rate;
+			}
+			if ( ! $rates ) {
+				continue;
+			}
+			usort( $rates, static fn( array $a, array $b ) => $a['total'] <=> $b['total'] );
+			$out[] = array(
+				'rooms' => $candidate['rooms'],
+				'spare' => $candidate['spare'],
+				'rates' => $rates,
+			);
+		}
+		usort(
+			$out,
+			static fn( array $a, array $b ) => count( $a['rooms'] ) <=> count( $b['rooms'] )
+				?: $a['spare'] <=> $b['spare']
+				?: $a['rates'][0]['total'] <=> $b['rates'][0]['total']
+		);
+		return array_slice( $out, 0, $limit );
+	}
+
 	/** Max nights a search may span, to keep requests small. */
 	public static function valid_range( string $from, string $to, int $max = 400 ): bool {
 		$n = Dates::count( $from, $to );

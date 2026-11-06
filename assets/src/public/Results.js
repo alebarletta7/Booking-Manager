@@ -926,7 +926,14 @@ function RoomSheet( { property, stay, item, quote, onChoose, busy, onClose } ) {
 	);
 }
 
-function RateRow( { rate, name, checked, onChange, property, quantity } ) {
+export function RateRow( {
+	rate,
+	name,
+	checked,
+	onChange,
+	property,
+	quantity,
+} ) {
 	const id = 'bkng-p-r-' + useId();
 	return (
 		<li className={ checked ? 'is-checked' : '' }>

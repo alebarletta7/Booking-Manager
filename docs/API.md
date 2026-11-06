@@ -210,8 +210,8 @@ Nessun login. Indirizzo usato dal modulo: `index.php?rest_route=/booking-manager
 | GET | `/` | indice |
 | GET | `/properties` | strutture che accettano prenotazioni online |
 | GET | `/properties/{slug}` | regole, tipologie, servizi aggiuntivi, primo giorno con camere libere (`first_free`), token del modulo, Turnstile |
-| GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`); ogni tariffa dice anche se oggi la cancellazione è gratuita (`free_cancel`) e quanto costerebbe ogni servizio facoltativo per questo soggiorno (`options[]`: `id`, `amount` in centesimi); con `extras[]` il totale e le condizioni di cancellazione tengono conto dei servizi scelti |
-| POST | `/properties/{slug}/holds` | blocca le camere scelte per N minuti |
+| GET | `/properties/{slug}/search` | tipologie libere con tariffe e totale (`arrival`, `departure`, `adults`, `children`, `extras[]`); ogni tariffa dice anche se oggi la cancellazione è gratuita (`free_cancel`) e quanto costerebbe ogni servizio facoltativo per questo soggiorno (`options[]`: `id`, `amount` in centesimi); con `extras[]` il totale e le condizioni di cancellazione tengono conto dei servizi scelti. Se nessuna camera da sola basta per gli ospiti, `combos[]` propone le camere da prenotare insieme (`rooms[]`: `room_type_id`, `adults`, `children`; `rates[]` con il totale di tutte le camere) |
+| POST | `/properties/{slug}/holds` | blocca le camere scelte per N minuti: `room_type_id` + `quantity`, oppure `rooms[]` (`room_type_id`, `quantity`) per camere di tipologie diverse sotto un solo token |
 | POST | `/holds/release` | libera il blocco |
 | POST | `/properties/{slug}/bookings` | crea la prenotazione (con `form_token`, campo trappola `website`, `captcha_token`, `hold_token`, `privacy`; con WhatsApp acceso il telefono è obbligatorio e `whatsapp_opt_out` registra la rinuncia) |
 | GET | `/manage/{code}` | la prenotazione dell'ospite (`?token=` dal link dell'email) |

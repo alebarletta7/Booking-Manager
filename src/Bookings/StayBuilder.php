@@ -177,9 +177,10 @@ class StayBuilder {
 	 *
 	 * @param array<int, array<string, mixed>> $lines
 	 * @param int[]                            $exclude_rooms stays being replaced
+	 * @param int|int[]                        $exclude_hold  the visitor's own holds
 	 * @return true|\WP_Error 409 bkng_unavailable
 	 */
-	public function check_free( array $lines, array $exclude_rooms = array(), int $exclude_hold = 0 ): bool|\WP_Error {
+	public function check_free( array $lines, array $exclude_rooms = array(), int|array $exclude_hold = 0 ): bool|\WP_Error {
 		$by_type = array();
 		foreach ( $lines as $line ) {
 			$by_type[ $line['room_type_id'] ][] = $line;
