@@ -12,6 +12,7 @@ declare( strict_types=1 );
 namespace BookingManager\Properties;
 
 use BookingManager\Database\Schema;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -113,6 +114,7 @@ class PropertyRepository {
 			'currency' => 'EUR',
 		);
 		$row['uuid']       = wp_generate_uuid4();
+		$row              = Tenancy::with_tenant( $row, null, $data['tenant_id'] ?? null );
 		$row['settings']   = wp_json_encode( PropertySettings::merge( array(), is_array( $data['settings'] ?? null ) ? $data['settings'] : array() ) );
 		$row['status']     = 'active';
 		$row['created_at'] = $now;

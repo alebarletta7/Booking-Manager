@@ -15,11 +15,15 @@ namespace BookingManager\Core;
 
 use BookingManager\Access\RoleManager;
 use BookingManager\Admin\AdminApp;
+use BookingManager\Audit\AuditLogger;
 use BookingManager\Channels\Channex\ChannexSync;
 use BookingManager\Database\Migrator;
 use BookingManager\Licensing\LicenseScheduler;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Rest\SetupController;
+use BookingManager\Tenants\Tenancy;
+use BookingManager\Tenants\TenantMigration;
+use BookingManager\Tenants\TenantRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -88,12 +92,18 @@ final class Installer {
 			return $result;
 		}
 		delete_option( 'bkng_migration_error' );
+		Tenancy::flush();
 
 		( new RoleManager() )->install();
 
 		if ( 0 === ( new PropertyRepository() )->count() ) {
 			// A brand new installation: the guided setup opens in Booking Manager.
 			add_option( SetupController::OPTION, array( 'state' => SetupController::PENDING ), '', false );
+			// Nothing to migrate yet: the first customer (tenant) is created right away.
+			// A site with data waits for `wp booking-manager tenant migrate` (backup first).
+			if ( ! Tenancy::migrated() ) {
+				( new TenantMigration( new TenantRepository(), new AuditLogger( new Settings() ) ) )->migrate( true );
+			}
 		}
 
 		if ( false === get_option( 'bkng_installed_at' ) ) {

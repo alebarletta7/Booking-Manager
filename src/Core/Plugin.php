@@ -80,6 +80,7 @@ use BookingManager\Rest\PaymentsController;
 use BookingManager\Rest\CheckinController;
 use BookingManager\Rest\HousekeepingController;
 use BookingManager\Cli\LicenseCommand;
+use BookingManager\Cli\TenantCommand;
 use BookingManager\Checkin\CheckinRepository;
 use BookingManager\Checkin\CheckinService;
 use BookingManager\Checkin\QrToken;
@@ -114,6 +115,8 @@ use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
 use BookingManager\Rates\RateService;
+use BookingManager\Tenants\TenantMigration;
+use BookingManager\Tenants\TenantRepository;
 use BookingManager\Updates\UpdateChecker;
 
 defined( 'ABSPATH' ) || exit;
@@ -221,6 +224,10 @@ final class Plugin {
 		$c->set( LicenseGate::class, fn( Container $c ) => new ServerGate( $c->get( LicenseManager::class ) ) );
 
 		// Properties and inventory.
+		// Platform customers (tenants) above the properties (0.2.0).
+		$c->set( TenantRepository::class, fn() => new TenantRepository() );
+		$c->set( TenantMigration::class, fn( Container $c ) => new TenantMigration( $c->get( TenantRepository::class ), $c->get( AuditLogger::class ) ) );
+
 		$c->set( PropertyRepository::class, fn() => new PropertyRepository() );
 		$c->set( PropertyService::class, fn( Container $c ) => new PropertyService( $c->get( PropertyRepository::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( RoomTypeRepository::class, fn() => new RoomTypeRepository() );
@@ -511,6 +518,7 @@ final class Plugin {
 		$c->get( LicenseScheduler::class )->hooks();
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( 'booking-manager license', new LicenseCommand( $c->get( LicenseManager::class ) ) );
+			\WP_CLI::add_command( 'booking-manager tenant', new TenantCommand( $c->get( TenantMigration::class ), $c->get( TenantRepository::class ) ) );
 		}
 		$c->get( UpdateChecker::class )->hooks();
 		$c->get( NotificationService::class )->hooks();

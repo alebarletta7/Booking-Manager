@@ -12,6 +12,7 @@ declare( strict_types=1 );
 namespace BookingManager\Notifications;
 
 use BookingManager\Database\Schema;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,6 +42,7 @@ class NotificationRepository {
 			'created_at'      => $now,
 			'updated_at'      => $now,
 		);
+		$row     = Tenancy::with_tenant( $row, isset( $row['property_id'] ) ? (int) $row['property_id'] : null, $row['tenant_id'] ?? null );
 		$t       = Schema::table( 'notifications' );
 		$columns = array();
 		$marks   = array();
