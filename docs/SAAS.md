@@ -8,7 +8,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.1 | Isolamento: permessi, ospiti, registro attività, staff, libreria media | ✓ |
 | 0.2.2 | Pannello Piattaforma: clienti, utenti, domini, piani, sospensione | ✓ |
 | 0.2.3 | Pagina iframe `/booking/{struttura}`, CSP per cliente, pagamento fuori dall'iframe | ✓ |
-| 0.2.4 | Contatti del cliente e pulsante WhatsApp | da fare |
+| 0.2.4 | Contatti del cliente e pulsante WhatsApp | ✓ |
 | 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | da fare |
 | 0.2.6 | WhatsApp Meta per cliente, Channex per struttura | da fare |
 | 0.2.7 | Limiti per cliente, protezione login, documentazione | da fare |
@@ -138,4 +138,28 @@ Il cliente incolla nel suo sito il codice che trova in **Struttura → Prenotazi
 
 Prova reale (Chromium, desktop e iPhone 13): da `www.hotel-bianchi.it` (autorizzato) il modulo si carica e l'iframe segue l'altezza a ogni passo (399 → 743 px su desktop, 665 → 1126 px su telefono); da un dominio di un altro cliente il browser blocca la cornice (`violates … frame-ancestors`); «Vai al pagamento sicuro» porta la finestra intera all'indirizzo di pagamento.
 
-Rimandati alla 0.2.4 (con i contatti del cliente): logo e caratteri del modulo per cliente, e l'indirizzo di ritorno sul sito del cliente dopo il pagamento.
+Logo e carattere del modulo e l'indirizzo di ritorno sul sito del cliente sono arrivati con la 0.2.4 (sotto).
+
+## Contatti, WhatsApp e aspetto del cliente (0.2.4)
+
+**Dove**: menu **Amministrazione → Attività** per l'amministratore del cliente (`bkng_manage_properties`, solo sulla piattaforma); la piattaforma apre lo stesso modulo per ogni cliente da **Piattaforma → cliente → Contatti e aspetto**. I dati stanno in `bkng_tenants.settings['profile']` (`Tenants\TenantProfile`); nessun segreto.
+
+| Campo | Note |
+|---|---|
+| Nome commerciale, referente, email principale, email prenotazioni, email informazioni, telefono, WhatsApp, sito web | ognuno con **«Mostra al pubblico»**; «Stessa email per tutto» copia l'email principale nelle altre due |
+| WhatsApp | solo con prefisso internazionale (`+39 333…` o `0039…`), salvato in cifre per `wa.me`; un numero senza prefisso è rifiutato perché aprirebbe la chat con un'altra persona. Mai il numero della piattaforma |
+| Testo del messaggio WhatsApp | facoltativo, con `{struttura}` e `{codice_prenotazione}`; vuoto: un testo predefinito per il modulo e uno per la pagina della prenotazione |
+| Logo | un'immagine della libreria del cliente (`TenantAccess::allows_attachment`) |
+| Carattere | quello della pagina (come prima), moderno, classico, elegante, arrotondato: solo caratteri di sistema, nessun font scaricato da servizi esterni |
+| Pagina di ritorno dopo il pagamento | facoltativa, deve stare su un dominio autorizzato del cliente (https sulle piattaforme in https); ricontrollata a ogni pagamento, quindi togliendo il dominio smette di valere |
+
+**API**: `GET/PUT /tenant/profile`. Il cliente è sempre quello dell'utente collegato; `?tenant=ID` vale solo per la piattaforma (o per il proprio cliente). Ogni modifica va nel registro attività del cliente (`tenant.profile_updated`). In `WriteGate::ALLOWED`.
+
+**Cosa vede l'ospite** (`GET /public/v1/properties/{slug}` e pagina della prenotazione):
+- `phone` ed `email` seguono la catena **struttura → cliente**: quelli scritti nella scheda della struttura vincono (come prima); altrimenti i contatti pubblici del cliente (per l'email: prenotazioni, poi informazioni, poi principale).
+- `business`: `{footer, name, logo, font, website, whatsapp, whatsapp_text}`, solo valori pubblici. `footer` è vero solo se il cliente ha reso pubblico qualcosa o ha un logo: senza impostazioni il modulo è identico a prima.
+- In fondo al modulo e alla pagina della prenotazione: logo, nome, telefono, email, sito e **«Scrivici su WhatsApp»** (`https://wa.me/{numero}?text=…`, nuova scheda). Nel modulo con prenotazioni non disponibili (cliente sospeso) gli stessi contatti.
+
+**Ritorno sul sito del cliente**: con la pagina di ritorno impostata, Stripe/Nexi riportano l'ospite che ha pagato a `pagina?bkng_paid=1&bkng_return=CODICE`. `embed.js` passa i due valori all'iframe del modulo, che mostra «Pagamento ricevuto, grazie!» con il codice. Il codice non è una credenziale: non mostra nessun dato della prenotazione; il link per gestirla arriva con l'email. Il pagamento annullato torna invece alla pagina della prenotazione sulla piattaforma, dove l'ospite può riprovare.
+
+Rimandati: le variabili `{telefono_struttura}`, `{email_struttura}`, `{whatsapp_struttura}`, `{sito_struttura}` nelle email arrivano con la 0.2.5 (email per cliente). Un numero WhatsApp diverso per singola struttura non c'è: vale quello del cliente.

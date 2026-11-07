@@ -50,6 +50,8 @@ class PublicBookingService {
 	public const READ_LIMIT = 300;
 	/** Manage-link attempts per IP per hour (guessing codes and tokens). */
 	public const MANAGE_LIMIT = 60;
+	/** Query argument with the booking code on the customer's return page (0.2.4). */
+	public const RETURN_ARG = 'bkng_return';
 
 	public function __construct(
 		private PropertyRepository $properties,
@@ -65,8 +67,57 @@ class PublicBookingService {
 		private PaymentAccountService $accounts,
 		private RateRepository $rates,
 		private WhatsAppSettings $whatsapp,
-		private ?\BookingManager\Tenants\TenantGate $tenant_gate = null
+		private ?\BookingManager\Tenants\TenantGate $tenant_gate = null,
+		private ?\BookingManager\Tenants\TenantProfile $profile = null
 	) {}
+
+	/**
+	 * Contacts and look of the business (0.2.4): the property's own phone, e-mail and
+	 * website first, then what the customer made public; WhatsApp, name, logo, font.
+	 *
+	 * @param array<string, mixed> $property
+	 * @return array<string, mixed>
+	 */
+	private function business( array $property ): array {
+		if ( $this->profile ) {
+			return $this->profile->public_for( $property );
+		}
+		return array(
+			'footer'        => false,
+			'name'          => '',
+			'logo'          => null,
+			'font'          => '',
+			'phone'         => $property['phone'] ?? null,
+			'email'         => $property['email'] ?? null,
+			'website'       => $property['website'] ?? null,
+			'whatsapp'      => null,
+			'whatsapp_text' => '',
+		);
+	}
+
+	/**
+	 * The public fields of business(): phone and email where they were, the rest under
+	 * "business".
+	 *
+	 * @param array<string, mixed> $property
+	 * @return array<string, mixed>
+	 */
+	private function contact_fields( array $property ): array {
+		$b = $this->business( $property );
+		return array(
+			'phone'    => $b['phone'],
+			'email'    => $b['email'],
+			'business' => array(
+				'footer'        => $b['footer'],
+				'name'          => $b['name'],
+				'logo'          => $b['logo'],
+				'font'          => $b['font'],
+				'website'       => $b['website'],
+				'whatsapp'      => $b['whatsapp'],
+				'whatsapp_text' => $b['whatsapp_text'],
+			),
+		);
+	}
 
 	/** Whether the property's customer takes new bookings now (suspended or expired: no). */
 	private function sells( array $property ): bool {
@@ -117,13 +168,15 @@ class PublicBookingService {
 				$types[] = self::public_type( InventoryService::type_payload( $type ) );
 			}
 		}
+		$contacts = $this->contact_fields( $property );
 		return array(
 			'slug'              => (string) $property['slug'],
 			'name'              => (string) $property['name'],
 			'kind'              => (string) $property['kind'],
 			'address'           => trim( (string) $property['address'] . ', ' . trim( $property['postcode'] . ' ' . $property['city'] ), ', ' ),
-			'phone'             => $property['phone'],
-			'email'             => $property['email'],
+			'phone'             => $contacts['phone'],
+			'email'             => $contacts['email'],
+			'business'          => $contacts['business'],
 			'currency'          => (string) $property['currency'],
 			'checkin_from'      => (string) $property['checkin_from'],
 			'checkin_to'        => (string) $property['checkin_to'],
@@ -578,7 +631,20 @@ class PublicBookingService {
 		$property = (array) $this->properties->find( (int) $booking['property_id'] );
 		$amount   = self::amount_to_pay( $booking, (string) ( $property['settings']['online_payment'] ?? 'full' ) );
 		$back     = $this->manage->url( $booking );
-		$result   = $this->payments->start_online_payment( $booking, $amount, add_query_arg( 'bkng_paid', '1', $back ), add_query_arg( 'bkng_paid', '0', $back ), $booking['email'] ?? null );
+		$success  = add_query_arg( 'bkng_paid', '1', $back );
+		// 0.2.4: the customer's own page, when it set one on its domains. It gets only the
+		// booking code (not a credential): the form there says the payment was received.
+		$return = $this->profile ? $this->profile->return_url_for( (int) $booking['property_id'] ) : '';
+		if ( '' !== $return ) {
+			$success = add_query_arg(
+				array(
+					'bkng_paid'   => '1',
+					self::RETURN_ARG => rawurlencode( (string) $booking['code'] ),
+				),
+				$return
+			);
+		}
+		$result = $this->payments->start_online_payment( $booking, $amount, $success, add_query_arg( 'bkng_paid', '0', $back ), $booking['email'] ?? null );
 		if ( $result instanceof \WP_Error ) {
 			return $result;
 		}
@@ -634,14 +700,16 @@ class PublicBookingService {
 				'children'  => $room['children'],
 			);
 		}
-		$terms = $this->cancellation( $b );
+		$terms    = $this->cancellation( $b );
+		$contacts = $property ? $this->contact_fields( $property ) : array( 'phone' => null, 'email' => null, 'business' => null );
 		return array(
 			'code'           => (string) $b['code'],
 			'property'       => array(
 				'name'           => (string) ( $property['name'] ?? '' ),
 				'address'        => trim( (string) ( $property['address'] ?? '' ) . ', ' . (string) ( $property['city'] ?? '' ), ', ' ),
-				'phone'          => $property['phone'] ?? null,
-				'email'          => $property['email'] ?? null,
+				'phone'          => $contacts['phone'],
+				'email'          => $contacts['email'],
+				'business'       => $contacts['business'],
 				'checkin_from'   => (string) ( $property['checkin_from'] ?? '' ),
 				'checkout_until' => (string) ( $property['checkout_until'] ?? '' ),
 				'color'          => (string) ( $property['settings']['form_color'] ?? '' ),

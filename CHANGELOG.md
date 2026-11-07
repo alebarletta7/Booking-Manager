@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.4] — 7 novembre 2026
+
+Quinto passo della piattaforma con più clienti: contatti, WhatsApp e aspetto del modulo per ogni cliente (vedi [docs/SAAS.md](docs/SAAS.md)). Senza impostazioni il modulo resta com'era.
+
+### Novità
+
+- Nuova voce **Amministrazione → Attività** (amministratore del cliente, sulla piattaforma): nome commerciale, referente, email principale, prenotazioni e informazioni (con «Stessa email per tutto»), telefono, WhatsApp, sito web. Ogni contatto ha **«Mostra al pubblico»**.
+- **Pulsante «Scrivici su WhatsApp»** nel modulo e nella pagina della prenotazione: apre la chat con il numero del cliente (`wa.me`, nessun servizio a pagamento) con un testo già scritto, modificabile, che può contenere `{struttura}` e `{codice_prenotazione}`. Il numero va scritto con il prefisso internazionale.
+- **Logo e carattere del modulo**: logo e nome commerciale in fondo al modulo con i contatti pubblici; cinque caratteri di sistema (nessun font esterno).
+- **Pagina di ritorno dopo il pagamento** (facoltativa): una pagina del sito del cliente, su un dominio autorizzato. Dopo il pagamento l'ospite torna lì e il modulo dice «Pagamento ricevuto, grazie!» con il codice; il pagamento annullato torna alla pagina della prenotazione per riprovare.
+- La piattaforma modifica gli stessi dati per ogni cliente da **Piattaforma → cliente → Contatti e aspetto**.
+
+### Modifiche
+
+- Modulo e pagina della prenotazione: telefono ed email della struttura restano i primi; se mancano, valgono quelli pubblici del cliente.
+- `GET /public/v1/properties/{slug}` e la pagina della prenotazione hanno il nuovo campo `business` (solo valori pubblici).
+
 ## [0.2.3] — 7 novembre 2026
 
 Quarto passo della piattaforma con più clienti: il modulo di prenotazione nel sito del cliente con un iframe (vedi [docs/SAAS.md](docs/SAAS.md)). Shortcode e pagine esistenti non cambiano.

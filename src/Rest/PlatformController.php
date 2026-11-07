@@ -11,6 +11,10 @@
  * And /tenant: the customer of the current user, read only (status, plan, limits, use,
  * domains). The customer comes from the user, never from the request.
  *
+ * /tenant/profile (0.2.4, GET and PUT, bkng_manage_properties): contacts, WhatsApp, logo,
+ * font and return page of the user's own customer. Only the platform may name another
+ * customer, with ?tenant=ID.
+ *
  * @package BookingManager
  */
 
@@ -21,13 +25,14 @@ namespace BookingManager\Rest;
 use BookingManager\Access\Policy;
 use BookingManager\Access\PropertyScope;
 use BookingManager\Core\Validation;
+use BookingManager\Tenants\TenantProfile;
 use BookingManager\Tenants\TenantService;
 
 defined( 'ABSPATH' ) || exit;
 
 class PlatformController extends RestController {
 
-	public function __construct( Policy $policy, private TenantService $tenants, private PropertyScope $scope ) {
+	public function __construct( Policy $policy, private TenantService $tenants, private PropertyScope $scope, private TenantProfile $profile ) {
 		parent::__construct( $policy );
 	}
 
@@ -174,6 +179,52 @@ class PlatformController extends RestController {
 				'permission_callback' => $this->require_cap( 'bkng_access' ),
 			)
 		);
+		$own = array(
+			'tenant' => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+			),
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tenant/profile',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->profile->payload( $this->profile_tenant( $r ) ) ?? TenantService::not_found() ),
+					'permission_callback' => array( $this, 'can_edit_profile' ),
+					'args'                => $own,
+				),
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->profile->save( $this->profile_tenant( $r ), (array) $r->get_json_params() ) ),
+					'permission_callback' => array( $this, 'can_edit_profile' ),
+					'args'                => $own,
+				),
+			)
+		);
+	}
+
+	/** The administrator of a customer, on its own customer; the platform on any. */
+	public function can_edit_profile( \WP_REST_Request $request ): bool|\WP_Error {
+		$basic = $this->policy->authorize( 'bkng_manage_properties' );
+		if ( true !== $basic ) {
+			return $basic;
+		}
+		$asked = (int) $request->get_param( 'tenant' );
+		if ( $asked > 0 && $asked !== $this->scope->tenant_of( get_current_user_id() ) ) {
+			return $this->policy->authorize( 'bkng_platform_manage' );
+		}
+		return $this->profile_tenant( $request ) > 0 ? true : $this->policy->authorize( 'bkng_platform_manage' );
+	}
+
+	/** The customer whose profile is read or written: never taken from the request, except by the platform. */
+	private function profile_tenant( \WP_REST_Request $request ): int {
+		$asked = (int) $request->get_param( 'tenant' );
+		if ( $asked > 0 && current_user_can( 'bkng_platform_manage' ) ) {
+			return $asked;
+		}
+		return $this->scope->tenant_of( get_current_user_id() );
 	}
 
 	/** @return string[]|\WP_Error */

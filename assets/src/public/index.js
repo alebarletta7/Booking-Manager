@@ -7,6 +7,7 @@ import { createRoot } from '@wordpress/element';
 
 import { createApi } from './api';
 import BookingForm from './BookingForm';
+import { PaidReturn } from './Business';
 import { setLocale } from './format';
 import { reportHeight } from './frame';
 import Manage from './Manage';
@@ -25,6 +26,12 @@ function mount( el ) {
 	const code = params.get( config.args?.code || 'bkng_code' );
 	const token = params.get( config.args?.token || 'bkng_token' );
 	const root = createRoot( el );
+	// Back from the payment on the customer's own page (0.2.4): only the code.
+	const returned = params.get( 'bkng_return' );
+	if ( ! token && returned && params.get( 'bkng_paid' ) === '1' ) {
+		root.render( <PaidReturn code={ returned.slice( 0, 32 ) } /> );
+		return;
+	}
 	if ( code && token ) {
 		root.render(
 			<Manage

@@ -4,7 +4,7 @@ Tags: booking, b&b, hotel, prenotazioni, affittacamere
 Requires at least: 6.6
 Tested up to: 6.6
 Requires PHP: 8.1
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,9 @@ Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
 3. Segui la configurazione guidata.
 
 == Changelog ==
+
+= 0.2.4 =
+* Nuova schermata «Attività»: contatti del cliente con «Mostra al pubblico», pulsante «Scrivici su WhatsApp» (click-to-chat), logo e carattere del modulo, pagina del sito del cliente dove torna l'ospite dopo il pagamento.
 
 = 0.2.3 =
 * Modulo di prenotazione da inserire con un iframe nel sito del cliente: pagina /booking/{struttura}/ senza il tema, aperta solo dentro i domini autorizzati dalla piattaforma, altezza che si adatta, pagamento nella finestra intera. Il codice da incollare è nella scheda della struttura.
