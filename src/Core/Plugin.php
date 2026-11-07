@@ -23,6 +23,7 @@ use BookingManager\Cloudflare\CloudflareService;
 use BookingManager\Cloudflare\CloudflareSettings;
 use BookingManager\Frontend\Captcha;
 use BookingManager\Frontend\PublicBookingService;
+use BookingManager\Frontend\EmbedPage;
 use BookingManager\Frontend\PublicFrontend;
 use BookingManager\Reports\DashboardService;
 use BookingManager\Rest\AuditController;
@@ -300,6 +301,7 @@ final class Plugin {
 			)
 		);
 		$c->set( PublicFrontend::class, fn( Container $c ) => new PublicFrontend( $c->get( PropertyRepository::class ), $c->get( Captcha::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
+		$c->set( EmbedPage::class, fn( Container $c ) => new EmbedPage( $c->get( PropertyRepository::class ), $c->get( TenantRepository::class ), $c->get( TenantGate::class ), $c->get( PublicFrontend::class ) ) );
 		$c->set( StaffService::class, fn( Container $c ) => new StaffService( $c->get( RoleManager::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ), $c->get( TenantRepository::class ) ) );
 		$c->set( CloudflareSettings::class, fn( Container $c ) => new CloudflareSettings( $c->get( SecretBox::class ) ) );
 		$c->set( CloudflareClient::class, fn( Container $c ) => new CloudflareClient( $c->get( CloudflareSettings::class ) ) );
@@ -523,6 +525,7 @@ final class Plugin {
 
 		$c->get( RoleManager::class )->hooks();
 		$c->get( PublicFrontend::class )->hooks();
+		$c->get( EmbedPage::class )->hooks();
 		$c->get( StaffEntry::class )->hooks();
 		$c->get( TenantAccess::class )->hooks();
 		$c->get( TenantGate::class )->hooks();

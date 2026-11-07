@@ -16,6 +16,7 @@ import {
 	nightsLabel,
 } from './format';
 import { Captcha } from './Captcha';
+import { isFramed } from './frame';
 import { comboTitle, Combos } from './Combos';
 import { Hero, Results, SearchBar } from './Results';
 import { Icon } from './icons';
@@ -486,11 +487,35 @@ function GuestForm( {
 function Done( { property, result } ) {
 	const b = result.booking;
 	const paying = !! result.payment?.checkout_url;
+	// In the client's iframe the payment opens in the whole window, on the guest's click.
+	const framed = isFramed();
 	useEffect( () => {
-		if ( paying ) {
+		if ( paying && ! framed ) {
 			window.location.assign( result.payment.checkout_url );
 		}
-	}, [ paying, result ] );
+	}, [ paying, framed, result ] );
+	if ( paying && framed ) {
+		return (
+			<div className="bkng-p-card bkng-p-done" role="status">
+				<p>
+					{ __(
+						'Per completare la prenotazione manca solo il pagamento.',
+						'booking-manager'
+					) }
+				</p>
+				<p>
+					<a
+						className="bkng-p-button is-primary"
+						href={ result.payment.checkout_url }
+						target="_top"
+						rel="noopener"
+					>
+						{ __( 'Vai al pagamento sicuro', 'booking-manager' ) }
+					</a>
+				</p>
+			</div>
+		);
+	}
 	if ( paying ) {
 		return (
 			<div className="bkng-p-card bkng-p-done" role="status">

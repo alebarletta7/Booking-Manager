@@ -7,7 +7,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.0 | Clienti sopra le strutture, migrazione dei dati esistenti | ✓ |
 | 0.2.1 | Isolamento: permessi, ospiti, registro attività, staff, libreria media | ✓ |
 | 0.2.2 | Pannello Piattaforma: clienti, utenti, domini, piani, sospensione | ✓ |
-| 0.2.3 | Pagina iframe `/booking/{struttura}`, CSP per cliente, pagamento fuori dall'iframe | da fare |
+| 0.2.3 | Pagina iframe `/booking/{struttura}`, CSP per cliente, pagamento fuori dall'iframe | ✓ |
 | 0.2.4 | Contatti del cliente e pulsante WhatsApp | da fare |
 | 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | da fare |
 | 0.2.6 | WhatsApp Meta per cliente, Channex per struttura | da fare |
@@ -109,3 +109,33 @@ Lo chiedono i servizi, non le rotte: `BookingService::create`, `InventoryService
 Le scritture sono in `WriteGate::ALLOWED`: la piattaforma gestisce i clienti qualunque sia lo stato della licenza. Le azioni sui clienti vanno nel registro attività senza cliente, quindi solo la piattaforma le legge.
 
 Rimandati: il selettore «entra nel gestionale di un cliente» e le viste trasversali con filtro per cliente (oggi la piattaforma vede già tutte le strutture nel selettore in alto) passano alla 0.2.7.
+
+## Modulo nel sito del cliente (0.2.3)
+
+Il cliente incolla nel suo sito il codice che trova in **Struttura → Prenotazioni e modulo online** (solo sulla piattaforma, cioè con i clienti migrati):
+
+```html
+<iframe src="https://piattaforma.example/booking/villa-bianchi/" title="Villa Bianchi" style="width:100%;min-height:640px;border:0" loading="lazy"></iframe>
+<script src="https://piattaforma.example/wp-content/plugins/booking-manager/assets/embed/embed.js" async></script>
+```
+
+**La pagina** (`Frontend\EmbedPage`, `template_redirect` priorità 1): `/booking/{slug}/`, oppure `/?bkng_embed={slug}` senza permalink. Nessuna regola di rewrite, quindi niente da rigenerare; la base `booking` si cambia col filtro `bkng_embed_base`. È lo stesso modulo dello shortcode (stesso script, stessa API pubblica) stampato senza il tema, con `<base target="_top">`, così contatti, link «gestisci la prenotazione» e pagamento si aprono nella finestra intera. Su una piattaforma in https la pagina chiamata in http rimanda (301) alla stessa in https.
+
+| Caso | Risposta |
+|---|---|
+| struttura attiva di un cliente attivo o in prova | 200, modulo |
+| cliente sospeso o scaduto | 200, il modulo dice che le prenotazioni online non sono disponibili e mostra i contatti (come lo shortcode) |
+| struttura sconosciuta o disattivata, cliente archiviato | 404 `noindex`, senza modulo |
+| con `bkng_booking` e `bkng_token` | la prenotazione dell'ospite (anche per una struttura disattivata) |
+
+**Intestazioni**: `Content-Security-Policy: frame-ancestors 'self' <domini del cliente>` (i domini senza schema: su una piattaforma in https il browser accetta solo pagine https di quei domini; un altro sito vede una cornice vuota), `X-Frame-Options` tolta, `Referrer-Policy: strict-origin` (il token del link dell'ospite non esce mai nel Referer), `X-Content-Type-Options: nosniff`, `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` anche per la CDN. Il filtro `bkng_embed_headers` le può cambiare. Un dominio autorizzato non dà nessun accesso all'API: serve solo al browser per decidere chi può mostrare la pagina.
+
+**Altezza**: dentro l'iframe lo script del modulo manda al sito padre solo `{type: 'bkng:height', height}` a ogni cambio di altezza. `assets/embed/embed.js` (file statico, servito e messo in cache come qualunque script) accetta i messaggi solo dall'origine da cui è stato caricato e solo da un iframe della pagina, e ne imposta l'altezza.
+
+**Pagamento**: dentro l'iframe il modulo non apre la pagina di pagamento da solo; mostra «Vai al pagamento sicuro», un link `target="_top"` che apre Stripe o Nexi nella finestra intera (così i browser non lo bloccano e l'ospite vede l'indirizzo del provider). Lo stesso per «Paga online» nella pagina dell'ospite. Fuori dall'iframe (shortcode) il comportamento è quello di prima.
+
+**Ritorno dal pagamento e link nelle email**: se nessuna pagina del sito centrale contiene lo shortcode di quella struttura, il link «gestisci la prenotazione» e il ritorno da Stripe/Nexi (`bkng_paid=1/0`) aprono `/booking/{slug}/?bkng_booking=…&bkng_token=…` nella finestra intera, invece della home page. Una pagina con lo shortcode, se c'è, resta la prima scelta come prima.
+
+Prova reale (Chromium, desktop e iPhone 13): da `www.hotel-bianchi.it` (autorizzato) il modulo si carica e l'iframe segue l'altezza a ogni passo (399 → 743 px su desktop, 665 → 1126 px su telefono); da un dominio di un altro cliente il browser blocca la cornice (`violates … frame-ancestors`); «Vai al pagamento sicuro» porta la finestra intera all'indirizzo di pagamento.
+
+Rimandati alla 0.2.4 (con i contatti del cliente): logo e caratteri del modulo per cliente, e l'indirizzo di ritorno sul sito del cliente dopo il pagamento.

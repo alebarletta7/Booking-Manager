@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.3] — 7 novembre 2026
+
+Quarto passo della piattaforma con più clienti: il modulo di prenotazione nel sito del cliente con un iframe (vedi [docs/SAAS.md](docs/SAAS.md)). Shortcode e pagine esistenti non cambiano.
+
+### Novità
+
+- Pagina **`/booking/{struttura}/`** (o `/?bkng_embed={struttura}` senza permalink): lo stesso modulo dello shortcode, senza il tema del sito centrale, da mostrare in un iframe. Nessuna regola di rewrite da rigenerare.
+- Si apre solo dentro i **domini autorizzati** dalla piattaforma per quel cliente (`Content-Security-Policy: frame-ancestors`); su qualunque altro sito il browser mostra una cornice vuota. Più `Referrer-Policy: strict-origin`, `nosniff`, `noindex` e nessuna cache.
+- Struttura sconosciuta o disattivata, cliente archiviato: pagina 404. Cliente sospeso o scaduto: il modulo dice che le prenotazioni online non sono disponibili e mostra i contatti.
+- **Altezza automatica**: con lo script `embed.js` incluso nel codice da incollare, l'iframe segue l'altezza del modulo a ogni passo, senza barre di scorrimento.
+- **Pagamento nella finestra intera**: dentro l'iframe, dopo la prenotazione, il pulsante «Vai al pagamento sicuro» apre Stripe o Nexi fuori dall'iframe. Lo stesso per «Paga online» nella pagina dell'ospite.
+- **Struttura → Prenotazioni e modulo online**: sulla piattaforma mostra il codice da incollare (con «Copia il codice» e «Apri la pagina») e i domini autorizzati.
+
+### Modifiche
+
+- Sulla piattaforma, se nessuna pagina del sito contiene lo shortcode della struttura, il link «gestisci la prenotazione» delle email e il ritorno dal pagamento aprono `/booking/{struttura}/` invece della home page.
+
 ## [0.2.2] — 7 novembre 2026
 
 Terzo passo della piattaforma con più clienti: il pannello della piattaforma e lo stato dei clienti (vedi [docs/SAAS.md](docs/SAAS.md)). Per chi lavora in un cliente attivo non cambia nulla.

@@ -8,7 +8,8 @@
  * takes the site theme's colours and fonts: its stylesheet uses the theme's preset
  * variables (--wp--preset--color--*), falling back to "inherit". The page hosting the
  * form of a property is remembered, so the links in e-mails open there; if none is known,
- * the link opens the site's home page, where a minimal page is shown.
+ * the link opens the site's home page, where a minimal page is shown (on the central
+ * platform, the property's page of EmbedPage instead).
  *
  * @package BookingManager
  */
@@ -24,6 +25,7 @@ use BookingManager\Core\NoStore;
 use BookingManager\Notifications\WhatsApp\WhatsAppVariables;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Rest\PublicController;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -149,7 +151,8 @@ class PublicFrontend {
 	}
 
 	/**
-	 * Link of e-mails: the page with the form of the booking's property, when known.
+	 * Link of e-mails: the page with the form of the booking's property, when known; on
+	 * the central platform (customers migrated) else the property's embeddable page.
 	 *
 	 * @param array<string, mixed> $booking
 	 */
@@ -160,6 +163,12 @@ class PublicFrontend {
 			$query = (string) wp_parse_url( $url, PHP_URL_QUERY );
 			parse_str( $query, $args );
 			return add_query_arg( $args, (string) get_permalink( $page_id ) );
+		}
+		if ( $property && Tenancy::migrated() ) {
+			// Central platform (0.2.3): the property's own page, where the payment also returns.
+			$query = (string) wp_parse_url( $url, PHP_URL_QUERY );
+			parse_str( $query, $args );
+			return add_query_arg( $args, EmbedPage::url( (string) $property['slug'] ) );
 		}
 		return $url;
 	}
@@ -180,7 +189,7 @@ class PublicFrontend {
 		}
 	}
 
-	private function container( string $slug, bool $manage_only, bool $hero = false ): string {
+	public function container( string $slug, bool $manage_only, bool $hero = false ): string {
 		$config = array(
 			'restUrl'    => esc_url_raw( PublicController::url() ),
 			'property'   => $slug,
@@ -200,7 +209,7 @@ class PublicFrontend {
 			. '</div>';
 	}
 
-	private function enqueue(): void {
+	public function enqueue(): void {
 		if ( $this->enqueued ) {
 			return;
 		}

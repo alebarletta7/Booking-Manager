@@ -41,6 +41,7 @@ cp "$SLUG.php" uninstall.php LICENSE CHANGELOG.md "$DEST/"
 cp -R src "$DEST/src"
 cp -R assets/build "$DEST/assets/build"
 cp -R assets/email "$DEST/assets/email"
+cp -R assets/embed "$DEST/assets/embed"
 [[ -d languages ]] && cp -R languages "$DEST/languages"
 
 # Nothing of the development environment may slip in.

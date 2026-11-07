@@ -8,6 +8,7 @@ import { createRoot } from '@wordpress/element';
 import { createApi } from './api';
 import BookingForm from './BookingForm';
 import { setLocale } from './format';
+import { reportHeight } from './frame';
 import Manage from './Manage';
 import './style.scss';
 
@@ -71,7 +72,12 @@ function gutters( els ) {
 function start() {
 	const els = [ ...document.querySelectorAll( '.bkng-public[data-bkng]' ) ];
 	els.forEach( ( el ) => mount( el ) );
-	gutters( els );
+	const page = document.querySelector( '.bkng-embed-page' );
+	if ( page ) {
+		reportHeight( page );
+	} else {
+		gutters( els );
+	}
 }
 
 if ( document.readyState === 'loading' ) {

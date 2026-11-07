@@ -16,6 +16,7 @@ use BookingManager\Access\PropertyScope;
 use BookingManager\Audit\AuditLogger;
 use BookingManager\Core\Hooks;
 use BookingManager\Core\Validation;
+use BookingManager\Frontend\EmbedPage;
 use BookingManager\Tenants\Tenancy;
 use BookingManager\Tenants\TenantAccess;
 use BookingManager\Tenants\TenantRepository;
@@ -353,6 +354,25 @@ class PropertyService {
 			'settings'       => $p['settings'],
 			'status'         => (string) $p['status'],
 			'version'        => (int) $p['version'],
+			'embed'          => self::embed( $p ),
+		);
+	}
+
+	/**
+	 * The page to put in an iframe on the customer's site (0.2.3): address, code to paste
+	 * and the domains the platform authorised (read only here).
+	 *
+	 * @param array<string, mixed> $p
+	 * @return array{enabled: bool, url: string, snippet: string, domains: string[]}
+	 */
+	private static function embed( array $p ): array {
+		$tenant = Tenancy::ready() ? Tenancy::of_property( (int) $p['id'] ) : 0;
+		return array(
+			// Shown in the property's screen on the central platform (customers migrated).
+			'enabled' => Tenancy::migrated(),
+			'url'     => EmbedPage::url( (string) $p['slug'] ),
+			'snippet' => EmbedPage::snippet( (string) $p['slug'], (string) $p['name'] ),
+			'domains' => $tenant > 0 ? ( new TenantRepository() )->domains( $tenant ) : array(),
 		);
 	}
 
