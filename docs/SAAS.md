@@ -5,7 +5,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | Versione | Passo | Stato |
 |---|---|---|
 | 0.2.0 | Clienti sopra le strutture, migrazione dei dati esistenti | ✓ |
-| 0.2.1 | Isolamento: permessi, ospiti, registro attività, staff, libreria media | da fare |
+| 0.2.1 | Isolamento: permessi, ospiti, registro attività, staff, libreria media | ✓ |
 | 0.2.2 | Pannello Piattaforma: clienti, utenti, domini, piani, sospensione | da fare |
 | 0.2.3 | Pagina iframe `/booking/{struttura}`, CSP per cliente, pagamento fuori dall'iframe | da fare |
 | 0.2.4 | Contatti del cliente e pulsante WhatsApp | da fare |
@@ -55,3 +55,26 @@ wp booking-manager tenant status
 Ripeterlo non cambia nulla. Su una nuova installazione il primo cliente viene creato all'attivazione.
 
 **Tornare indietro**: `wp booking-manager tenant rollback --yes` rimette `tenant_id` a NULL e dimentica il cliente predefinito, senza cancellare clienti, utenti o domini (una nuova `migrate` li riusa). Il ritorno completo si fa ripristinando il backup.
+
+## Isolamento (0.2.1)
+
+Piattaforma e clienti si distinguono dal permesso `bkng_platform_manage`, che vale solo con `manage_options` (amministratori di WordPress). `RoleManager::strip_platform_caps` toglie a runtime `bkng_platform_manage`, `bkng_manage_settings` e `bkng_manage_roles` (`Capabilities::PLATFORM`) a chiunque non abbia `manage_options`, qualunque cosa ci sia nel ruolo salvato.
+
+`Access\PropertyScope::allowed_ids()` resta l'unico punto che decide le strutture visibili:
+
+| Utente | Strutture |
+|---|---|
+| piattaforma | tutte (`null`) |
+| sito non ancora migrato | come prima della 0.2.0 |
+| senza cliente | nessuna |
+| con «Accedere a tutte le strutture» | tutte quelle del suo cliente |
+| altri | quelle assegnate ∩ quelle del suo cliente |
+
+Tutti i permessi per struttura o per record (`require_cap_for_property`, `require_cap_for_record`) passano da lì, quindi un ID di un altro cliente dà 404. Dove il dato non ha struttura:
+
+- **ospiti**: `GuestService::find_or_create` cerca i duplicati (hash di email e telefono) solo nel cliente della struttura; `GuestsController` rifiuta una scheda di un altro cliente;
+- **registro attività**: `AuditLogger` scrive il cliente esplicito, altrimenti quello della struttura, altrimenti quello dell'utente, altrimenti NULL (azione della piattaforma); `AuditLogReader` mostra le voci senza struttura solo al loro cliente e quelle NULL solo alla piattaforma;
+- **staff**: `StaffService` limita elenco, aggiunta, modifica e rimozione al cliente dell'utente; le rotte `/staff/{id}` danno 404 per un utente di un altro cliente; `candidates` (ricerca tra tutti gli utenti del sito) è vuoto per i clienti;
+- **libreria media**: `Tenants\TenantAccess` segna gli allegati (`_bkng_tenant_id`), filtra la libreria (`ajax_query_attachments_args`) e `allows_attachment()` rifiuta gli ID di un altro cliente in impostazioni della struttura e foto delle camere.
+
+`tests/Integration/TenantIsolationTest.php` chiama il controllo dei permessi di ogni rotta di `booking-manager/v1` come amministratore di un secondo cliente con gli ID dei record del primo: tutte devono rifiutare, tranne quelle che agiscono solo sul proprio cliente (profilo, elenchi, aggiunta di strutture e staff, webhook dei pagamenti), che vengono controllate sui dati restituiti. Lo stesso giro come amministratore del primo cliente deve passare ovunque, così il test non può passare rifiutando tutto.

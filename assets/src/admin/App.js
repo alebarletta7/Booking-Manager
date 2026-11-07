@@ -127,7 +127,7 @@ const NAV = [
 			{
 				path: '/channex',
 				label: __( 'Channex', 'booking-manager' ),
-				cap: 'bkng_manage_integrations',
+				cap: 'bkng_platform_manage',
 				icon: globeIcon,
 			},
 		],

@@ -17,6 +17,7 @@ use BookingManager\Access\Policy;
 use BookingManager\Access\PropertyScope;
 use BookingManager\Core\Clock;
 use BookingManager\Properties\PropertyRepository;
+use BookingManager\Tenants\TenantRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -110,9 +111,21 @@ class MeController extends RestController {
 			'roles'        => $roles,
 			'capabilities' => $caps,
 			'is_wp_admin'  => user_can( $user_id, 'manage_options' ),
+			'is_platform'  => $this->scope->is_platform( $user_id ),
+			'tenant'       => $this->tenant( $user_id ),
 			'properties'   => $properties,
 			'preferences'  => $prefs,
 		);
+	}
+
+	/** @return array{id: int, name: string}|null the user's customer */
+	private function tenant( int $user_id ): ?array {
+		$id = $this->scope->tenant_of( $user_id );
+		$t  = $id > 0 ? ( new TenantRepository() )->find( $id ) : null;
+		return $t ? array(
+			'id'   => (int) $t['id'],
+			'name' => (string) $t['name'],
+		) : null;
 	}
 
 	/**

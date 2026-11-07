@@ -115,6 +115,7 @@ use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
 use BookingManager\Rates\RateService;
+use BookingManager\Tenants\TenantAccess;
 use BookingManager\Tenants\TenantMigration;
 use BookingManager\Tenants\TenantRepository;
 use BookingManager\Updates\UpdateChecker;
@@ -191,7 +192,7 @@ final class Plugin {
 		$c->set( SecretBox::class, fn() => new SecretBox() );
 		$c->set( Migrator::class, fn() => new Migrator() );
 		$c->set( RoleManager::class, fn() => new RoleManager() );
-		$c->set( PropertyScope::class, fn() => new PropertyScope() );
+		$c->set( PropertyScope::class, fn( Container $c ) => new PropertyScope( $c->get( TenantRepository::class ) ) );
 		$c->set( Policy::class, fn( Container $c ) => new Policy( $c->get( PropertyScope::class ) ) );
 		$c->set( AuditLogger::class, fn( Container $c ) => new AuditLogger( $c->get( Settings::class ) ) );
 		$c->set( AuditLogReader::class, fn() => new AuditLogReader() );
@@ -224,12 +225,13 @@ final class Plugin {
 		$c->set( LicenseGate::class, fn( Container $c ) => new ServerGate( $c->get( LicenseManager::class ) ) );
 
 		// Properties and inventory.
-		// Platform customers (tenants) above the properties (0.2.0).
+		// Platform customers (tenants) above the properties (0.2.0), separation (0.2.1).
 		$c->set( TenantRepository::class, fn() => new TenantRepository() );
+		$c->set( TenantAccess::class, fn( Container $c ) => new TenantAccess( $c->get( TenantRepository::class ), $c->get( PropertyScope::class ) ) );
 		$c->set( TenantMigration::class, fn( Container $c ) => new TenantMigration( $c->get( TenantRepository::class ), $c->get( AuditLogger::class ) ) );
 
 		$c->set( PropertyRepository::class, fn() => new PropertyRepository() );
-		$c->set( PropertyService::class, fn( Container $c ) => new PropertyService( $c->get( PropertyRepository::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ) ) );
+		$c->set( PropertyService::class, fn( Container $c ) => new PropertyService( $c->get( PropertyRepository::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ), $c->get( TenantRepository::class ) ) );
 		$c->set( RoomTypeRepository::class, fn() => new RoomTypeRepository() );
 		$c->set( UnitRepository::class, fn() => new UnitRepository() );
 		$c->set( Ledger::class, fn() => new Ledger() );
@@ -288,7 +290,7 @@ final class Plugin {
 			)
 		);
 		$c->set( PublicFrontend::class, fn( Container $c ) => new PublicFrontend( $c->get( PropertyRepository::class ), $c->get( Captcha::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
-		$c->set( StaffService::class, fn( Container $c ) => new StaffService( $c->get( RoleManager::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ) ) );
+		$c->set( StaffService::class, fn( Container $c ) => new StaffService( $c->get( RoleManager::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ), $c->get( TenantRepository::class ) ) );
 		$c->set( CloudflareSettings::class, fn( Container $c ) => new CloudflareSettings( $c->get( SecretBox::class ) ) );
 		$c->set( CloudflareClient::class, fn( Container $c ) => new CloudflareClient( $c->get( CloudflareSettings::class ) ) );
 		$c->set( CloudflareService::class, fn( Container $c ) => new CloudflareService( $c->get( CloudflareSettings::class ), $c->get( CloudflareClient::class ), $c->get( PropertyRepository::class ), $c->get( PaymentAccountRepository::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ) ) );
@@ -510,6 +512,7 @@ final class Plugin {
 		$c->get( RoleManager::class )->hooks();
 		$c->get( PublicFrontend::class )->hooks();
 		$c->get( StaffEntry::class )->hooks();
+		$c->get( TenantAccess::class )->hooks();
 		if ( is_admin() ) {
 			$c->get( AdminApp::class )->hooks();
 		}

@@ -32,6 +32,8 @@ use BookingManager\Database\Schema;
 use BookingManager\Licensing\LicenseGate;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
+use BookingManager\Tenants\Tenancy;
+use BookingManager\Tenants\TenantAccess;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,7 +68,7 @@ class InventoryService {
 		if ( ! $property ) {
 			return PropertyService::not_found();
 		}
-		$data = $this->validate_type( $input, null );
+		$data = $this->validate_type( $input, null, Tenancy::of_property( $property_id ) );
 		if ( $data instanceof \WP_Error ) {
 			return $data;
 		}
@@ -91,7 +93,7 @@ class InventoryService {
 		if ( isset( $input['version'] ) && (int) $input['version'] !== $type['version'] ) {
 			return PropertyService::conflict();
 		}
-		$data = $this->validate_type( $input, $type );
+		$data = $this->validate_type( $input, $type, Tenancy::of_property( (int) $type['property_id'] ) );
 		if ( $data instanceof \WP_Error ) {
 			return $data;
 		}
@@ -148,7 +150,7 @@ class InventoryService {
 	 * @param array<string, mixed>|null $current
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public function validate_type( array $input, ?array $current ): array|\WP_Error {
+	public function validate_type( array $input, ?array $current, int $tenant_id = 0 ): array|\WP_Error {
 		$errors = array();
 		$data   = array();
 		if ( null === $current || array_key_exists( 'name', $input ) ) {
@@ -200,7 +202,8 @@ class InventoryService {
 			$images = array();
 			foreach ( array_slice( (array) $input['images'], 0, 20 ) as $image ) {
 				$image = (int) $image;
-				if ( Validation::public_image( $image ) ) {
+				// Photos of the customer's own media library only.
+				if ( Validation::public_image( $image ) && ( $tenant_id <= 0 || TenantAccess::allows_attachment( $image, $tenant_id ) ) ) {
 					$images[] = $image;
 				} else {
 					$errors['images'] = __( 'Una delle immagini non è valida o non è pubblica.', 'booking-manager' );
@@ -267,7 +270,7 @@ class InventoryService {
 					'is_hidden' => in_array( $property['kind'], PropertyRepository::ROOM_IS_TYPE, true ),
 				)
 			);
-			$type_data = $this->validate_type( $type_input, null );
+			$type_data = $this->validate_type( $type_input, null, Tenancy::of_property( $property_id ) );
 			if ( $type_data instanceof \WP_Error ) {
 				return $type_data;
 			}

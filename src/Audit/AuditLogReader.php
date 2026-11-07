@@ -12,6 +12,7 @@ namespace BookingManager\Audit;
 
 use BookingManager\Core\Clock;
 use BookingManager\Database\Schema;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,11 +24,19 @@ class AuditLogReader {
 	 * @param array{entity_type?: string, entity_id?: int, action?: string, user_id?: int, from?: string, to?: string, page?: int, per_page?: int} $filters
 	 * @return array{items: array<int, array<string, mixed>>, total: int}
 	 */
-	public function search( int $property_id, array $filters, string $tz = 'UTC' ): array {
+	public function search( int $property_id, array $filters, string $tz = 'UTC', bool $platform = false ): array {
 		global $wpdb;
 		$table  = Schema::table( 'audit_log' );
-		$where  = array( '(property_id = %d OR property_id IS NULL)' );
-		$params = array( $property_id );
+		$tenant = Tenancy::migrated() ? Tenancy::of_property( $property_id ) : 0;
+		if ( $tenant > 0 ) {
+			// Entries without a property (guests, staff) only of the property's customer;
+			// those of the platform itself (licence, customers) only for its administrators.
+			$where  = array( $platform ? '(property_id = %d OR (property_id IS NULL AND (tenant_id = %d OR tenant_id IS NULL)))' : '(property_id = %d OR (property_id IS NULL AND tenant_id = %d))' );
+			$params = array( $property_id, $tenant );
+		} else {
+			$where  = array( '(property_id = %d OR property_id IS NULL)' );
+			$params = array( $property_id );
+		}
 
 		if ( ! empty( $filters['entity_type'] ) ) {
 			$where[]  = 'entity_type = %s';
