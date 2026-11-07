@@ -50,7 +50,8 @@ class InventoryService {
 		private Ledger $ledger,
 		private AuditLogger $audit,
 		private Clock $clock,
-		private LicenseGate $license
+		private LicenseGate $license,
+		private ?\BookingManager\Tenants\TenantGate $tenant_gate = null
 	) {}
 
 	/* ------------------------------------------------------------------ Room types */
@@ -60,7 +61,7 @@ class InventoryService {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function create_type( int $property_id, array $input ): array|\WP_Error {
-		$gate = $this->gate();
+		$gate = $this->gate() ?? $this->tenant_gate?->rooms( $property_id );
 		if ( $gate ) {
 			return $gate;
 		}
@@ -249,7 +250,7 @@ class InventoryService {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function create_unit( int $property_id, array $input ): array|\WP_Error {
-		$gate = $this->gate();
+		$gate = $this->gate() ?? $this->tenant_gate?->rooms( $property_id, 1 );
 		if ( $gate ) {
 			return $gate;
 		}
@@ -323,6 +324,12 @@ class InventoryService {
 			} elseif ( $taken ) {
 				/* translators: %s: room codes. */
 				$errors['codes'] = sprintf( __( 'Esistono già camere con questi numeri: %s.', 'booking-manager' ), implode( ', ', $taken ) );
+			}
+		}
+		if ( ! $errors && $this->tenant_gate ) {
+			$limit = $this->tenant_gate->rooms( $property_id, count( $codes ) );
+			if ( $limit ) {
+				return $limit;
 			}
 		}
 		if ( $errors ) {
@@ -443,6 +450,11 @@ class InventoryService {
 		$unit = $this->units->find( $id );
 		if ( ! $unit ) {
 			return self::unit_not_found();
+		}
+		// A room back in use counts like a new one (status and plan of the customer).
+		$limit = 'archived' === $unit['status'] ? $this->tenant_gate?->rooms( (int) $unit['property_id'], 1 ) : null;
+		if ( $limit ) {
+			return $limit;
 		}
 		$type = $this->types->find( (int) $unit['room_type_id'] );
 		if ( $type && 'active' !== $type['status'] ) {

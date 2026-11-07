@@ -30,7 +30,8 @@ class PropertyService {
 		private PropertyRepository $repo,
 		private PropertyScope $scope,
 		private AuditLogger $audit,
-		?TenantRepository $tenants = null
+		?TenantRepository $tenants = null,
+		private ?\BookingManager\Tenants\TenantGate $tenant_gate = null
 	) {
 		$this->tenants = $tenants ?? new TenantRepository();
 	}
@@ -71,6 +72,11 @@ class PropertyService {
 		}
 		if ( $tenant > 0 ) {
 			$data['tenant_id'] = $tenant;
+		}
+		// Status and plan of the customer (properties beyond the plan's limit are refused).
+		$refused = $this->tenant_gate?->property( $tenant );
+		if ( $refused ) {
+			return $refused;
 		}
 		$id = $this->repo->create( $data );
 		if ( $id <= 0 ) {
@@ -185,6 +191,12 @@ class PropertyService {
 
 	/** @return array<string, mixed>|\WP_Error */
 	public function restore( int $id ): array|\WP_Error {
+		$current = $this->repo->find( $id );
+		// A property back in use counts like a new one (status and plan of the customer).
+		$refused = $current && 'archived' === $current['status'] ? $this->tenant_gate?->property( \BookingManager\Tenants\Tenancy::of_property( $id ) ) : null;
+		if ( $refused ) {
+			return $refused;
+		}
 		return $this->set_status( $id, 'active' );
 	}
 

@@ -64,8 +64,14 @@ class PublicBookingService {
 		private PaymentService $payments,
 		private PaymentAccountService $accounts,
 		private RateRepository $rates,
-		private WhatsAppSettings $whatsapp
+		private WhatsAppSettings $whatsapp,
+		private ?\BookingManager\Tenants\TenantGate $tenant_gate = null
 	) {}
+
+	/** Whether the property's customer takes new bookings now (suspended or expired: no). */
+	private function sells( array $property ): bool {
+		return ! $this->tenant_gate || $this->tenant_gate->sells( \BookingManager\Tenants\Tenancy::of_property( (int) $property['id'] ) );
+	}
 
 	/**
 	 * Properties that take online bookings.
@@ -75,14 +81,14 @@ class PublicBookingService {
 	public function properties(): array {
 		$out = array();
 		foreach ( $this->properties->all( null, false ) as $property ) {
-			if ( self::online( $property ) ) {
+			if ( self::online( $property ) && ! $this->tenant_gate?->archived( \BookingManager\Tenants\Tenancy::of_property( (int) $property['id'] ) ) ) {
 				$out[] = array(
 					'slug' => (string) $property['slug'],
 					'name' => (string) $property['name'],
 					'kind' => (string) $property['kind'],
 					'city' => $property['city'],
 					// Set to false by the licence gate when online bookings are closed.
-					'available' => true,
+					'available' => $this->sells( $property ),
 				);
 			}
 		}
@@ -144,7 +150,7 @@ class PublicBookingService {
 			'whatsapp'          => $this->whatsapp->active(),
 			'room_types'        => $types,
 			'extras'            => $this->extras( (int) $property['id'], (bool) $s['show_prices'] ),
-			'available'         => (bool) $types,
+			'available'         => (bool) $types && $this->sells( $property ),
 		);
 	}
 
@@ -309,6 +315,9 @@ class PublicBookingService {
 		$property = $this->find( $slug );
 		if ( $property instanceof \WP_Error ) {
 			return $property;
+		}
+		if ( ! $this->sells( $property ) ) {
+			return new \WP_Error( \BookingManager\Tenants\TenantGate::ERROR_CODE, __( 'Le prenotazioni online non sono disponibili in questo momento. Contatta la struttura.', 'booking-manager' ), array( 'status' => 403 ) );
 		}
 		if ( ! RateLimiter::hit( 'public_hold', RateLimiter::ip_key( $ip ), self::HOLD_LIMIT, HOUR_IN_SECONDS ) ) {
 			return self::too_many();
@@ -746,7 +755,8 @@ class PublicBookingService {
 	/** @return array<string, mixed>|\WP_Error */
 	private function find( string $slug ): array|\WP_Error {
 		$property = $this->properties->find_by_slug( sanitize_title( $slug ) );
-		if ( ! $property || ! self::online( $property ) ) {
+		// An archived customer's pages are gone; its data stays.
+		if ( ! $property || ! self::online( $property ) || $this->tenant_gate?->archived( \BookingManager\Tenants\Tenancy::of_property( (int) $property['id'] ) ) ) {
 			return new \WP_Error( 'bkng_property_not_found', __( 'Le prenotazioni online non sono disponibili per questa struttura.', 'booking-manager' ), array( 'status' => 404 ) );
 		}
 		return $property;

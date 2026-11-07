@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.2] — 7 novembre 2026
+
+Terzo passo della piattaforma con più clienti: il pannello della piattaforma e lo stato dei clienti (vedi [docs/SAAS.md](docs/SAAS.md)). Per chi lavora in un cliente attivo non cambia nulla.
+
+### Novità
+
+- Nuova voce di menu **Piattaforma → Clienti e piani**, solo per gli amministratori di WordPress:
+  - **Clienti**: elenco con ricerca e filtro per stato; nuovo cliente (nome, tipo di attività, piano, attivo o in prova, scadenza, primo amministratore che riceve l'email di WordPress per scegliere la password); scheda del cliente con modifica, eccezioni al piano, uso del piano, domini autorizzati e persone.
+  - **Sospendi** (con motivo, mostrato al cliente), **Riattiva** e **Archivia**. Il cliente principale della piattaforma non si archivia.
+  - **Riepilogo**: clienti per stato, scadenze nei prossimi 30 giorni, prenotazioni, valore e incassato per cliente nel periodo. Solo numeri, nessun dato degli ospiti.
+  - **Piani**: nome, numero massimo di strutture e di camere (0 = nessun limite) e funzioni incluse. Il piano «Senza limiti» c'è sempre; un piano usato da un cliente non si può togliere.
+- Cliente **sospeso o scaduto**: non registra nuove prenotazioni (gestionale, modulo online, blocco delle camere nel modulo) e non aggiunge strutture, tipologie o camere. Tutto il resto continua: modifiche, cancellazioni, check-in e check-out, pagamenti e rimborsi, privacy, pagina dell'ospite, messaggi sulle prenotazioni esistenti. Il modulo online mostra che le prenotazioni non sono disponibili. Le prenotazioni dai portali vengono salvate comunque, con una voce nel registro attività. Lo staff del cliente vede un avviso in alto.
+- La **scadenza** vale dal momento in cui passa (controllo a ogni richiesta) e una volta al giorno il cliente passa a «Scaduto», con una voce nel registro. Spostando in avanti la scadenza il cliente torna attivo.
+- Cliente **archiviato**: le sue persone non vedono più nulla e le sue pagine di prenotazione online spariscono. I dati restano conservati e visibili alla piattaforma; si può riattivare.
+- **Limiti del piano**: oltre il numero di strutture o di camere del piano, il cliente riceve un messaggio che lo invita a contattare la piattaforma. Rimettere in uso una struttura o una camera archiviata conta come aggiungerne una. La piattaforma può superarli quando prepara un cliente.
+- `GET /tenant`: il proprio cliente in sola lettura (stato, piano, limiti, uso, domini).
+- Ogni azione della piattaforma sui clienti è scritta nel registro attività, visibile solo alla piattaforma.
+
+### Modifiche
+
+- Staff e permessi: per lo staff di un cliente, «Aggiungi» crea direttamente un nuovo utente (la ricerca tra gli utenti del sito è della piattaforma dalla 0.2.1).
+- Le funzioni dei piani (pagamenti online, WhatsApp Meta, Channex, SMTP proprio) sono salvate ma non ancora applicate: ciascuna lo sarà quando diventerà per cliente (SMTP nella 0.2.5, WhatsApp e Channex nella 0.2.6).
+
 ## [0.2.1] — 6 novembre 2026
 
 Secondo passo della piattaforma con più clienti: isolamento dei dati (vedi [docs/SAAS.md](docs/SAAS.md)). Su un sito con un solo cliente il gestionale funziona come prima, salvo le voci riservate alla piattaforma elencate sotto.

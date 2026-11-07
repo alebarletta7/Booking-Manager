@@ -56,7 +56,8 @@ class BookingService {
 		private Clock $clock,
 		private LicenseGate $license,
 		private ManageLink $manage,
-		private UnitRepository $units
+		private UnitRepository $units,
+		private ?\BookingManager\Tenants\TenantGate $tenant_gate = null
 	) {}
 
 	/**
@@ -80,6 +81,11 @@ class BookingService {
 		$property = $this->properties->find( (int) ( $input['property_id'] ?? 0 ) );
 		if ( ! $property || 'active' !== $property['status'] ) {
 			return PropertyService::not_found();
+		}
+		// The customer suspended or expired takes no new bookings (portal ones excepted).
+		$tenant_refusal = $this->tenant_gate ? $this->tenant_gate->booking( $property, $channel ) : null;
+		if ( $tenant_refusal ) {
+			return $tenant_refusal;
 		}
 
 		$key = isset( $input['idempotency_key'] ) ? substr( preg_replace( '/[^A-Za-z0-9_\-:.]/', '', (string) $input['idempotency_key'] ), 0, 64 ) : '';
@@ -289,6 +295,9 @@ class BookingService {
 		// the channel already did it.
 		$notify = 'import' !== $booking['source'] && false !== ( $input['notify_guest'] ?? true );
 		Hooks::dispatch( Hooks::BOOKING_CREATED, (int) $booking['id'], $this->context( $booking ) + array( 'notify' => $notify ) );
+		if ( 'import' === $channel && $this->tenant_gate ) {
+			$this->tenant_gate->note_import( (int) $booking['property_id'], (int) $booking['id'] );
+		}
 		if ( BookingStatus::CONFIRMED === $booking['status'] ) {
 			Hooks::dispatch( Hooks::BOOKING_CONFIRMED, (int) $booking['id'], $this->context( $booking ) + array( 'notify' => $notify ) );
 		}

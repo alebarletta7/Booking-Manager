@@ -6,7 +6,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 |---|---|---|
 | 0.2.0 | Clienti sopra le strutture, migrazione dei dati esistenti | ✓ |
 | 0.2.1 | Isolamento: permessi, ospiti, registro attività, staff, libreria media | ✓ |
-| 0.2.2 | Pannello Piattaforma: clienti, utenti, domini, piani, sospensione | da fare |
+| 0.2.2 | Pannello Piattaforma: clienti, utenti, domini, piani, sospensione | ✓ |
 | 0.2.3 | Pagina iframe `/booking/{struttura}`, CSP per cliente, pagamento fuori dall'iframe | da fare |
 | 0.2.4 | Contatti del cliente e pulsante WhatsApp | da fare |
 | 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | da fare |
@@ -78,3 +78,34 @@ Tutti i permessi per struttura o per record (`require_cap_for_property`, `requir
 - **libreria media**: `Tenants\TenantAccess` segna gli allegati (`_bkng_tenant_id`), filtra la libreria (`ajax_query_attachments_args`) e `allows_attachment()` rifiuta gli ID di un altro cliente in impostazioni della struttura e foto delle camere.
 
 `tests/Integration/TenantIsolationTest.php` chiama il controllo dei permessi di ogni rotta di `booking-manager/v1` come amministratore di un secondo cliente con gli ID dei record del primo: tutte devono rifiutare, tranne quelle che agiscono solo sul proprio cliente (profilo, elenchi, aggiunta di strutture e staff, webhook dei pagamenti), che vengono controllate sui dati restituiti. Lo stesso giro come amministratore del primo cliente deve passare ovunque, così il test non può passare rifiutando tutto.
+
+## Pannello della piattaforma e stato dei clienti (0.2.2)
+
+**Piani** (`Tenants\Plans`, opzione `bkng_plans`): chiave, nome, `limits` (`max_properties`, `max_units`; 0 = nessun limite) e `features` (`online_payment`, `whatsapp_meta`, `channex`, `custom_smtp`). Il piano `unlimited` esiste sempre. Un cliente prende i valori del suo piano; `bkng_tenants.limits` e `bkng_tenants.features` contengono solo le eccezioni decise dalla piattaforma. Le funzioni sono salvate ma applicate da ciascuna funzione quando diventa per cliente.
+
+**`Tenants\TenantGate`** è il corrispondente per cliente di `LicenseGate` (che resta la licenza della piattaforma):
+
+| Stato | Effetto |
+|---|---|
+| `active`, `trial` non scaduti | tutto, nei limiti del piano |
+| `suspended`, `expired` (anche solo `expires_at` passata) | niente nuove prenotazioni (staff, modulo, blocchi del modulo) né nuove strutture, tipologie o camere; tutto il resto funziona; le prenotazioni dai portali (`channel = import`) si salvano con la voce `tenant.booking_while_inactive` |
+| `archived` | `PropertyScope` non dà strutture al suo staff, le pagine pubbliche rispondono «non trovata»; dati conservati, visibili alla piattaforma |
+
+Lo chiedono i servizi, non le rotte: `BookingService::create`, `InventoryService` (tipologie, camere, ripristino di camere archiviate), `PropertyService::create` e `restore`, `PublicBookingService` (disponibilità nel modulo e blocchi). La piattaforma è vincolata dallo stato per le prenotazioni, ma non da stato e limiti per strutture e camere. Ogni giorno (`bkng_daily`) `expire_due()` porta a `expired` i clienti con la scadenza passata.
+
+**API** (`Rest\PlatformController`, tutte con `bkng_platform_manage`):
+
+| Rotta | Metodi |
+|---|---|
+| `/platform/tenants` | GET (`search`, `status`), POST (`name`, `business_type`, `plan`, `status`, `expires_at`, `admin{email, first_name, last_name}`) |
+| `/platform/tenants/{id}` | GET (con domini, uso, limiti e funzioni effettivi), PUT (`name`, `business_type`, `plan`, `expires_at`, `limits{}`, `features{}`, `version`) |
+| `/platform/tenants/{id}/(suspend\|activate\|archive)` | POST (`reason`, obbligatorio per sospendere) |
+| `/platform/tenants/{id}/domains` | GET, POST `{host}`, DELETE `?host=` |
+| `/platform/tenants/{id}/users` | GET, POST (come `/staff`, nel cliente) |
+| `/platform/plans` | GET, PUT `{plans: [...]}` |
+| `/platform/stats` | GET `?from&to` |
+| `/tenant` | GET, per chiunque abbia `bkng_access`: il proprio cliente in sola lettura |
+
+Le scritture sono in `WriteGate::ALLOWED`: la piattaforma gestisce i clienti qualunque sia lo stato della licenza. Le azioni sui clienti vanno nel registro attività senza cliente, quindi solo la piattaforma le legge.
+
+Rimandati: il selettore «entra nel gestionale di un cliente» e le viste trasversali con filtro per cliente (oggi la piattaforma vede già tutte le strutture nel selettore in alto) passano alla 0.2.7.

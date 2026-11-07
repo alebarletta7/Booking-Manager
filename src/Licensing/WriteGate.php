@@ -131,6 +131,9 @@ class WriteGate {
 		'#^/properties/\d+/channex/(mapping|push|pull|full-sync)$#',
 		'#^/channex/revisions/[0-9a-fA-F-]{36}/(retry|resolve)$#',
 		'#^/public/channex/webhook$#',
+		// Platform panel (0.2.2): the platform manages its customers whatever the licence says.
+		'#^/platform/tenants(/\d+(/(suspend|activate|archive|domains|users))?)?$#',
+		'#^/platform/plans$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}

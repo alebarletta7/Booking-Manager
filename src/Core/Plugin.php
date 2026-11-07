@@ -39,6 +39,7 @@ use BookingManager\Rest\RatesController;
 use BookingManager\Rest\SettingsController;
 use BookingManager\Rest\SetupController;
 use BookingManager\Rest\StaffController;
+use BookingManager\Rest\PlatformController;
 use BookingManager\Staff\StaffService;
 use BookingManager\Access\Policy;
 use BookingManager\Access\PropertyScope;
@@ -115,7 +116,10 @@ use BookingManager\Properties\PropertyRepository;
 use BookingManager\Properties\PropertyService;
 use BookingManager\Rates\RateRepository;
 use BookingManager\Rates\RateService;
+use BookingManager\Tenants\Plans;
 use BookingManager\Tenants\TenantAccess;
+use BookingManager\Tenants\TenantGate;
+use BookingManager\Tenants\TenantService;
 use BookingManager\Tenants\TenantMigration;
 use BookingManager\Tenants\TenantRepository;
 use BookingManager\Updates\UpdateChecker;
@@ -229,13 +233,17 @@ final class Plugin {
 		$c->set( TenantRepository::class, fn() => new TenantRepository() );
 		$c->set( TenantAccess::class, fn( Container $c ) => new TenantAccess( $c->get( TenantRepository::class ), $c->get( PropertyScope::class ) ) );
 		$c->set( TenantMigration::class, fn( Container $c ) => new TenantMigration( $c->get( TenantRepository::class ), $c->get( AuditLogger::class ) ) );
+		// Platform panel: plans, status of the customers, their management (0.2.2).
+		$c->set( Plans::class, fn() => new Plans() );
+		$c->set( TenantGate::class, fn( Container $c ) => new TenantGate( $c->get( TenantRepository::class ), $c->get( Plans::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ) ) );
+		$c->set( TenantService::class, fn( Container $c ) => new TenantService( $c->get( TenantRepository::class ), $c->get( Plans::class ), $c->get( TenantGate::class ), $c->get( StaffService::class ), $c->get( AuditLogger::class ) ) );
 
 		$c->set( PropertyRepository::class, fn() => new PropertyRepository() );
-		$c->set( PropertyService::class, fn( Container $c ) => new PropertyService( $c->get( PropertyRepository::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ), $c->get( TenantRepository::class ) ) );
+		$c->set( PropertyService::class, fn( Container $c ) => new PropertyService( $c->get( PropertyRepository::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ), $c->get( TenantRepository::class ), $c->get( TenantGate::class ) ) );
 		$c->set( RoomTypeRepository::class, fn() => new RoomTypeRepository() );
 		$c->set( UnitRepository::class, fn() => new UnitRepository() );
 		$c->set( Ledger::class, fn() => new Ledger() );
-		$c->set( InventoryService::class, fn( Container $c ) => new InventoryService( $c->get( RoomTypeRepository::class ), $c->get( UnitRepository::class ), $c->get( PropertyRepository::class ), $c->get( Ledger::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ), $c->get( LicenseGate::class ) ) );
+		$c->set( InventoryService::class, fn( Container $c ) => new InventoryService( $c->get( RoomTypeRepository::class ), $c->get( UnitRepository::class ), $c->get( PropertyRepository::class ), $c->get( Ledger::class ), $c->get( AuditLogger::class ), $c->get( Clock::class ), $c->get( LicenseGate::class ), $c->get( TenantGate::class ) ) );
 
 		// Rates and availability.
 		$c->set( RateRepository::class, fn() => new RateRepository() );
@@ -263,7 +271,8 @@ final class Plugin {
 				$c->get( Clock::class ),
 				$c->get( LicenseGate::class ),
 				$c->get( ManageLink::class ),
-				$c->get( UnitRepository::class )
+				$c->get( UnitRepository::class ),
+				$c->get( TenantGate::class )
 			)
 		);
 		// Read models, public form, staff, integrations.
@@ -286,7 +295,8 @@ final class Plugin {
 				$c->get( PaymentService::class ),
 				$c->get( PaymentAccountService::class ),
 				$c->get( RateRepository::class ),
-				$c->get( WhatsAppSettings::class )
+				$c->get( WhatsAppSettings::class ),
+				$c->get( TenantGate::class )
 			)
 		);
 		$c->set( PublicFrontend::class, fn( Container $c ) => new PublicFrontend( $c->get( PropertyRepository::class ), $c->get( Captcha::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
@@ -431,6 +441,7 @@ final class Plugin {
 		$c->set( SettingsController::class, fn( Container $c ) => new SettingsController( $p( $c ), $c->get( Settings::class ), $c->get( AuditLogger::class ), $c->get( Captcha::class ) ) );
 		$c->set( AuditController::class, fn( Container $c ) => new AuditController( $p( $c ), $c->get( AuditLogReader::class ), $c->get( PropertyRepository::class ) ) );
 		$c->set( StaffController::class, fn( Container $c ) => new StaffController( $p( $c ), $c->get( StaffService::class ) ) );
+		$c->set( PlatformController::class, fn( Container $c ) => new PlatformController( $p( $c ), $c->get( TenantService::class ), $c->get( PropertyScope::class ) ) );
 		$c->set( CloudflareController::class, fn( Container $c ) => new CloudflareController( $p( $c ), $c->get( CloudflareSettings::class ), $c->get( CloudflareService::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( PaymentsController::class, fn( Container $c ) => new PaymentsController( $p( $c ), $c->get( PaymentService::class ), $c->get( PaymentRepository::class ), $c->get( PaymentAccountService::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
 		$c->set( CheckinController::class, fn( Container $c ) => new CheckinController( $p( $c ), $c->get( CheckinService::class ), $c->get( BookingRepository::class ) ) );
@@ -494,6 +505,7 @@ final class Plugin {
 			SettingsController::class,
 			AuditController::class,
 			StaffController::class,
+			PlatformController::class,
 			CloudflareController::class,
 			PaymentsController::class,
 			CheckinController::class,
@@ -513,6 +525,7 @@ final class Plugin {
 		$c->get( PublicFrontend::class )->hooks();
 		$c->get( StaffEntry::class )->hooks();
 		$c->get( TenantAccess::class )->hooks();
+		$c->get( TenantGate::class )->hooks();
 		if ( is_admin() ) {
 			$c->get( AdminApp::class )->hooks();
 		}

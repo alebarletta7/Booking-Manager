@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import { del, get, post, put } from '../lib/api';
-import { can } from '../lib/boot';
+import { boot, can } from '../lib/boot';
 import { useAction, useLoad } from '../lib/hooks';
 import { useProperty } from '../lib/property';
 import {
@@ -80,7 +80,9 @@ function memberBody( member, mode, form ) {
 
 function MemberModal( { member, roles, properties, onClose, onDone } ) {
 	const action = useAction();
-	const [ mode, setMode ] = useState( 'existing' );
+	// Searching the site's users is for the platform: a customer adds new people (0.2.1).
+	const searchable = ! boot.me || boot.me.is_platform !== false;
+	const [ mode, setMode ] = useState( searchable ? 'existing' : 'new' );
 	const [ search, setSearch ] = useState( '' );
 	const [ found, setFound ] = useState( null );
 	const [ form, setForm ] = useState( {
@@ -126,7 +128,7 @@ function MemberModal( { member, roles, properties, onClose, onDone } ) {
 				}
 			} }
 		>
-			{ ! member && (
+			{ ! member && searchable && (
 				<Tabs
 					current={ mode }
 					onChange={ setMode }
