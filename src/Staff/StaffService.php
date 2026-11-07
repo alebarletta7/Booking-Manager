@@ -102,6 +102,24 @@ class StaffService {
 	}
 
 	/**
+	 * People of one customer, for the platform (Piattaforma → Clienti); also those whose
+	 * role was removed, so they can be found again.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function members_of( int $tenant_id, \WP_User $actor ): array {
+		$out = array();
+		foreach ( $this->tenants->user_ids( $tenant_id ) as $user_id ) {
+			$user = get_userdata( $user_id );
+			if ( $user ) {
+				$out[] = $this->format( $user, $actor );
+			}
+		}
+		usort( $out, static fn( array $a, array $b ) => strcasecmp( (string) $a['display_name'], (string) $b['display_name'] ) );
+		return $out;
+	}
+
+	/**
 	 * WordPress users who are not staff yet, to add one.
 	 *
 	 * @return array<int, array<string, mixed>>
@@ -159,7 +177,7 @@ class StaffService {
 		if ( $properties instanceof \WP_Error ) {
 			return $properties;
 		}
-		$tenant = $this->tenant_for( $actor, $properties );
+		$tenant = $this->tenant_for( $actor, $properties, (int) ( $input['tenant_id'] ?? 0 ) );
 		if ( $tenant instanceof \WP_Error ) {
 			return $tenant;
 		}
@@ -465,7 +483,7 @@ class StaffService {
 	 *
 	 * @param int[] $properties
 	 */
-	private function tenant_for( \WP_User $actor, array $properties ): int|\WP_Error {
+	private function tenant_for( \WP_User $actor, array $properties, int $requested = 0 ): int|\WP_Error {
 		if ( ! Tenancy::migrated() ) {
 			return 0;
 		}
@@ -473,6 +491,16 @@ class StaffService {
 			return $this->scope->tenant_of( $actor->ID );
 		}
 		$tenants = array_values( array_unique( array_map( array( Tenancy::class, 'of_property' ), $properties ) ) );
+		// The platform names the customer (Piattaforma → Clienti → Persone).
+		if ( $requested > 0 ) {
+			if ( ! $this->tenants->find( $requested ) ) {
+				return Validation::error( array( 'tenant_id' => __( 'Cliente inesistente.', 'booking-manager' ) ) );
+			}
+			if ( array_diff( $tenants, array( $requested ) ) ) {
+				return Validation::error( array( 'properties' => __( 'Le strutture scelte appartengono a un altro cliente.', 'booking-manager' ) ) );
+			}
+			return $requested;
+		}
 		if ( count( $tenants ) > 1 ) {
 			return Validation::error( array( 'properties' => __( 'Le strutture scelte appartengono a clienti diversi: un operatore lavora per un solo cliente.', 'booking-manager' ) ) );
 		}

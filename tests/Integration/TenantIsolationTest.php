@@ -48,6 +48,8 @@ final class TenantIsolationTest extends TestCase {
 		'POST /booking-manager/v1/staff',
 		'GET /booking-manager/v1/staff/candidates',
 		'GET /booking-manager/v1/capabilities',
+		// The user's own customer, read only (0.2.2).
+		'GET /booking-manager/v1/tenant',
 		// Authenticated by the payment provider's signature, not by a user.
 		'POST /booking-manager/v1/webhooks/(?P<provider>[a-z0-9_-]{2,20})/(?P<account>\d+)',
 	);
@@ -160,6 +162,7 @@ final class TenantIsolationTest extends TestCase {
 			'block'        => (int) $block['id'],
 			'notification' => $notification,
 			'staff'        => $staff_a,
+			'tenant'       => Tenancy::default_id(),
 		);
 
 		// Customer B: its own property, created by the platform administrator.
@@ -231,6 +234,7 @@ final class TenantIsolationTest extends TestCase {
 					'payments'      => 'payment',
 					'notifications' => 'notification',
 					'messages'      => 'notification',
+					'tenants'       => 'tenant',
 				)[ $segments[ $i - 1 ] ] ?? null;
 				$this->assertNotNull( $kind, 'Record ID not mapped for ' . $route );
 				return (string) $this->a[ $kind ];
@@ -299,7 +303,7 @@ final class TenantIsolationTest extends TestCase {
 		$refused = array();
 		foreach ( $this->handlers() as list( $method, $route, $permission ) ) {
 			// Global settings, licence, roles, WhatsApp and Channex belong to the platform.
-			if ( ! str_contains( $route, '(?P<' ) || preg_match( '#/(whatsapp|channex/revisions|roles|webhooks)/#', $route ) ) {
+			if ( ! str_contains( $route, '(?P<' ) || preg_match( '#/(whatsapp|channex/revisions|roles|webhooks|platform)/#', $route ) ) {
 				continue;
 			}
 			if ( true !== call_user_func( $permission, $this->request( $method, $route ) ) ) {

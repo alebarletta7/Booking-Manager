@@ -86,6 +86,11 @@ class PropertyScope {
 		if ( $tenant <= 0 ) {
 			return array();
 		}
+		// An archived customer keeps its data, visible to the platform only (0.2.2).
+		$row = $this->tenants->find( $tenant );
+		if ( ! $row || \BookingManager\Tenants\TenantStatus::ARCHIVED === $row['status'] ) {
+			return array();
+		}
 		$own = $this->tenant_property_ids( $tenant );
 		if ( $this->has_all( $user_id ) ) {
 			return $own;

@@ -153,7 +153,17 @@ const TONES = {
 	skipped: 'muted',
 };
 
+// Customers of the platform (Piattaforma).
+const TENANT_TONES = {
+	active: 'ok',
+	trial: 'info',
+	suspended: 'warn',
+	expired: 'bad',
+	archived: 'muted',
+};
+
 export function Badge( { status, kind = 'booking', children } ) {
+	const tones = kind === 'tenant' ? TENANT_TONES : TONES;
 	const labels =
 		{
 			booking: BOOKING_STATUS,
@@ -162,7 +172,7 @@ export function Badge( { status, kind = 'booking', children } ) {
 			op: OP_STATUS,
 		}[ kind ] || {};
 	return (
-		<span className={ 'bkng-badge is-' + ( TONES[ status ] || 'muted' ) }>
+		<span className={ 'bkng-badge is-' + ( tones[ status ] || 'muted' ) }>
 			{ children || labels[ status ] || status }
 		</span>
 	);

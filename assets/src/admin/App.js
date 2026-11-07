@@ -3,12 +3,13 @@
  */
 import { Button, Notice, SelectControl } from '@wordpress/components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	brush as brushIcon,
 	calendar as calendarIcon,
 	category as categoryIcon,
 	check as checkIcon,
+	cloud as cloudIcon,
 	currencyEuro as currencyEuroIcon,
 	fullscreen as fullscreenIcon,
 	globe as globeIcon,
@@ -45,6 +46,7 @@ import License from './screens/License';
 import Messages from './screens/Messages';
 import NewBooking from './screens/NewBooking';
 import Planning from './screens/Planning';
+import Platform, { TenantDetail } from './screens/Platform';
 import PropertySettings from './screens/PropertySettings';
 import Rates from './screens/Rates';
 import Rooms from './screens/Rooms';
@@ -161,6 +163,17 @@ const NAV = [
 			},
 		],
 	},
+	{
+		label: __( 'Piattaforma', 'booking-manager' ),
+		items: [
+			{
+				path: '/platform',
+				label: __( 'Clienti e piani', 'booking-manager' ),
+				cap: 'bkng_platform_manage',
+				icon: cloudIcon,
+			},
+		],
+	},
 ];
 
 const ROUTES = [
@@ -184,6 +197,8 @@ const ROUTES = [
 	[ '/settings', Settings ],
 	[ '/license', License ],
 	[ '/setup', Setup ],
+	[ '/platform', Platform ],
+	[ '/platform/tenants/:id', TenantDetail ],
 ];
 
 function resolve( path ) {
@@ -194,6 +209,36 @@ function resolve( path ) {
 		}
 	}
 	return null;
+}
+
+/** The customer cannot take new bookings (suspended or expired): said once, on top. */
+function TenantBand( { tenant } ) {
+	if ( ! tenant || tenant.can_sell ) {
+		return null;
+	}
+	const text =
+		tenant.status === 'expired'
+			? __(
+					'Il tuo abbonamento è scaduto: non si possono registrare nuove prenotazioni né aggiungere camere. Le prenotazioni esistenti restano gestibili. Contatta la piattaforma per rinnovarlo.',
+					'booking-manager'
+			  )
+			: __(
+					'Il tuo account è sospeso: non si possono registrare nuove prenotazioni né aggiungere camere. Le prenotazioni esistenti restano gestibili. Contatta la piattaforma.',
+					'booking-manager'
+			  );
+	return (
+		<Notice status="warning" isDismissible={ false } className="bkng-band">
+			{ text }
+			{ tenant.reason
+				? ' ' +
+				  sprintf(
+						/* translators: %s: reason of the suspension */
+						__( 'Motivo: %s', 'booking-manager' ),
+						tenant.reason
+				  )
+				: '' }
+		</Notice>
+	);
 }
 
 function LicenseBand( { notice } ) {
@@ -300,12 +345,13 @@ export default function App() {
 	const visible = ( item ) =>
 		can( item.cap ) &&
 		( ! item.housekeeping || ! property || property.housekeeping );
-	const groups = NAV.map( ( group, i ) => ( {
+	const groups = NAV.map( ( group ) => ( {
 		...group,
 		items: [
 			...group.items.filter( visible ),
 			// The licence is the last entry of Amministrazione, before Impostazioni.
-			...( i === NAV.length - 1 && license.canManage
+			...( group.label === __( 'Amministrazione', 'booking-manager' ) &&
+			license.canManage
 				? [
 						{
 							path: '/license',
@@ -329,7 +375,8 @@ export default function App() {
 		found &&
 		! [ '/property', '/staff', '/settings', '/license', '/setup' ].includes(
 			route.path
-		);
+		) &&
+		! route.path.startsWith( '/platform' );
 	const operational = !! me.preferences?.operational_mode;
 
 	let content;
@@ -542,6 +589,7 @@ export default function App() {
 						) }
 					</div>
 					<LicenseBand notice={ license.notice } />
+					<TenantBand tenant={ me.tenant } />
 					<main className="bkng-content">{ content }</main>
 				</div>
 			</div>

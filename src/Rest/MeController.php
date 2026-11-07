@@ -118,14 +118,23 @@ class MeController extends RestController {
 		);
 	}
 
-	/** @return array{id: int, name: string}|null the user's customer */
+	/** @return array{id: int, name: string, status: string, status_label: string, can_sell: bool, reason: string|null}|null the user's customer */
 	private function tenant( int $user_id ): ?array {
 		$id = $this->scope->tenant_of( $user_id );
 		$t  = $id > 0 ? ( new TenantRepository() )->find( $id ) : null;
-		return $t ? array(
-			'id'   => (int) $t['id'],
-			'name' => (string) $t['name'],
-		) : null;
+		if ( ! $t ) {
+			return null;
+		}
+		$state = \BookingManager\Tenants\TenantGate::state( $t );
+		return array(
+			'id'           => (int) $t['id'],
+			'name'         => (string) $t['name'],
+			'status'       => $state,
+			'status_label' => \BookingManager\Tenants\TenantStatus::labels()[ $state ] ?? $state,
+			// The app shows a band when the customer cannot take new bookings.
+			'can_sell'     => in_array( $state, \BookingManager\Tenants\TenantStatus::CAN_SELL, true ),
+			'reason'       => \BookingManager\Tenants\TenantStatus::SUSPENDED === $state ? $t['suspend_reason'] : null,
+		);
 	}
 
 	/**
