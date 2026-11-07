@@ -14,6 +14,7 @@ import {
 	StaySummary,
 	stayItems,
 } from './StayCard';
+import { isFramed } from './frame';
 import { ErrorBox, Spinner } from './ui';
 
 const STATUS = {
@@ -45,6 +46,7 @@ export default function Manage( { api, code, token, paid, root } ) {
 	const [ busy, setBusy ] = useState( false );
 	const [ confirming, setConfirming ] = useState( false );
 	const [ checks, setChecks ] = useState( 0 );
+	const [ checkout, setCheckout ] = useState( '' );
 
 	useEffect( () => {
 		applyColor( root, booking?.property?.color );
@@ -87,6 +89,12 @@ export default function Manage( { api, code, token, paid, root } ) {
 				{},
 				{ token }
 			);
+			if ( isFramed() ) {
+				// Inside the client's iframe: the guest opens it in the whole window.
+				setCheckout( res.checkout_url );
+				setBusy( false );
+				return;
+			}
 			window.location.assign( res.checkout_url );
 		} catch ( err ) {
 			setActionError( err );
@@ -216,7 +224,20 @@ export default function Manage( { api, code, token, paid, root } ) {
 								) }
 							</button>
 						) }
-						{ b.can_pay && (
+						{ b.can_pay && checkout && (
+							<a
+								className="bkng-p-button is-primary"
+								href={ checkout }
+								target="_top"
+								rel="noopener"
+							>
+								{ __(
+									'Vai al pagamento sicuro',
+									'booking-manager'
+								) }
+							</a>
+						) }
+						{ b.can_pay && ! checkout && (
 							<button
 								type="button"
 								className="bkng-p-button is-primary"

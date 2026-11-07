@@ -2034,3 +2034,24 @@
 		width: 100%;
 	}
 }
+
+/* The form as a page of its own, in the client's iframe (/booking/{slug}/, 0.2.3). */
+.bkng-embed-body {
+	margin: 0;
+	background: #fff;
+	color: #1d2327;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+}
+
+.bkng-embed-page {
+	box-sizing: border-box;
+	padding: 16px;
+
+	// The theme's wide alignment means nothing here.
+	.bkng-public.alignwide {
+		max-width: none;
+		margin: 0;
+	}
+}

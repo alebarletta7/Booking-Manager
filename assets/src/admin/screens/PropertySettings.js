@@ -404,6 +404,9 @@ function BookingTab( { data, onSaved } ) {
 								{ data.slug }&quot;]
 							</code>
 						</p>
+						{ data.embed?.enabled && (
+							<EmbedCode embed={ data.embed } />
+						) }
 						<div className="bkng-stack">
 							<Toggle
 								label={ __(
@@ -1324,5 +1327,62 @@ export default function PropertySettings() {
 			) }
 			{ modal }
 		</Page>
+	);
+}
+
+/**
+ * The form on the customer's own site (0.2.3): the code of the iframe and the domains
+ * allowed to show it, which only the platform manages.
+ */
+function EmbedCode( { embed } ) {
+	const [ copied, setCopied ] = useState( false );
+	const copy = () => {
+		window.navigator.clipboard?.writeText( embed.snippet ).then(
+			() => setCopied( true ),
+			() => {}
+		);
+	};
+	return (
+		<div className="bkng-embed-code">
+			<p className="bkng-help">
+				{ __(
+					'Sul sito della struttura incolla questo codice nella pagina delle prenotazioni:',
+					'booking-manager'
+				) }
+			</p>
+			<textarea
+				className="bkng-embed-code__snippet"
+				readOnly
+				rows={ 4 }
+				value={ embed.snippet }
+				onFocus={ ( e ) => e.target.select() }
+				aria-label={ __( 'Codice da incollare', 'booking-manager' ) }
+			/>
+			<p>
+				<Button variant="secondary" onClick={ copy }>
+					{ copied
+						? __( 'Copiato', 'booking-manager' )
+						: __( 'Copia il codice', 'booking-manager' ) }
+				</Button>{ ' ' }
+				<a href={ embed.url } target="_blank" rel="noreferrer">
+					{ __( 'Apri la pagina', 'booking-manager' ) }
+				</a>
+			</p>
+			<p className="bkng-help">
+				{ embed.domains.length
+					? sprintf(
+							/* translators: %s: list of domains */
+							__(
+								'Il modulo si apre solo dentro le pagine di: %s.',
+								'booking-manager'
+							),
+							embed.domains.join( ', ' )
+					  )
+					: __(
+							'Nessun dominio autorizzato: per ora il modulo non si apre dentro altri siti. I domini li aggiunge l’amministratore della piattaforma.',
+							'booking-manager'
+					  ) }
+			</p>
+		</div>
 	);
 }

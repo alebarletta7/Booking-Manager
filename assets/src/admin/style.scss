@@ -1782,3 +1782,16 @@ html.wp-toolbar:has(body.bkng-operational) {
 	}
 }
 /* stylelint-enable no-descending-specificity */
+
+/* Code of the iframe in the property's "Modulo online" card (0.2.3). */
+.bkng-embed-code {
+	margin: 0 0 16px;
+
+	&__snippet {
+		box-sizing: border-box;
+		width: 100%;
+		font-family: Menlo, Consolas, monospace;
+		font-size: 12px;
+		resize: vertical;
+	}
+}
