@@ -455,8 +455,8 @@ final class RestApiTest extends TestCase {
 			return $out;
 		}
 		$path = preg_replace(
-			array( '/\(\?P<\w+>\\\\d\+\)/', '/\(\?P<\w+>\[a-z0-9\\\\-\]\+\)/', '/\(\?P<\w+>\[A-Za-z0-9\]\{6,16\}\)/', '/\(\?P<\w+>\[a-z_\]\+\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,20\}\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,40\}\)/', '/\(\?P<\w+>\[a-z_\]\{3,30\}\)/', '/\(\?P<\w+>\[0-9a-fA-F-\]\{36\}\)/' ),
-			array( '12', 'villa-test', 'ABCDEFGH', 'bkng_admin', 'stripe', 'channel_x', 'guest_confirmed', '0b9a4c1e-2f3d-4e5f-8a7b-6c5d4e3f2a1b' ),
+			array( '/\(\?P<\w+>\\\\d\+\)/', '/\(\?P<\w+>\[a-z0-9\\\\-\]\+\)/', '/\(\?P<\w+>\[A-Za-z0-9\]\{6,16\}\)/', '/\(\?P<\w+>\[a-z_\]\+\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,20\}\)/', '/\(\?P<\w+>\[a-z0-9_-\]\{2,40\}\)/', '/\(\?P<\w+>\[a-z_\]\{3,30\}\)/', '/\(\?P<\w+>\[0-9a-fA-F-\]\{36\}\)/', '/\(\?P<\w+>(\(\?!custom\$\))?\[a-z0-9_\]\+\)/' ),
+			array( '12', 'villa-test', 'ABCDEFGH', 'bkng_admin', 'stripe', 'channel_x', 'guest_confirmed', '0b9a4c1e-2f3d-4e5f-8a7b-6c5d4e3f2a1b', 'custom_1' ),
 			$route
 		);
 		return array( (string) $path );

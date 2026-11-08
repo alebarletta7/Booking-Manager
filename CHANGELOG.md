@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.5] — 8 novembre 2026
+
+Sesto passo della piattaforma con più clienti: le email di ogni cliente (vedi [docs/SAAS.md](docs/SAAS.md)). Senza impostazioni le email partono e si presentano come prima.
+
+### Novità
+
+- **Attività → Email**: le email agli ospiti partono dal **servizio della piattaforma** (predefinito: mittente della piattaforma, nome della struttura, risposte all'email della struttura o, se manca, all'email prenotazioni dell'attività) oppure dal **server SMTP del cliente**, se il piano lo comprende. Server, porta, cifratura, utente, password, indirizzo e nome del mittente. La password è cifrata e non torna mai al browser né nei registri. Il server si usa **solo dopo un'email di prova riuscita**, e se cambia un dato va provato di nuovo. Il mittente deve essere l'utente SMTP o un indirizzo dello stesso dominio delle email dell'attività. Un invio non riuscito resta in coda con i soliti tentativi: non passa mai da un altro server.
+- **Testi per tutte le strutture dell'attività**: in Email → Testi si sceglie «Questa struttura» o «Tutte le strutture dell'attività». Catena: testo della struttura → testo dell'attività → testo predefinito, campo per campo (oggetto e testo).
+- **Editor visuale** dei testi (quello di WordPress): paragrafi, titoli, grassetto, corsivo, elenchi e link, con i segnaposto da inserire con un clic. L'HTML viene ripulito sul server (`wp_kses`); i testi semplici di prima restano validi.
+- **Nuove variabili**: `{nome_cliente} {cognome_cliente} {email_cliente} {nome_struttura} {codice_prenotazione} {data_prenotazione} {data_arrivo} {data_partenza} {numero_notti} {numero_ospiti} {importo_totale} {importo_saldo} {stato_prenotazione} {link_prenotazione} {telefono_struttura} {email_struttura} {whatsapp_struttura} {sito_struttura}`. Quelle di prima (`{nome}`, `{struttura}`…) funzionano ancora; una variabile senza valore diventa vuota.
+- Nuova email **«Pagamento non riuscito»**: quando Stripe o Nexi rifiutano il pagamento online e la prenotazione è ancora in attesa del pagamento, l'ospite riceve il pulsante «Riprova il pagamento». Una sola per pagamento, mai per i pagamenti in struttura.
+- **Messaggi personalizzati**: in Email → Testi, «+ Nuovo messaggio personalizzato» (oggetto, che è anche il titolo, e testo, in ogni lingua). Si inviano a mano dalla scheda della prenotazione, in «Invia un'email».
+- **Registro**: ogni email ha anche il suo **oggetto**, come è partito.
+
+### Modifiche
+
+- `GET /properties/{id}/templates` ha i campi `tenant` (i testi dell'attività) e `custom`. Il corpo dei testi accetta HTML limitato (fino a 20.000 caratteri).
+- Nuove rotte `/tenant/mail`, `/tenant/mail/test`, `/tenant/templates`, `/tenant/templates/{key}` (e `/preview`), `GET/POST /properties/{id}/templates/custom`. Il cliente è sempre quello dell'utente; un altro cliente risponde 403.
+- La scheda della struttura nell'API ha `tenant_id`.
+
 ## [0.2.4] — 7 novembre 2026
 
 Quinto passo della piattaforma con più clienti: contatti, WhatsApp e aspetto del modulo per ogni cliente (vedi [docs/SAAS.md](docs/SAAS.md)). Senza impostazioni il modulo resta com'era.

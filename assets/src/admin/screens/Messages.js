@@ -7,12 +7,16 @@ import { Button, ColorPalette } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
-import { del, getPaged, get, post, put } from '../lib/api';
+import { del, getPaged, get, post, put, query } from '../lib/api';
 import { boot, can } from '../lib/boot';
 import { dateTime } from '../lib/format';
 import { useAction, useLoad } from '../lib/hooks';
 import { useProperty } from '../lib/property';
 import { FORM_COLORS } from './PropertySettings';
+import RichEditor, {
+	editorAvailable,
+	insertAtCursor,
+} from '../components/RichEditor';
 import {
 	Badge,
 	Card,
@@ -26,7 +30,6 @@ import {
 	Success,
 	Tabs,
 	Text,
-	Textarea,
 } from '../components/ui';
 
 const PER_PAGE = 30;
@@ -124,6 +127,11 @@ function Log( { property } ) {
 									</td>
 									<td>
 										{ n.template_label }
+										{ n.subject && (
+											<div className="bkng-small">
+												{ n.subject }
+											</div>
+										) }
 										<div className="bkng-small bkng-muted">
 											{ n.channel === 'whatsapp'
 												? 'WhatsApp'
@@ -221,22 +229,53 @@ function Log( { property } ) {
 	);
 }
 
+const NEW_CUSTOM = '__new';
+
+/**
+ * Texts of the e-mails (0.2.5): for this property, or for all the properties of the
+ * customer (used where a property has none of its own), with the visual editor, the
+ * placeholders and the custom messages of the property, sent by hand from a booking.
+ */
 function Templates( { property } ) {
-	const data = useLoad(
-		() => get( '/properties/' + property.id + '/templates' ),
-		[ property.id ]
-	);
+	// The customer's level needs the right to manage the business (Attività).
+	const business = can( 'bkng_manage_properties' ) && !! boot.me?.tenant;
+	const [ level, setLevel ] = useState( 'property' );
+	const tenantLevel = level === 'tenant';
+	// The customer of this property (the platform may be looking at any customer's).
+	const tq =
+		tenantLevel && property.tenant_id ? { tenant: property.tenant_id } : {};
+	const listPath = tenantLevel
+		? '/tenant/templates' + query( tq )
+		: '/properties/' + property.id + '/templates';
+	const data = useLoad( () => get( listPath ), [ listPath ] );
 	const [ key, setKey ] = useState( '' );
 	const [ lang, setLang ] = useState( 'it' );
 	const [ form, setForm ] = useState( { subject: '', body: '' } );
+	const [ mount, setMount ] = useState( 0 );
 	const [ preview, setPreview ] = useState( null );
 	const [ notice, setNotice ] = useState( '' );
+	const [ editor, setEditor ] = useState( null );
 	const action = useAction();
-	const base = '/properties/' + property.id + '/templates/';
+	const base = tenantLevel
+		? '/tenant/templates/'
+		: '/properties/' + property.id + '/templates/';
 
-	const tpl =
-		data.data?.templates.find( ( t ) => t.key === key ) ||
-		data.data?.templates[ 0 ];
+	const custom = ( ( ! tenantLevel && data.data?.custom ) || [] ).map(
+		( t ) => ( { ...t, defaults: { subject: '', body: '' } } )
+	);
+	const isNew = key === NEW_CUSTOM;
+	const tpl = isNew
+		? {
+				key: NEW_CUSTOM,
+				label: '',
+				defaults: { subject: '', body: '' },
+				own: {},
+				custom: true,
+		  }
+		: custom.find( ( t ) => t.key === key ) ||
+		  data.data?.templates.find( ( t ) => t.key === key ) ||
+		  data.data?.templates[ 0 ];
+	const isCustom = !! tpl && ( isNew || tpl.key.startsWith( 'custom_' ) );
 	useEffect( () => {
 		if ( tpl ) {
 			const own = tpl.own[ lang ];
@@ -246,8 +285,9 @@ function Templates( { property } ) {
 					: { subject: '', body: '' }
 			);
 			setPreview( null );
+			setMount( ( m ) => m + 1 );
 		}
-	}, [ tpl?.key, lang, data.data ] ); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [ tpl?.key, lang, data.data, level ] ); // eslint-disable-line react-hooks/exhaustive-deps
 
 	if ( data.loading && ! data.data ) {
 		return <Loading />;
@@ -256,14 +296,62 @@ function Templates( { property } ) {
 		return <ErrorNotice error={ data.error } onRetry={ data.reload } />;
 	}
 	const own = !! tpl.own[ lang ];
+	const inherited = ! tenantLevel && ! own && tpl.tenant?.[ lang ];
+	const fields = action.error?.fields || {};
+	const options = [
+		...data.data.templates.map( ( t ) => ( {
+			value: t.key,
+			label: t.label,
+		} ) ),
+		...custom.map( ( t ) => ( {
+			value: t.key,
+			label: sprintf(
+				/* translators: %s: name of a custom message. */
+				__( 'Personalizzato: %s', 'booking-manager' ),
+				t.label
+			),
+		} ) ),
+		...( tenantLevel
+			? []
+			: [
+					{
+						value: NEW_CUSTOM,
+						label: __(
+							'+ Nuovo messaggio personalizzato',
+							'booking-manager'
+						),
+					},
+			  ] ),
+	];
+
+	const save = async () => {
+		const res = await action.run( () =>
+			isNew
+				? post( base + 'custom', { ...form, language: lang } )
+				: put( base + tpl.key, { ...form, language: lang, ...tq } )
+		);
+		if ( res ) {
+			data.setData( res );
+			if ( res.created ) {
+				setKey( res.created );
+			}
+			setNotice( __( 'Testo salvato.', 'booking-manager' ) );
+		}
+	};
+
 	return (
 		<div className="bkng-columns">
 			<Card title={ __( 'Testi delle email', 'booking-manager' ) }>
 				<p className="bkng-help">
-					{ __(
-						'Lascia vuoto per usare il testo predefinito. Dettagli della prenotazione, QR e link per gestirla vengono aggiunti da soli.',
-						'booking-manager'
-					) }
+					{ isCustom
+						? __(
+								'Un messaggio personalizzato si invia a mano dalla scheda della prenotazione («Invia un’email»). L’oggetto è anche il titolo dell’email.',
+								'booking-manager'
+						  )
+						: __(
+								'Lascia vuoto per usare il testo predefinito. Dettagli della prenotazione, QR e link per gestirla vengono aggiunti da soli.',
+								'booking-manager'
+						  ) }
 				</p>
 				<Success onDismiss={ () => setNotice( '' ) }>
 					{ notice }
@@ -272,14 +360,55 @@ function Templates( { property } ) {
 					error={ action.error }
 					onDismiss={ () => action.setError( null ) }
 				/>
+				{ business && (
+					<Select
+						label={ __( 'Testi per', 'booking-manager' ) }
+						value={ level }
+						options={ [
+							{
+								value: 'property',
+								label: sprintf(
+									/* translators: %s: property name. */
+									__(
+										'Questa struttura (%s)',
+										'booking-manager'
+									),
+									property.name
+								),
+							},
+							{
+								value: 'tenant',
+								label: __(
+									'Tutte le strutture dell’attività',
+									'booking-manager'
+								),
+							},
+						] }
+						onChange={ ( v ) => {
+							// The same message on the other level (custom ones are per property).
+							if (
+								key.startsWith( 'custom_' ) ||
+								key === NEW_CUSTOM
+							) {
+								setKey( '' );
+							}
+							setLevel( v );
+						} }
+						help={
+							tenantLevel
+								? __(
+										'Questi testi valgono per ogni struttura che non ha il proprio.',
+										'booking-manager'
+								  )
+								: ''
+						}
+					/>
+				) }
 				<div className="bkng-row">
 					<Select
 						label={ __( 'Messaggio', 'booking-manager' ) }
 						value={ tpl.key }
-						options={ data.data.templates.map( ( t ) => ( {
-							value: t.key,
-							label: t.label,
-						} ) ) }
+						options={ options }
 						onChange={ setKey }
 					/>
 					<Select
@@ -292,82 +421,132 @@ function Templates( { property } ) {
 						onChange={ setLang }
 					/>
 				</div>
+				{ inherited && (
+					<p className="bkng-help">
+						{ __(
+							'Ora questa struttura usa il testo scritto per tutte le strutture dell’attività. Se salvi qui, questa struttura avrà il suo.',
+							'booking-manager'
+						) }
+					</p>
+				) }
 				<div className="bkng-stack">
 					<Text
 						label={ __( 'Oggetto', 'booking-manager' ) }
 						value={ form.subject }
-						placeholder={ tpl.defaults.subject }
+						placeholder={
+							inherited ? inherited.subject : tpl.defaults.subject
+						}
 						onChange={ ( v ) => setForm( { ...form, subject: v } ) }
+						help={ fields.subject }
 					/>
-					<Textarea
+					<RichEditor
+						key={ level + tpl.key + lang + mount }
 						label={ __( 'Testo', 'booking-manager' ) }
-						rows={ 8 }
 						value={ form.body }
-						placeholder={ tpl.defaults.body }
-						onChange={ ( v ) => setForm( { ...form, body: v } ) }
+						onChange={ ( v ) =>
+							setForm( ( f ) => ( { ...f, body: v } ) )
+						}
+						onReady={ setEditor }
+						help={
+							fields.body ||
+							( ! isCustom && ! form.body
+								? __(
+										'Vuoto: si usa il testo predefinito (vedi l’anteprima).',
+										'booking-manager'
+								  )
+								: '' )
+						}
 					/>
-					<p className="bkng-small bkng-muted">
+					<div className="bkng-small bkng-muted">
 						{ __( 'Segnaposto:', 'booking-manager' ) }{ ' ' }
-						{ data.data.placeholders.join( ' ' ) }
-					</p>
+						{ data.data.placeholders.map( ( p ) =>
+							editor && editorAvailable() ? (
+								<button
+									key={ p }
+									type="button"
+									className="bkng-chip"
+									onClick={ () =>
+										insertAtCursor( editor, p )
+									}
+								>
+									{ p }
+								</button>
+							) : (
+								<span key={ p }>{ p } </span>
+							)
+						) }
+					</div>
 				</div>
 				<div className="bkng-page__actions" style={ { marginTop: 12 } }>
 					<Button
 						variant="primary"
 						isBusy={ action.busy }
-						onClick={ async () => {
-							const res = await action.run( () =>
-								put( base + tpl.key, {
-									...form,
-									language: lang,
-								} )
-							);
-							if ( res ) {
-								data.setData( res );
-								setNotice(
-									__( 'Testo salvato.', 'booking-manager' )
+						onClick={ save }
+					>
+						{ isNew
+							? __( 'Crea il messaggio', 'booking-manager' )
+							: __( 'Salva', 'booking-manager' ) }
+					</Button>
+					{ ! isNew && (
+						<Button
+							variant="secondary"
+							onClick={ async () => {
+								const res = await action.run( () =>
+									post( base + tpl.key + '/preview', {
+										subject: form.subject || null,
+										body: form.body || null,
+										...tq,
+									} )
 								);
-							}
-						} }
-					>
-						{ __( 'Salva', 'booking-manager' ) }
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={ async () => {
-							const res = await action.run( () =>
-								post( base + tpl.key + '/preview', {
-									subject: form.subject || null,
-									body: form.body || null,
-								} )
-							);
-							if ( res ) {
-								setPreview( res );
-							}
-						} }
-					>
-						{ __( 'Anteprima', 'booking-manager' ) }
-					</Button>
+								if ( res ) {
+									setPreview( res );
+								}
+							} }
+						>
+							{ __( 'Anteprima', 'booking-manager' ) }
+						</Button>
+					) }
 					{ own && (
 						<Button
 							variant="tertiary"
 							isDestructive
 							onClick={ async () => {
 								const res = await action.run( () =>
-									del( base + tpl.key, { language: lang } )
+									del(
+										base + tpl.key,
+										isCustom
+											? {}
+											: { language: lang, ...tq }
+									)
 								);
 								if ( res ) {
 									data.setData( res );
+									if ( isCustom ) {
+										setKey( '' );
+									}
 									setNotice(
-										__(
-											'Ripristinato il testo predefinito.',
-											'booking-manager'
-										)
+										isCustom
+											? __(
+													'Messaggio eliminato.',
+													'booking-manager'
+											  )
+											: __(
+													'Ripristinato il testo predefinito.',
+													'booking-manager'
+											  )
 									);
 								}
 							} }
 						>
-							{ __( 'Torna al predefinito', 'booking-manager' ) }
+							{ isCustom
+								? __(
+										'Elimina il messaggio',
+										'booking-manager'
+								  )
+								: __(
+										'Torna al predefinito',
+										'booking-manager'
+								  ) }
 						</Button>
 					) }
 				</div>

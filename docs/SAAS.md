@@ -9,7 +9,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.2 | Pannello Piattaforma: clienti, utenti, domini, piani, sospensione | ✓ |
 | 0.2.3 | Pagina iframe `/booking/{struttura}`, CSP per cliente, pagamento fuori dall'iframe | ✓ |
 | 0.2.4 | Contatti del cliente e pulsante WhatsApp | ✓ |
-| 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | da fare |
+| 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | ✓ |
 | 0.2.6 | WhatsApp Meta per cliente, Channex per struttura | da fare |
 | 0.2.7 | Limiti per cliente, protezione login, documentazione | da fare |
 
@@ -162,4 +162,52 @@ Logo e carattere del modulo e l'indirizzo di ritorno sul sito del cliente sono a
 
 **Ritorno sul sito del cliente**: con la pagina di ritorno impostata, Stripe/Nexi riportano l'ospite che ha pagato a `pagina?bkng_paid=1&bkng_return=CODICE`. `embed.js` passa i due valori all'iframe del modulo, che mostra «Pagamento ricevuto, grazie!» con il codice. Il codice non è una credenziale: non mostra nessun dato della prenotazione; il link per gestirla arriva con l'email. Il pagamento annullato torna invece alla pagina della prenotazione sulla piattaforma, dove l'ospite può riprovare.
 
-Rimandati: le variabili `{telefono_struttura}`, `{email_struttura}`, `{whatsapp_struttura}`, `{sito_struttura}` nelle email arrivano con la 0.2.5 (email per cliente). Un numero WhatsApp diverso per singola struttura non c'è: vale quello del cliente.
+Le variabili `{telefono_struttura}`, `{email_struttura}`, `{whatsapp_struttura}`, `{sito_struttura}` nelle email sono arrivate con la 0.2.5 (sotto). Un numero WhatsApp diverso per singola struttura non c'è: vale quello del cliente.
+
+## Email del cliente (0.2.5)
+
+Ogni email ricava struttura e cliente **dalla prenotazione** (`NotificationService::compose` → struttura → `Tenancy::of_property`), mai dall'utente collegato o dall'ultimo invio.
+
+### Mittente e server (`Tenants\TenantMail`, `bkng_tenants.settings['mail']`)
+
+**Dove**: Attività → Email (stessa regola di accesso del profilo: `bkng_manage_properties`, il proprio cliente; la piattaforma per tutti con `?tenant=ID`).
+
+| Modalità | Cosa succede |
+|---|---|
+| Servizio della piattaforma (predefinito) | From: `BKNG_MAIL_FROM` se definita in `wp-config.php`, altrimenti quello del sito. Nome: la struttura (come prima). **Reply-To**: email della struttura, altrimenti email prenotazioni → principale → informazioni del cliente |
+| SMTP del cliente | solo se il piano ha **Server email (SMTP) proprio** (`custom_smtp`). Host, porta, cifratura (STARTTLS, SSL/TLS, nessuna), utente, password, From e nome |
+
+- La password è cifrata con `SecretBox` (chiave `BKNG_SECRET_KEY` in `wp-config.php`, consigliata sulla piattaforma; altrimenti i sali di WordPress). L'API restituisce solo `password_set`; lasciarla vuota mantiene quella salvata. Non compare nel registro attività (`tenant.mail_updated`, `tenant.mail_verified`, `tenant.mail_test_failed`).
+- **Verifica**: il server si usa solo dopo un'email di prova riuscita con esattamente quei dati (impronta di host, porta, cifratura, utente, From e password). Qualunque modifica lo riporta a «da verificare» e le email ripartono dal servizio della piattaforma finché la prova non riesce. Anche togliere `custom_smtp` dal piano lo spegne subito.
+- From: deve essere l'utente SMTP o un indirizzo dello stesso dominio di un'email del cliente.
+- Invio (`EmailChannel`): il server del cliente viene impostato su PHPMailer (`phpmailer_init`, priorità 999) solo per quel messaggio e poi tolto, rimettendo i valori di prima. Se l'invio fallisce il messaggio resta in coda con i tentativi (1, 5, 15, 60 minuti): **non** riparte dal server della piattaforma.
+
+### Testi (`Notifications\NotificationTemplates`, `Tenants\TenantTemplates`)
+
+- **Catena**, campo per campo: testo della struttura (`bkng_templates`) → testo del cliente (`bkng_tenants.settings['templates'][chiave][lingua]`) → predefinito. Lingua della prenotazione, altrimenti italiano.
+- Email → Testi: selettore «Questa struttura (nome)» / «Tutte le strutture dell'attività» (solo per chi gestisce l'attività). L'anteprima dei testi del cliente usa la sua prima struttura.
+- **HTML limitato**: `p br strong b em i u a[href,title] ul ol li h2 h3` (`NotificationTemplates::HTML_TAGS`), ripulito con `wp_kses` al salvataggio e di nuovo all'invio; script e stili spariscono con il loro contenuto. Nei testi HTML i valori delle variabili sono protetti con `esc_html`. L'email aggiunge i propri stili in linea; la versione solo testo e l'anteprima nella casella si ricavano togliendo i tag. Un testo senza tag resta «una riga per paragrafo» come prima.
+- Editor: TinyMCE di WordPress (`wp_enqueue_editor`), solo i pulsanti dei tag ammessi; senza TinyMCE resta la casella di testo.
+- **Variabili** (`NotificationTemplates::PLACEHOLDERS`): le vecchie più `{nome_cliente} {cognome_cliente} {email_cliente} {nome_struttura} {codice_prenotazione} {data_prenotazione} {data_arrivo} {data_partenza} {numero_notti} {numero_ospiti} {importo_totale} {importo_saldo} {stato_prenotazione} {link_prenotazione} {telefono_struttura} {email_struttura} {whatsapp_struttura} {sito_struttura}`. Telefono, email e sito: quelli della struttura, altrimenti quelli **pubblici** del cliente; WhatsApp: quello pubblico del cliente. Senza valore diventano vuote.
+
+### Nuovi messaggi (decisione D2)
+
+- `guest_payment_failed` «Pagamento non riuscito»: su `bkng_payment_failed` da Stripe/Nexi (non per i pagamenti manuali) quando la prenotazione è ancora in **opzione**; una per pagamento (`fail{payment_id}`); scartata se nel frattempo la prenotazione è stata pagata. Pulsante «Riprova il pagamento» verso la pagina della prenotazione.
+- **Personalizzati** `custom_N`: per struttura, in ogni lingua, creati con `POST /properties/{id}/templates/custom`. L'oggetto è anche il titolo. Si inviano solo a mano da «Invia un'email» nella prenotazione (`POST /bookings/{id}/notify`), e solo quelli della struttura della prenotazione. `DELETE …/templates/custom_N` senza lingua li toglie in tutte le lingue.
+
+### Registro
+
+`bkng_notifications.subject` contiene l'oggetto come è partito (mai il testo). Visibile in Email → Registro e nell'API (`subject`).
+
+### API
+
+| Rotta | Chi |
+|---|---|
+| `GET/PUT /tenant/mail`, `POST /tenant/mail/test {to}` | amministratore del cliente (il proprio), piattaforma con `?tenant` |
+| `GET /tenant/templates`, `PUT/DELETE /tenant/templates/{key}`, `POST /tenant/templates/{key}/preview` | come sopra |
+| `GET /properties/{id}/templates/custom` | chi vede le prenotazioni della struttura |
+| `POST /properties/{id}/templates/custom` | chi gestisce le impostazioni della struttura |
+
+Tutte le scritture sono in `WriteGate::ALLOWED` (servono agli ospiti già prenotati).
+
+**Test** (`tests/Integration/TenantMailTest.php`): due clienti, uno con SMTP verificato e uno sul servizio della piattaforma, ogni email esce con server, From e Reply-To del proprio cliente e PHPMailer torna come prima; verifica obbligatoria, password mai in risposta, impostazioni o registro; piano senza SMTP; accessi a un altro cliente rifiutati; catena dei testi con HTML ripulito; variabili; pagamento non riuscito; messaggi personalizzati; oggetto nel registro.

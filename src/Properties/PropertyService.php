@@ -331,6 +331,8 @@ class PropertyService {
 		return array(
 			'id'             => (int) $p['id'],
 			'uuid'           => (string) $p['uuid'],
+			// The customer it belongs to (0.2.5: its texts in Email → Testi); null on a site without customers.
+			'tenant_id'      => empty( $p['tenant_id'] ) ? null : (int) $p['tenant_id'],
 			'name'           => (string) $p['name'],
 			'slug'           => (string) $p['slug'],
 			'kind'           => (string) $p['kind'],

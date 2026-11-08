@@ -64,15 +64,20 @@ final class EmailDesign {
 		// Title and text: the greeting line ("Ciao Anna,") in bold.
 		$tick  = empty( $c['tick'] ) ? null : $brand->icon( 'check' );
 		$title = '<h1 style="margin:0;color:' . $k['primary'] . ';font:700 26px/1.25 ' . $f . '">' . $e( $c['title'] ) . '</h1>';
-		$lines = preg_split( '/\R/', trim( $c['intro'] ) ) ?: array();
-		$intro = '';
-		foreach ( $lines as $i => $line ) {
-			$bold   = 0 === $i && count( $lines ) > 1 && str_ends_with( rtrim( $line ), ',' );
-			$intro .= ( $i ? '<br>' : '' ) . ( $bold ? '<strong>' . $e( $line ) . '</strong>' : $e( $line ) );
-		}
 		$heading = '<tr><td class="bk-pad" style="padding-top:30px;' . $pad . '">'
-			. ( null === $tick ? $title : '<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="padding-right:14px;vertical-align:middle">' . $img( $tick, 44 ) . '</td><td style="vertical-align:middle">' . $title . '</td></tr></table>' )
-			. '<p style="margin:16px 0 0;color:' . $k['ink'] . ';font:16px/1.6 ' . $f . '">' . $intro . '</p></td></tr>';
+			. ( null === $tick ? $title : '<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="padding-right:14px;vertical-align:middle">' . $img( $tick, 44 ) . '</td><td style="vertical-align:middle">' . $title . '</td></tr></table>' );
+		if ( ! empty( $c['html'] ) ) {
+			// A formatted text (already cleaned with wp_kses): the e-mail's own styles on its tags.
+			$heading .= '<div style="margin:16px 0 0;color:' . $k['ink'] . ';font:16px/1.6 ' . $f . '">' . self::styled( (string) $c['intro'], $k, $f ) . '</div></td></tr>';
+		} else {
+			$lines = preg_split( '/\R/', trim( $c['intro'] ) ) ?: array();
+			$intro = '';
+			foreach ( $lines as $i => $line ) {
+				$bold   = 0 === $i && count( $lines ) > 1 && str_ends_with( rtrim( $line ), ',' );
+				$intro .= ( $i ? '<br>' : '' ) . ( $bold ? '<strong>' . $e( $line ) . '</strong>' : $e( $line ) );
+			}
+			$heading .= '<p style="margin:16px 0 0;color:' . $k['ink'] . ';font:16px/1.6 ' . $f . '">' . $intro . '</p></td></tr>';
+		}
 
 		// Summary of the stay: two columns of icon, label and value.
 		$summary = '';
@@ -147,11 +152,32 @@ final class EmailDesign {
 
 		return '<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $e( $c['title'] ) . '</title>' . $style . '</head>'
 			. '<body style="margin:0;padding:0;background:' . $k['page'] . '">'
-			. '<span style="display:none;max-height:0;overflow:hidden;opacity:0">' . $e( wp_trim_words( $c['intro'], 20 ) ) . '</span>'
+			. '<span style="display:none;max-height:0;overflow:hidden;opacity:0">' . $e( wp_trim_words( empty( $c['html'] ) ? $c['intro'] : NotificationTemplates::plain( (string) $c['intro'] ), 20 ) ) . '</span>'
 			. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $k['page'] . '"><tr><td class="bk-outer" align="center" style="padding:24px 10px">'
 			. '<table class="bk-card" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid ' . $k['line'] . '">'
 			. '<tr><td style="padding:0">' . $header . '</td></tr>'
 			. $heading . $summary . $note . $qr . $button . $footer . $bar
 			. '</table></td></tr></table></body></html>';
+	}
+	/**
+	 * Inline styles on the tags of a formatted text (e-mail programs drop <style>).
+	 *
+	 * @param array<string, string> $k colours
+	 */
+	private static function styled( string $html, array $k, string $f ): string {
+		$styles = array(
+			'p'  => 'margin:0 0 12px',
+			'h2' => 'margin:18px 0 8px;color:' . $k['primary'] . ';font:700 20px/1.3 ' . $f,
+			'h3' => 'margin:16px 0 6px;color:' . $k['primary'] . ';font:700 17px/1.3 ' . $f,
+			'ul' => 'margin:0 0 12px;padding-left:22px',
+			'ol' => 'margin:0 0 12px;padding-left:22px',
+			'li' => 'margin:0 0 4px',
+			'a'  => 'color:' . $k['primary'] . ';text-decoration:underline',
+		);
+		return (string) preg_replace_callback(
+			'#<(p|h2|h3|ul|ol|li|a)(\s[^>]*)?>#i',
+			static fn( array $m ) => '<' . $m[1] . ( $m[2] ?? '' ) . ' style="' . esc_attr( $styles[ strtolower( $m[1] ) ] ) . '">',
+			$html
+		);
 	}
 }

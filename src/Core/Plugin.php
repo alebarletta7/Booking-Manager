@@ -122,6 +122,8 @@ use BookingManager\Tenants\TenantAccess;
 use BookingManager\Tenants\TenantGate;
 use BookingManager\Tenants\TenantService;
 use BookingManager\Tenants\TenantMigration;
+use BookingManager\Tenants\TenantMail;
+use BookingManager\Tenants\TenantTemplates;
 use BookingManager\Tenants\TenantProfile;
 use BookingManager\Tenants\TenantRepository;
 use BookingManager\Updates\UpdateChecker;
@@ -238,7 +240,9 @@ final class Plugin {
 		// Platform panel: plans, status of the customers, their management (0.2.2).
 		$c->set( Plans::class, fn() => new Plans() );
 		$c->set( TenantGate::class, fn( Container $c ) => new TenantGate( $c->get( TenantRepository::class ), $c->get( Plans::class ), $c->get( PropertyScope::class ), $c->get( AuditLogger::class ) ) );
+		$c->set( TenantMail::class, fn( Container $c ) => new TenantMail( $c->get( TenantRepository::class ), $c->get( Plans::class ), $c->get( SecretBox::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( TenantProfile::class, fn( Container $c ) => new TenantProfile( $c->get( TenantRepository::class ), $c->get( AuditLogger::class ) ) );
+		$c->set( TenantTemplates::class, fn( Container $c ) => new TenantTemplates( $c->get( TenantRepository::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( TenantService::class, fn( Container $c ) => new TenantService( $c->get( TenantRepository::class ), $c->get( Plans::class ), $c->get( TenantGate::class ), $c->get( StaffService::class ), $c->get( AuditLogger::class ) ) );
 
 		$c->set( PropertyRepository::class, fn() => new PropertyRepository() );
@@ -347,8 +351,8 @@ final class Plugin {
 		// Messages: e-mail and WhatsApp (the site's WhatsApp Business number, like Night Manager).
 		$c->set( NotificationRepository::class, fn() => new NotificationRepository() );
 		$c->set( TemplateRepository::class, fn() => new TemplateRepository() );
-		$c->set( NotificationTemplates::class, fn( Container $c ) => new NotificationTemplates( $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ), $c->get( RoomTypeRepository::class ) ) );
-		$c->set( EmailChannel::class, fn() => new EmailChannel() );
+		$c->set( NotificationTemplates::class, fn( Container $c ) => new NotificationTemplates( $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( TenantTemplates::class ), $c->get( TenantProfile::class ) ) );
+		$c->set( EmailChannel::class, fn( Container $c ) => new EmailChannel( $c->get( TenantMail::class ) ) );
 		$c->set( WhatsAppSettings::class, fn( Container $c ) => new WhatsAppSettings( $c->get( SecretBox::class ) ) );
 		$c->set( WhatsAppChannel::class, fn( Container $c ) => new WhatsAppChannel( $c->get( WhatsAppSettings::class ), $c->get( GuestRepository::class ), $c->get( ManageLink::class ), $c->get( NotificationTemplates::class ) ) );
 		$c->set(
@@ -446,12 +450,12 @@ final class Plugin {
 		$c->set( SettingsController::class, fn( Container $c ) => new SettingsController( $p( $c ), $c->get( Settings::class ), $c->get( AuditLogger::class ), $c->get( Captcha::class ) ) );
 		$c->set( AuditController::class, fn( Container $c ) => new AuditController( $p( $c ), $c->get( AuditLogReader::class ), $c->get( PropertyRepository::class ) ) );
 		$c->set( StaffController::class, fn( Container $c ) => new StaffController( $p( $c ), $c->get( StaffService::class ) ) );
-		$c->set( PlatformController::class, fn( Container $c ) => new PlatformController( $p( $c ), $c->get( TenantService::class ), $c->get( PropertyScope::class ), $c->get( TenantProfile::class ) ) );
+		$c->set( PlatformController::class, fn( Container $c ) => new PlatformController( $p( $c ), $c->get( TenantService::class ), $c->get( PropertyScope::class ), $c->get( TenantProfile::class ), $c->get( TenantMail::class ), $c->get( TenantTemplates::class ), $c->get( NotificationService::class ) ) );
 		$c->set( CloudflareController::class, fn( Container $c ) => new CloudflareController( $p( $c ), $c->get( CloudflareSettings::class ), $c->get( CloudflareService::class ), $c->get( AuditLogger::class ) ) );
 		$c->set( PaymentsController::class, fn( Container $c ) => new PaymentsController( $p( $c ), $c->get( PaymentService::class ), $c->get( PaymentRepository::class ), $c->get( PaymentAccountService::class ), $c->get( BookingRepository::class ), $c->get( ManageLink::class ) ) );
 		$c->set( CheckinController::class, fn( Container $c ) => new CheckinController( $p( $c ), $c->get( CheckinService::class ), $c->get( BookingRepository::class ) ) );
 		$c->set( HousekeepingController::class, fn( Container $c ) => new HousekeepingController( $p( $c ), $c->get( HousekeepingService::class ), $c->get( UnitRepository::class ) ) );
-		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ) ) );
+		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ), $c->get( TenantTemplates::class ) ) );
 		$c->set( WhatsAppController::class, fn( Container $c ) => new WhatsAppController( $p( $c ), $c->get( WhatsAppService::class ) ) );
 		$c->set( ChannelsController::class, fn( Container $c ) => new ChannelsController( $p( $c ), $c->get( ChannelService::class ), $c->get( RoomTypeRepository::class ) ) );
 		$c->set( ChannexController::class, fn( Container $c ) => new ChannexController( $p( $c ), $c->get( ChannexAdmin::class ), $c->get( ChannexBookings::class ), $c->get( ChannexRevisions::class ) ) );

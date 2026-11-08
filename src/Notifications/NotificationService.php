@@ -72,6 +72,7 @@ class NotificationService {
 		add_action( Hooks::BOOKING_CANCELLED, array( $this, 'on_cancelled' ), 10, 2 );
 		add_action( Hooks::BOOKING_CHECKED_IN, array( $this, 'on_checked_in' ), 10, 2 );
 		add_action( Hooks::PAYMENT_RECORDED, array( $this, 'on_payment' ), 10, 2 );
+		add_action( Hooks::PAYMENT_FAILED, array( $this, 'on_payment_failed' ), 10, 2 );
 		add_action( 'shutdown', array( $this, 'flush' ) );
 	}
 
@@ -194,6 +195,22 @@ class NotificationService {
 		$booking = $this->bookings->find( $booking_id );
 		if ( $booking && in_array( $booking['status'], array( BookingStatus::CONFIRMED, BookingStatus::IN_HOUSE ), true ) ) {
 			$this->queue_guest( NotificationTemplates::GUEST_PAYMENT, $booking, 'pay' . (int) ( $ctx['payment_id'] ?? 0 ) );
+		}
+	}
+
+	/**
+	 * An online payment refused by Stripe/Nexi while the booking still waits for it (an
+	 * option): the guest gets the link to try again. Once per payment.
+	 *
+	 * @param array<string, mixed> $ctx
+	 */
+	public function on_payment_failed( int $booking_id, array $ctx ): void {
+		if ( 'manual' === ( $ctx['provider'] ?? 'manual' ) ) {
+			return;
+		}
+		$booking = $this->bookings->find( $booking_id );
+		if ( $booking && BookingStatus::OPTION === $booking['status'] ) {
+			$this->queue_guest( NotificationTemplates::GUEST_PAYMENT_FAILED, $booking, 'fail' . (int) ( $ctx['payment_id'] ?? 0 ) );
 		}
 	}
 
@@ -352,14 +369,17 @@ class NotificationService {
 				$result = SendResult::skipped( $reason );
 			}
 		}
+		$subject = null;
 		if ( null === $result ) {
 			try {
-				$result = $channel->send( $this->compose( $row, $booking, $property ) );
+				$message = $this->compose( $row, $booking, $property );
+				$subject = '' === $message->subject ? null : mb_substr( $message->subject, 0, 255 );
+				$result  = $channel->send( $message );
 			} catch ( \Throwable $e ) {
 				$result = SendResult::retry( mb_substr( $e->getMessage(), 0, 400 ) );
 			}
 		}
-		return $this->record( $row, $result );
+		return $this->record( $row, $result, $subject );
 	}
 
 	/**
@@ -407,8 +427,13 @@ class NotificationService {
 	 */
 	public function send_now( int $booking_id, string $key ): array|\WP_Error {
 		$booking = $this->bookings->find( $booking_id );
-		if ( ! $booking || ! NotificationTemplates::editable( $key ) ) {
+		$custom  = $booking && NotificationTemplates::is_custom( $key );
+		if ( ! $booking || ! ( NotificationTemplates::editable( $key ) || $custom ) ) {
 			return new \WP_Error( 'bkng_invalid', __( 'Prenotazione o messaggio non validi.', 'booking-manager' ), array( 'status' => 400 ) );
+		}
+		// A custom message of this property only (never one of another property).
+		if ( $custom && ! $this->templates->own( $key, (int) $booking['property_id'], (string) ( $booking['language'] ?: 'it' ) ) ) {
+			return new \WP_Error( 'bkng_unknown_template', __( 'Messaggio sconosciuto.', 'booking-manager' ), array( 'status' => 404 ) );
 		}
 		if ( ! NotificationTemplates::still_relevant( $key, $booking ) ) {
 			return new \WP_Error( 'bkng_not_relevant', __( 'Questo messaggio non corrisponde allo stato attuale della prenotazione.', 'booking-manager' ), array( 'status' => 409 ) );
@@ -488,7 +513,7 @@ class NotificationService {
 	 */
 	public function preview( int $property_id, string $key, ?string $subject = null, ?string $body = null, array $design = array() ): array|\WP_Error {
 		$property = $this->properties->find( $property_id );
-		if ( ! $property || ! NotificationTemplates::editable( $key ) ) {
+		if ( ! $property || ! ( NotificationTemplates::editable( $key ) || NotificationTemplates::is_custom( $key ) ) ) {
 			return new \WP_Error( 'bkng_invalid', __( 'Struttura o messaggio non validi.', 'booking-manager' ), array( 'status' => 400 ) );
 		}
 		$found   = $this->bookings->arriving( $property_id, $this->clock->today_in( (string) $property['timezone'] ), Dates::add_days( $this->clock->today_in( (string) $property['timezone'] ), 365 ), BookingStatus::CONFIRMED );
@@ -534,7 +559,8 @@ class NotificationService {
 			'booking_code'   => null === $row['booking_id'] ? null : ( $this->bookings->find( (int) $row['booking_id'] )['code'] ?? null ),
 			'channel'        => (string) $row['channel'],
 			'template'       => (string) $row['template_key'],
-			'template_label' => $labels[ $row['template_key'] ] ?? (string) $row['template_key'],
+			'template_label' => $labels[ $row['template_key'] ] ?? ( NotificationTemplates::is_custom( (string) $row['template_key'] ) ? __( 'Messaggio personalizzato', 'booking-manager' ) : (string) $row['template_key'] ),
+			'subject'        => isset( $row['subject'] ) ? (string) $row['subject'] : null,
 			'audience'       => (string) $row['audience'],
 			'recipient'      => (string) $row['recipient'],
 			'status'         => (string) $row['status'],
@@ -590,9 +616,11 @@ class NotificationService {
 	}
 
 	/** @param array<string, mixed> $row */
-	private function record( array $row, SendResult $result ): string {
+	private function record( array $row, SendResult $result, ?string $subject = null ): string {
 		$id      = (int) $row['id'];
 		$now     = $this->clock->now_mysql();
+		// The subject as it went out (0.2.5): the log keeps it, never the text.
+		$keep    = null === $subject ? array() : array( 'subject' => $subject );
 		$context = array(
 			'booking_id' => (int) $row['booking_id'],
 			'channel'    => (string) $row['channel'],
@@ -610,7 +638,7 @@ class NotificationService {
 					'last_error'          => null,
 					'sent_at'             => $now,
 					'updated_at'          => $now,
-				)
+				) + $keep
 			);
 			Hooks::dispatch( Hooks::NOTIFICATION_SENT, $id, $context );
 			return NotificationRepository::SENT;
@@ -634,7 +662,7 @@ class NotificationService {
 				'last_error'      => mb_substr( $result->error, 0, 500 ),
 				'next_attempt_at' => gmdate( 'Y-m-d H:i:s', (int) strtotime( $now . ' UTC' ) + self::retry_after( (int) $row['attempts'] ) ),
 				'updated_at'      => $now,
-			)
+			) + $keep
 		);
 		if ( $final ) {
 			Hooks::dispatch( Hooks::NOTIFICATION_FAILED, $id, $context + array( 'error' => $result->error ) );
