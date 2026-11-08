@@ -257,6 +257,8 @@ final class TenantIsolationTest extends TestCase {
 				'property_id' => $this->a['property'],
 				'from'        => self::day( 0 ),
 				'to'          => self::day( 30 ),
+				// Routes of "the user's customer" (0.2.4 /tenant/profile) must ignore it.
+				'tenant'      => Tenancy::default_id(),
 			)
 		);
 		$request->set_body_params( array( 'property_id' => $this->a['property'] ) );

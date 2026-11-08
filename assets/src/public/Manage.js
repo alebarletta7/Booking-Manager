@@ -14,6 +14,7 @@ import {
 	StaySummary,
 	stayItems,
 } from './StayCard';
+import Business, { applyFont } from './Business';
 import { isFramed } from './frame';
 import { ErrorBox, Spinner } from './ui';
 
@@ -50,6 +51,7 @@ export default function Manage( { api, code, token, paid, root } ) {
 
 	useEffect( () => {
 		applyColor( root, booking?.property?.color );
+		applyFont( root, booking?.property?.business );
 	}, [ root, booking ] );
 
 	const load = useCallback(
@@ -318,6 +320,7 @@ export default function Manage( { api, code, token, paid, root } ) {
 					) }
 				<StayFooter name={ p.name } where={ p } signoff={ p.signoff } />
 			</div>
+			<Business place={ p } code={ b.code } />
 		</div>
 	);
 }

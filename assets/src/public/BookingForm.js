@@ -15,6 +15,7 @@ import {
 	nightsBetween,
 	nightsLabel,
 } from './format';
+import Business, { applyFont } from './Business';
 import { Captcha } from './Captcha';
 import { isFramed } from './frame';
 import { comboTitle, Combos } from './Combos';
@@ -630,6 +631,7 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 		api.get( 'properties/' + slug )
 			.then( ( p ) => {
 				applyColor( root, p.color );
+				applyFont( root, p.business );
 				setProperty( p );
 				const first = p.first_free || p.first_day;
 				setStay( ( s ) => ( {
@@ -807,7 +809,11 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 						'booking-manager'
 					) }
 				</p>
-				<Contacts property={ property } />
+				{ property.business?.footer ? (
+					<Business place={ property } />
+				) : (
+					<Contacts property={ property } />
+				) }
 			</div>
 		);
 	}
@@ -815,6 +821,10 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 		return (
 			<div ref={ top } className="bkng-p-stack">
 				<Done property={ property } result={ done } />
+				<Business
+					place={ property }
+					code={ done.booking?.code || '' }
+				/>
 			</div>
 		);
 	}
@@ -908,6 +918,7 @@ export default function BookingForm( { api, slug, hero = false, root } ) {
 					) }
 				</>
 			) }
+			<Business place={ property } />
 		</div>
 	);
 }

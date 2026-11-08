@@ -748,6 +748,12 @@ export function TenantDetail( { params } ) {
 					>
 						{ __( 'Modifica', 'booking-manager' ) }
 					</Button>
+					<Button
+						variant="secondary"
+						href={ '#/platform/tenants/' + t.id + '/business' }
+					>
+						{ __( 'Contatti e aspetto', 'booking-manager' ) }
+					</Button>
 					{ actions.map( ( key ) => (
 						<Button
 							key={ key }

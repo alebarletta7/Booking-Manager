@@ -9,6 +9,7 @@ import {
 	calendar as calendarIcon,
 	category as categoryIcon,
 	check as checkIcon,
+	institution as contactIcon,
 	cloud as cloudIcon,
 	currencyEuro as currencyEuroIcon,
 	fullscreen as fullscreenIcon,
@@ -46,6 +47,7 @@ import License from './screens/License';
 import Messages from './screens/Messages';
 import NewBooking from './screens/NewBooking';
 import Planning from './screens/Planning';
+import Business from './screens/Business';
 import Platform, { TenantDetail } from './screens/Platform';
 import PropertySettings from './screens/PropertySettings';
 import Rates from './screens/Rates';
@@ -144,6 +146,14 @@ const NAV = [
 				icon: storeIcon,
 			},
 			{
+				// The customer's contacts and look (0.2.4), on the platform only.
+				path: '/business',
+				label: __( 'Attività', 'booking-manager' ),
+				cap: 'bkng_manage_properties',
+				tenant: true,
+				icon: contactIcon,
+			},
+			{
 				path: '/staff',
 				label: __( 'Staff e permessi', 'booking-manager' ),
 				cap: 'bkng_manage_staff',
@@ -199,6 +209,8 @@ const ROUTES = [
 	[ '/setup', Setup ],
 	[ '/platform', Platform ],
 	[ '/platform/tenants/:id', TenantDetail ],
+	[ '/business', Business ],
+	[ '/platform/tenants/:id/business', Business ],
 ];
 
 function resolve( path ) {
@@ -344,6 +356,7 @@ export default function App() {
 
 	const visible = ( item ) =>
 		can( item.cap ) &&
+		( ! item.tenant || me.tenant ) &&
 		( ! item.housekeeping || ! property || property.housekeeping );
 	const groups = NAV.map( ( group ) => ( {
 		...group,
@@ -373,9 +386,14 @@ export default function App() {
 	const found = resolve( route.path );
 	const needsProperty =
 		found &&
-		! [ '/property', '/staff', '/settings', '/license', '/setup' ].includes(
-			route.path
-		) &&
+		! [
+			'/property',
+			'/staff',
+			'/settings',
+			'/license',
+			'/setup',
+			'/business',
+		].includes( route.path ) &&
 		! route.path.startsWith( '/platform' );
 	const operational = !! me.preferences?.operational_mode;
 

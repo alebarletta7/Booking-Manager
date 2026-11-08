@@ -2055,3 +2055,76 @@
 		margin: 0;
 	}
 }
+
+/* The business behind the form: name, logo, contacts, WhatsApp (0.2.4). */
+.bkng-public.has-font {
+	font-family: var(--bkng-font);
+
+	input,
+	select,
+	textarea,
+	button {
+		font-family: inherit;
+	}
+}
+
+.bkng-p-business {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px 20px;
+	margin-top: 8px;
+	padding: 16px 0 4px;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+	font-size: 0.9em;
+
+	&__brand {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-right: auto;
+	}
+
+	&__logo {
+		display: block;
+		max-width: 140px;
+		max-height: 48px;
+		width: auto;
+		height: auto;
+	}
+
+	&__contacts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 16px;
+
+		a {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			color: inherit;
+			text-decoration: none;
+
+			&:hover,
+			&:focus {
+				text-decoration: underline;
+			}
+		}
+	}
+}
+
+.bkng-public a.bkng-p-whatsapp {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: #25d366;
+	border-color: #25d366;
+	color: #0b2e17;
+	text-decoration: none;
+
+	&:hover,
+	&:focus {
+		background: #1ebe5b;
+		color: #0b2e17;
+	}
+}

@@ -472,10 +472,18 @@ export function FormModal( {
 }
 
 /** One image of the media library: its thumbnail, «Scegli» and «Rimuovi». */
-export function ImageField( { label, help, id, onChange, empty } ) {
+export function ImageField( {
+	label,
+	help,
+	id,
+	onChange,
+	empty,
+	preview = '',
+} ) {
 	const [ url, setUrl ] = useState( '' );
 	useEffect( () => {
-		setUrl( '' );
+		// preview: the address the server already gave for this image, if any.
+		setUrl( preview );
 		if ( id > 0 && window.wp?.media?.attachment ) {
 			const a = window.wp.media.attachment( id );
 			a.fetch().then( () =>
@@ -484,6 +492,7 @@ export function ImageField( { label, help, id, onChange, empty } ) {
 				)
 			);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ id ] );
 	const pick = () => {
 		if ( ! window.wp?.media ) {
