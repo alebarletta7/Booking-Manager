@@ -25,6 +25,10 @@ namespace BookingManager\Rest;
 use BookingManager\Access\Policy;
 use BookingManager\Access\PropertyScope;
 use BookingManager\Core\Validation;
+use BookingManager\Notifications\NotificationService;
+use BookingManager\Notifications\NotificationTemplates;
+use BookingManager\Tenants\TenantMail;
+use BookingManager\Tenants\TenantTemplates;
 use BookingManager\Tenants\TenantProfile;
 use BookingManager\Tenants\TenantService;
 
@@ -32,7 +36,7 @@ defined( 'ABSPATH' ) || exit;
 
 class PlatformController extends RestController {
 
-	public function __construct( Policy $policy, private TenantService $tenants, private PropertyScope $scope, private TenantProfile $profile ) {
+	public function __construct( Policy $policy, private TenantService $tenants, private PropertyScope $scope, private TenantProfile $profile, private TenantMail $mail, private ?TenantTemplates $templates = null, private ?NotificationService $notifications = null ) {
 		parent::__construct( $policy );
 	}
 
@@ -201,6 +205,164 @@ class PlatformController extends RestController {
 					'permission_callback' => array( $this, 'can_edit_profile' ),
 					'args'                => $own,
 				),
+			)
+		);
+		$this->mail_routes( $own );
+		$this->template_routes( $own );
+	}
+
+	/**
+	 * The customer's texts of the guest e-mails (0.2.5), used by its properties that have
+	 * none of their own. Same rule as the profile.
+	 *
+	 *   GET    /tenant/templates
+	 *   PUT    /tenant/templates/{key} { language, subject, body }
+	 *   DELETE /tenant/templates/{key}?language=it
+	 *   POST   /tenant/templates/{key}/preview { subject, body }   on one of its properties
+	 */
+	private function template_routes( array $own ): void {
+		if ( ! $this->templates ) {
+			return;
+		}
+		$key = '/tenant/templates/(?P<key>[a-z0-9_]+)';
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tenant/templates',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => fn( \WP_REST_Request $r ) => $this->list_tenant_templates( $this->profile_tenant( $r ) ),
+				'permission_callback' => array( $this, 'can_edit_profile' ),
+				'args'                => $own,
+			)
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			$key,
+			array(
+				array(
+					'methods'             => 'PUT',
+					'callback'            => function ( \WP_REST_Request $r ) {
+						$tenant = $this->profile_tenant( $r );
+						if ( ! NotificationTemplates::editable( (string) $r['key'] ) ) {
+							return self::unknown_template();
+						}
+						$this->templates->save(
+							$tenant,
+							(string) $r['key'],
+							self::language( $r ),
+							mb_substr( sanitize_text_field( (string) $r->get_param( 'subject' ) ), 0, 255 ),
+							mb_substr( NotificationTemplates::clean_body( (string) $r->get_param( 'body' ) ), 0, 20000 )
+						);
+						return $this->list_tenant_templates( $tenant );
+					},
+					'permission_callback' => array( $this, 'can_edit_profile' ),
+					'args'                => $own,
+				),
+				array(
+					'methods'             => \WP_REST_Server::DELETABLE,
+					'callback'            => function ( \WP_REST_Request $r ) {
+						$tenant = $this->profile_tenant( $r );
+						if ( ! NotificationTemplates::editable( (string) $r['key'] ) ) {
+							return self::unknown_template();
+						}
+						$this->templates->delete( $tenant, (string) $r['key'], self::language( $r ) );
+						return $this->list_tenant_templates( $tenant );
+					},
+					'permission_callback' => array( $this, 'can_edit_profile' ),
+					'args'                => $own,
+				),
+			)
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			$key . '/preview',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => function ( \WP_REST_Request $r ) {
+					$ids = $this->scope->tenant_property_ids( $this->profile_tenant( $r ) );
+					if ( ! $ids || ! $this->notifications ) {
+						return new \WP_Error( 'bkng_no_property', __( 'Per l\'anteprima serve almeno una struttura.', 'booking-manager' ), array( 'status' => 409 ) );
+					}
+					$subject = $r->get_param( 'subject' );
+					$body    = $r->get_param( 'body' );
+					return self::respond( $this->notifications->preview( (int) $ids[0], (string) $r['key'], sanitize_text_field( (string) $subject ), NotificationTemplates::clean_body( (string) $body ) ) );
+				},
+				'permission_callback' => array( $this, 'can_edit_profile' ),
+				'args'                => $own,
+			)
+		);
+	}
+
+	private function list_tenant_templates( int $tenant_id ): \WP_REST_Response|\WP_Error {
+		if ( $tenant_id <= 0 ) {
+			return TenantService::not_found();
+		}
+		$own = $this->templates ? $this->templates->all( $tenant_id ) : array();
+		$out = array();
+		foreach ( NotificationTemplates::labels() as $key => $label ) {
+			if ( ! NotificationTemplates::editable( $key ) ) {
+				continue;
+			}
+			$defaults = NotificationTemplates::defaults( $key );
+			$out[]    = array(
+				'key'      => $key,
+				'label'    => $label,
+				'defaults' => array(
+					'subject' => $defaults['subject'],
+					'body'    => $defaults['intro'],
+				),
+				'own'      => (object) ( $own[ $key ] ?? array() ),
+			);
+		}
+		return rest_ensure_response(
+			array(
+				'templates'    => $out,
+				'placeholders' => NotificationTemplates::PLACEHOLDERS,
+				'languages'    => NotificationsController::LANGUAGES,
+			)
+		);
+	}
+
+	private static function language( \WP_REST_Request $r ): string {
+		$lang = sanitize_key( (string) ( $r->get_param( 'language' ) ?? 'it' ) );
+		return in_array( $lang, NotificationsController::LANGUAGES, true ) ? $lang : 'it';
+	}
+
+	private static function unknown_template(): \WP_Error {
+		return new \WP_Error( 'bkng_unknown_template', __( 'Messaggio sconosciuto.', 'booking-manager' ), array( 'status' => 404 ) );
+	}
+
+	/**
+	 * /tenant/mail (GET, PUT) and /tenant/mail/test (POST) (0.2.5): how the customer's
+	 * e-mails leave. Same rule as the profile.
+	 */
+	private function mail_routes( array $own ): void {
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tenant/mail',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->mail->payload( $this->profile_tenant( $r ) ) ?? TenantService::not_found() ),
+					'permission_callback' => array( $this, 'can_edit_profile' ),
+					'args'                => $own,
+				),
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->mail->save( $this->profile_tenant( $r ), (array) $r->get_json_params() ) ),
+					'permission_callback' => array( $this, 'can_edit_profile' ),
+					'args'                => $own,
+				),
+			)
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/tenant/mail/test',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->mail->test( $this->profile_tenant( $r ), sanitize_email( (string) $r->get_param( 'to' ) ) ) ),
+				'permission_callback' => array( $this, 'can_edit_profile' ),
+				'args'                => $own,
 			)
 		);
 	}

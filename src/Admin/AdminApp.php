@@ -104,6 +104,10 @@ class AdminApp {
 		if ( current_user_can( 'upload_files' ) && current_user_can( 'bkng_manage_property_settings' ) ) {
 			wp_enqueue_media();
 		}
+		// The visual editor of the e-mail texts (Email → Testi, 0.2.5): WordPress's own TinyMCE.
+		if ( current_user_can( 'bkng_manage_property_settings' ) && function_exists( 'wp_enqueue_editor' ) ) {
+			wp_enqueue_editor();
+		}
 		wp_enqueue_script( self::HANDLE, BKNG_URL . 'assets/build/admin.js', $asset['dependencies'], $asset['version'], true );
 		wp_set_script_translations( self::HANDLE, 'booking-manager', BKNG_DIR . 'languages' );
 

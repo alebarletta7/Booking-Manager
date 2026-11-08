@@ -89,6 +89,7 @@ const TEMPLATES = {
 	guest_cancelled: __( 'Prenotazione annullata', 'booking-manager' ),
 	guest_pre_arrival: __( "Promemoria prima dell'arrivo", 'booking-manager' ),
 	guest_payment: __( 'Pagamento ricevuto', 'booking-manager' ),
+	guest_payment_failed: __( 'Pagamento non riuscito', 'booking-manager' ),
 };
 
 function StatusModal( { booking, to, onClose, onDone } ) {
@@ -861,9 +862,31 @@ function SendMessage( { booking } ) {
 	);
 	const action = useAction();
 	const [ sent, setSent ] = useState( '' );
+	// The property's custom messages (0.2.5), after the usual ones.
+	const custom = useLoad(
+		() =>
+			get(
+				'/properties/' + booking.property_id + '/templates/custom'
+			).catch( () => [] ),
+		[ booking.property_id ]
+	);
 	if ( ! booking.email ) {
 		return null;
 	}
+	const options = [
+		...Object.entries( TEMPLATES ).map( ( [ value, label ] ) => ( {
+			value,
+			label,
+		} ) ),
+		...( custom.data || [] ).map( ( row ) => ( {
+			value: row.key,
+			label: sprintf(
+				/* translators: %s: name of a custom message. */
+				__( 'Personalizzato: %s', 'booking-manager' ),
+				row.label
+			),
+		} ) ),
+	];
 	return (
 		<Card title={ __( "Invia un'email", 'booking-manager' ) }>
 			<ErrorNotice
@@ -874,9 +897,7 @@ function SendMessage( { booking } ) {
 			<Select
 				label={ __( 'Messaggio', 'booking-manager' ) }
 				value={ key }
-				options={ Object.entries( TEMPLATES ).map(
-					( [ value, label ] ) => ( { value, label } )
-				) }
+				options={ options }
 				onChange={ setKey }
 			/>
 			<div style={ { marginTop: 10 } }>

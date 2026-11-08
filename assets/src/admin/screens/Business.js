@@ -1,16 +1,17 @@
 /**
  * Attività (0.2.4): the customer's contacts, with «Mostra al pubblico» on each, the
  * WhatsApp click-to-chat, logo and font of the booking form, and the page of its own
- * site where the guest lands after paying. The customer's administrator edits its own;
+ * site where the guest lands after paying, and (0.2.5) how its e-mails leave. The customer's administrator edits its own;
  * the platform reaches every customer from Piattaforma (#/platform/tenants/:id/business).
  */
 import { Button } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
-import { get, put } from '../lib/api';
+import { get, post, put } from '../lib/api';
 import { useAction, useLoad } from '../lib/hooks';
 import {
+	Badge,
 	Card,
 	Check,
 	ErrorNotice,
@@ -316,6 +317,292 @@ export default function Business( { params = {} } ) {
 						  ) }
 				</p>
 			</Card>
+			<MailCard tenantId={ tenantId } />
 		</Page>
+	);
+}
+
+const SECURE = {
+	tls: __( 'STARTTLS (di solito porta 587)', 'booking-manager' ),
+	ssl: __( 'SSL/TLS (di solito porta 465)', 'booking-manager' ),
+	none: __( 'Nessuna (sconsigliato)', 'booking-manager' ),
+};
+
+/**
+ * Email (0.2.5): how the customer's e-mails leave. With the platform's service the
+ * sender is the platform and the replies go to the business; with its own SMTP server
+ * (if the plan has it) the e-mails leave from there, only after a test e-mail went out.
+ * The password is never sent back: empty keeps the saved one.
+ */
+function MailCard( { tenantId } ) {
+	const q = tenantId ? '?tenant=' + tenantId : '';
+	const data = useLoad( () => get( '/tenant/mail' + q ), [ q ] );
+	const action = useAction();
+	const [ form, setForm ] = useState( null );
+	const [ to, setTo ] = useState( '' );
+	const [ done, setDone ] = useState( '' );
+
+	useEffect( () => {
+		if ( data.data ) {
+			setForm( { ...data.data, password: '' } );
+		}
+	}, [ data.data ] );
+
+	if ( data.error ) {
+		return <ErrorNotice error={ data.error } onRetry={ data.reload } />;
+	}
+	if ( ! form ) {
+		return <Loading />;
+	}
+	const d = data.data;
+	const fields = action.error?.fields || {};
+	const set = ( key ) => ( value ) =>
+		setForm( ( f ) => ( { ...f, [ key ]: value } ) );
+	const smtp = form.mode === 'smtp';
+	const field = ( key, label, extra = {} ) => (
+		<Text
+			label={ label }
+			value={ form[ key ] === null ? '' : String( form[ key ] ) }
+			onChange={ set( key ) }
+			help={ fields[ key ] || extra.help }
+			className={ fields[ key ] ? 'has-error' : '' }
+			type={ extra.type || 'text' }
+			placeholder={ extra.placeholder }
+			autoComplete={ extra.autoComplete }
+		/>
+	);
+
+	const save = async () => {
+		setDone( '' );
+		const saved = await action.run( () =>
+			put( '/tenant/mail' + q, {
+				mode: form.mode,
+				host: form.host,
+				port: Number( form.port ) || 0,
+				secure: form.secure,
+				user: form.user,
+				password: form.password,
+				from_email: form.from_email,
+				from_name: form.from_name,
+				version: form.version,
+			} )
+		);
+		if ( saved ) {
+			data.setData( saved );
+			setDone(
+				saved.mode === 'smtp' && ! saved.verified
+					? __(
+							'Salvato. Ora invia l’email di prova: finché non arriva, le email partono dal servizio della piattaforma.',
+							'booking-manager'
+					  )
+					: __( 'Impostazioni email salvate.', 'booking-manager' )
+			);
+		}
+	};
+	const test = async () => {
+		setDone( '' );
+		const res = await action.run( () =>
+			post( '/tenant/mail/test' + q, { to } )
+		);
+		if ( res ) {
+			data.setData( res.settings );
+			if ( res.ok ) {
+				setDone(
+					__(
+						'Email di prova inviata: da ora le email ai tuoi ospiti partono dal tuo server.',
+						'booking-manager'
+					)
+				);
+			} else {
+				action.setError( {
+					message: sprintf(
+						/* translators: %s: error of the mail server. */
+						__(
+							'L’email di prova non è partita: %s',
+							'booking-manager'
+						),
+						res.error ||
+							__( 'errore sconosciuto', 'booking-manager' )
+					),
+				} );
+			}
+		}
+	};
+
+	let state;
+	if ( ! smtp || d.mode !== 'smtp' ) {
+		state = null;
+	} else if ( d.active ) {
+		state = (
+			<Badge status="sent">
+				{ __( 'Verificato e in uso', 'booking-manager' ) }
+			</Badge>
+		);
+	} else {
+		state = (
+			<Badge status="pending">
+				{ __( 'Da verificare: non ancora in uso', 'booking-manager' ) }
+			</Badge>
+		);
+	}
+
+	return (
+		<Card title={ __( 'Email', 'booking-manager' ) }>
+			<Success onDismiss={ () => setDone( '' ) }>{ done }</Success>
+			<ErrorNotice
+				error={ action.error }
+				onDismiss={ () => action.setError( null ) }
+			/>
+			<Select
+				label={ __(
+					'Le email agli ospiti partono da',
+					'booking-manager'
+				) }
+				value={ form.mode }
+				options={ [
+					{
+						value: 'platform',
+						label: __(
+							'Servizio della piattaforma (consigliato)',
+							'booking-manager'
+						),
+					},
+					{
+						value: 'smtp',
+						label: __(
+							'Il server SMTP della mia attività',
+							'booking-manager'
+						),
+						disabled: ! d.allowed,
+					},
+				] }
+				onChange={ set( 'mode' ) }
+				help={ fields.mode }
+			/>
+			{ ! smtp && (
+				<p className="bkng-help">
+					{ sprintf(
+						/* translators: 1: sender address, 2: reply address. */
+						__(
+							'Mittente: %1$s, con il nome della struttura. Le risposte degli ospiti arrivano a %2$s (email prenotazioni dell’attività, o quella della struttura se l’ha).',
+							'booking-manager'
+						),
+						d.platform.from || '—',
+						d.platform.reply_to ||
+							__( 'nessun indirizzo', 'booking-manager' )
+					) }
+				</p>
+			) }
+			{ ! d.allowed && (
+				<p className="bkng-help">
+					{ __(
+						'Il piano attuale non comprende un server email proprio: contatta la piattaforma per attivarlo.',
+						'booking-manager'
+					) }
+				</p>
+			) }
+			{ smtp && (
+				<>
+					{ state && <p>{ state }</p> }
+					<Grid>
+						{ field(
+							'host',
+							__( 'Server SMTP', 'booking-manager' ),
+							{
+								placeholder: 'smtp.miodominio.it',
+							}
+						) }
+						{ field( 'port', __( 'Porta', 'booking-manager' ), {
+							type: 'number',
+						} ) }
+						<Select
+							label={ __( 'Cifratura', 'booking-manager' ) }
+							value={ form.secure }
+							options={ Object.entries( SECURE ).map(
+								( [ value, label ] ) => ( { value, label } )
+							) }
+							onChange={ set( 'secure' ) }
+							help={ fields.secure }
+						/>
+						{ field( 'user', __( 'Utente', 'booking-manager' ), {
+							autoComplete: 'off',
+						} ) }
+						{ field(
+							'password',
+							__( 'Password', 'booking-manager' ),
+							{
+								type: 'password',
+								autoComplete: 'new-password',
+								help: d.password_set
+									? __(
+											'Salvata e cifrata. Lascia vuoto per non cambiarla.',
+											'booking-manager'
+									  )
+									: __(
+											'Viene salvata cifrata e non si legge più da qui.',
+											'booking-manager'
+									  ),
+							}
+						) }
+						{ field(
+							'from_email',
+							__( 'Indirizzo del mittente', 'booking-manager' ),
+							{
+								type: 'email',
+								help: __(
+									'Lo stesso dell’utente SMTP o dello stesso dominio delle email dell’attività.',
+									'booking-manager'
+								),
+							}
+						) }
+						{ field(
+							'from_name',
+							__( 'Nome del mittente', 'booking-manager' ),
+							{
+								help: __(
+									'Vuoto: il nome della struttura.',
+									'booking-manager'
+								),
+							}
+						) }
+					</Grid>
+					<p className="bkng-help">
+						{ __(
+							'Il server si usa solo dopo un’email di prova riuscita; se cambi un dato va provato di nuovo. Se un invio non riesce, l’email resta in coda e viene ritentata: non parte mai da un altro server.',
+							'booking-manager'
+						) }
+					</p>
+				</>
+			) }
+			<div className="bkng-page__actions" style={ { marginTop: 12 } }>
+				<Button
+					variant="primary"
+					onClick={ save }
+					isBusy={ action.busy }
+					disabled={ action.busy }
+				>
+					{ __( 'Salva le impostazioni email', 'booking-manager' ) }
+				</Button>
+			</div>
+			{ smtp && d.mode === 'smtp' && (
+				<div className="bkng-row" style={ { marginTop: 12 } }>
+					<Text
+						label={ __( 'Email di prova a', 'booking-manager' ) }
+						type="email"
+						value={ to }
+						onChange={ setTo }
+						help={ fields.to }
+					/>
+					<Button
+						variant="secondary"
+						onClick={ test }
+						isBusy={ action.busy }
+						disabled={ action.busy || ! to }
+					>
+						{ __( 'Invia la prova', 'booking-manager' ) }
+					</Button>
+				</div>
+			) }
+		</Card>
 	);
 }

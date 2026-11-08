@@ -1810,3 +1810,37 @@ html.wp-toolbar:has(body.bkng-operational) {
 	border-radius: 6px;
 	font-size: 16px;
 }
+
+/* Email → Testi (0.2.5): the visual editor and the placeholders to insert. */
+.bkng-rich {
+	.bkng-field__label {
+		display: block;
+		margin-bottom: 8px;
+		font-size: 11px;
+		font-weight: 500;
+		text-transform: uppercase;
+	}
+
+	.wp-editor-container {
+		border: 1px solid #d6e0da;
+		border-radius: 4px;
+		overflow: hidden;
+	}
+}
+
+.bkng-chip {
+	display: inline-block;
+	margin: 2px 4px 2px 0;
+	padding: 1px 8px;
+	border: 1px solid #d6e0da;
+	border-radius: 999px;
+	background: #f5f8f6;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		border-color: var(--bkng-green, #1f7a4d);
+	}
+}

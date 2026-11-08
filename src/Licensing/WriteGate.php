@@ -121,7 +121,7 @@ class WriteGate {
 		'#^/notifications/\d+/resend$#',
 		'#^/bookings/\d+/notify$#',
 		'#^/properties/\d+/notifications/test$#',
-		'#^/properties/\d+/templates/[a-z_]+(/preview)?$#',
+		'#^/properties/\d+/templates/[a-z0-9_]+(/preview)?$#',
 		'#^/properties/\d+/channels/[a-z0-9_-]{2,40}/mappings$#',
 		'#^/whatsapp/(settings|connection|templates/refresh|templates/[a-z_]{3,30}(/(preview|test))?|messages/\d+/resend)$#',
 		'#^/public/whatsapp/webhook$#',
@@ -136,6 +136,8 @@ class WriteGate {
 		'#^/platform/plans$#',
 		// The customer's contacts and look (0.2.4): no booking, no room.
 		'#^/tenant/profile$#',
+		// How the customer's e-mails leave (0.2.5).
+		'#^/tenant/(mail|mail/test|templates/[a-z0-9_]+(/preview)?)$#',
 	);
 
 	public function __construct( private LicenseManager $license ) {}
