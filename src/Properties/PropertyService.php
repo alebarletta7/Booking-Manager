@@ -64,7 +64,7 @@ class PropertyService {
 		}
 		// The customer of the new property: the creator's. A platform administrator may
 		// choose one (default: the default customer); nobody else can.
-		$tenant = $this->scope->tenant_of( $user_id );
+		$tenant = $this->scope->acting_tenant( $user_id );
 		if ( $user_id > 0 && $this->scope->is_platform( $user_id ) && ! empty( $input['tenant_id'] ) ) {
 			$tenant = (int) $input['tenant_id'];
 			if ( ! $this->tenants->find( $tenant ) ) {

@@ -204,6 +204,8 @@ final class Plugin {
 		$c->set( Policy::class, fn( Container $c ) => new Policy( $c->get( PropertyScope::class ) ) );
 		$c->set( AuditLogger::class, fn( Container $c ) => new AuditLogger( $c->get( Settings::class ) ) );
 		$c->set( AuditLogReader::class, fn() => new AuditLogReader() );
+		$c->set( \BookingManager\Access\LoginGuard::class, fn( Container $c ) => new \BookingManager\Access\LoginGuard( $c->get( AuditLogger::class ) ) );
+		$c->set( Https::class, fn() => new Https() );
 
 		// Licence (licence server shared with Night, Beach and Restaurant Manager): state,
 		// gates on bookings, rooms and the REST API, scheduled checks, updates.
@@ -533,6 +535,8 @@ final class Plugin {
 		$c->get( RoleManager::class )->hooks();
 		$c->get( PublicFrontend::class )->hooks();
 		$c->get( EmbedPage::class )->hooks();
+		$c->get( \BookingManager\Access\LoginGuard::class )->hooks();
+		$c->get( Https::class )->hooks();
 		$c->get( StaffEntry::class )->hooks();
 		$c->get( TenantAccess::class )->hooks();
 		$c->get( TenantGate::class )->hooks();

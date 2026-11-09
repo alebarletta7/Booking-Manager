@@ -113,6 +113,8 @@ class MeController extends RestController {
 			'is_wp_admin'  => user_can( $user_id, 'manage_options' ),
 			'is_platform'  => $this->scope->is_platform( $user_id ),
 			'tenant'       => $this->tenant( $user_id ),
+			// 0.2.7: the customer a platform administrator has entered (0 = all).
+			'viewing'      => $this->scope->viewing( $user_id ),
 			'properties'   => $properties,
 			'preferences'  => $prefs,
 		);
@@ -120,7 +122,8 @@ class MeController extends RestController {
 
 	/** @return array{id: int, name: string, status: string, status_label: string, can_sell: bool, reason: string|null, features: array<string, bool>}|null the user's customer */
 	private function tenant( int $user_id ): ?array {
-		$id = $this->scope->tenant_of( $user_id );
+		// For the platform: the customer entered with the selector (0.2.7).
+		$id = $this->scope->acting_tenant( $user_id );
 		$t  = $id > 0 ? ( new TenantRepository() )->find( $id ) : null;
 		if ( ! $t ) {
 			return null;

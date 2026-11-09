@@ -452,6 +452,11 @@ class PublicBookingService {
 		if ( true !== $captcha ) {
 			return $captcha;
 		}
+		// 0.2.7: the customer's hourly cap (its plan), on top of the visitor's.
+		$quota = $this->tenant_gate?->online_quota( \BookingManager\Tenants\Tenancy::of_property( (int) $property['id'] ) );
+		if ( $quota ) {
+			return $quota;
+		}
 		$guest = is_array( $input['guest'] ?? null ) ? $input['guest'] : array();
 		$rooms = array();
 		foreach ( array_slice( (array) ( $input['rooms'] ?? array() ), 0, 50 ) as $room ) {

@@ -146,7 +146,9 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | PUT, DELETE | `/properties/{property_id}/templates/{key}` |
 | POST | `/properties/{property_id}/templates/{key}/preview` (`subject`, `body`, e `design` con le impostazioni `email_*` non ancora salvate) |
 
-### WhatsApp (`bkng_manage_settings`)
+### WhatsApp (amministratore del cliente per il proprio, piattaforma per tutti)
+
+Ogni richiesta agisce sul WhatsApp del cliente dell'utente (`bkng_manage_properties`); solo la piattaforma (`bkng_manage_settings`) può indicare un altro cliente con `?tenant=ID`. Serve la funzione di piano `whatsapp_meta`.
 
 | Metodi | Rotta |
 |---|---|
@@ -160,7 +162,7 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | GET | `/whatsapp/messages` (`status`, `page`, `per_page`) |
 | POST | `/whatsapp/messages/{id}/resend` |
 
-`GET/POST /booking-manager/public/v1/whatsapp/webhook` è chiamata da Meta: verifica con il token, aggiornamenti firmati con la chiave segreta dell'app.
+`GET/POST /booking-manager/public/v1/whatsapp/webhook[/{uuid cliente}]` è chiamata da Meta (senza uuid: il cliente predefinito): verifica con il token, aggiornamenti firmati con la chiave segreta dell'app.
 
 ### Channex (`bkng_manage_integrations`)
 
@@ -175,8 +177,31 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 | PUT | `/properties/{property_id}/channex/mapping` (`property`, `room_types`, `rate_plans`; avvia la sincronizzazione completa) |
 | POST | `/properties/{property_id}/channex/push`, `/pull`, `/full-sync` |
 | POST | `/channex/revisions/{revision}/retry`, `/resolve` |
+| GET, PUT, DELETE | `/properties/{property_id}/channex/connection` (0.2.6: la connessione propria della struttura; stessi campi di `/channex/settings`) |
+| POST | `/properties/{property_id}/channex/connection/test`, `/webhook`, `/webhook-test`, `/signing-key` |
 
-`POST /booking-manager/public/v1/channex/webhook` è chiamata da Channex: risponde 401 senza l'intestazione `X-Bkng-Webhook-Token` giusta o una firma valida (`x-hmac-signature-256` su `{x-hmac-timestamp}.{corpo}`, tolleranza 5 minuti) e non importa nulla da sola: avvia la lettura del feed.
+Le rotte `/channex`, `/channex/settings`, `/channex/test`, `/channex/webhook*`, `/channex/signing-key` e `/channex/alerts/read` riguardano la connessione del sito e sono solo della piattaforma (`bkng_platform_manage`).
+
+`POST /booking-manager/public/v1/channex/webhook` (connessione del sito) e `POST /booking-manager/public/v1/channex/webhook/{uuid struttura}` (connessione propria, agisce solo su quella struttura) sono chiamate da Channex: risponde 401 senza l'intestazione `X-Bkng-Webhook-Token` giusta o una firma valida (`x-hmac-signature-256` su `{x-hmac-timestamp}.{corpo}`, tolleranza 5 minuti) e non importa nulla da sola: avvia la lettura del feed.
+
+### Piattaforma e cliente
+
+| Metodi | Rotta | Chi |
+|---|---|---|
+| GET, POST | `/platform/tenants` | piattaforma |
+| GET, PUT | `/platform/tenants/{id}` | piattaforma |
+| POST | `/platform/tenants/{id}/suspend`, `/activate`, `/archive` | piattaforma |
+| GET, POST, DELETE | `/platform/tenants/{id}/domains` | piattaforma |
+| GET, POST | `/platform/tenants/{id}/users` | piattaforma |
+| GET, PUT | `/platform/plans` (limiti `max_properties`, `max_units`, `max_bookings_hour`; funzioni `online_payment`, `whatsapp_meta`, `channex`, `custom_smtp`) | piattaforma |
+| GET | `/platform/stats` | piattaforma |
+| GET, PUT | `/platform/viewing` (`tenant_id`: entra nel gestionale di un cliente, 0 = tutti; scritto nel registro) | piattaforma |
+| GET | `/tenant` (stato, piano, limiti, uso, domini) | ogni utente, il proprio cliente |
+| GET, PUT | `/tenant/profile` | amministratore del cliente; piattaforma con `?tenant` |
+| GET, PUT | `/tenant/mail`; POST `/tenant/mail/test` | come sopra |
+| GET | `/tenant/templates`; PUT, DELETE `/tenant/templates/{key}`; POST `/tenant/templates/{key}/preview` | come sopra |
+
+Un cliente che indica un altro cliente riceve 403; un record di un altro cliente risponde 404.
 
 ### Canali
 
@@ -204,6 +229,8 @@ Un supplemento accetta `free_cancel_days` (1-365 oppure `null`), solo se è faco
 ## Modulo pubblico: `booking-manager/public/v1`
 
 Nessun login. Indirizzo usato dal modulo: `index.php?rest_route=/booking-manager/public/v1/…` (funziona anche senza permalink). Ogni richiesta ha limiti per IP; i dati mostrati non sono mai creduti: prezzi, regole e disponibilità si ricontrollano alla prenotazione.
+
+Dalla 0.2.7: se il sito è su https, una richiesta in http riceve **403** `bkng_https_required`; le prenotazioni online di un cliente hanno anche un tetto orario del piano (`max_bookings_hour`, **429** `bkng_rate_limited`); un cliente sospeso o scaduto riceve **403** `bkng_tenant_inactive` su blocchi e prenotazioni.
 
 | Metodi | Rotta | Uso |
 |---|---|---|

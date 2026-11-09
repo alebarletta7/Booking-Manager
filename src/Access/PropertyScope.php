@@ -3,7 +3,9 @@
  * Which properties (strutture) a user may work on.
  *
  * - platform administrators (WordPress administrators, bkng_platform_manage) see every
- *   property of every customer;
+ *   property of every customer, or only one customer's after choosing it in the panel's
+ *   customer selector (0.2.7, user meta bkng_viewing_tenant: they then see what that
+ *   customer sees; every entry is in the activity log);
  * - everybody else works inside their customer (tenant, bkng_tenant_users): with
  *   bkng_access_all_properties every property of that customer, otherwise only the
  *   properties assigned in bkng_user_properties that belong to it;
@@ -27,6 +29,9 @@ use BookingManager\Tenants\TenantRepository;
 defined( 'ABSPATH' ) || exit;
 
 class PropertyScope {
+
+	/** User meta: the customer a platform administrator is looking at (0.2.7). */
+	public const VIEWING_META = 'bkng_viewing_tenant';
 
 	private array $cache = array();
 
@@ -61,6 +66,27 @@ class PropertyScope {
 	}
 
 	/**
+	 * The customer a platform administrator has entered with the selector (0 = all).
+	 * Nobody else can have one: the meta is ignored for customers' users.
+	 */
+	public function viewing( int $user_id ): int {
+		if ( ! Tenancy::ready() || ! $this->is_platform( $user_id ) ) {
+			return 0;
+		}
+		$tenant = (int) get_user_meta( $user_id, self::VIEWING_META, true );
+		return $tenant > 0 && $this->tenants->find( $tenant ) ? $tenant : 0;
+	}
+
+	/**
+	 * The customer the user works for: its own, or for the platform the one it has
+	 * entered (0 = none or all). For screens of one customer (profile, e-mail, WhatsApp).
+	 */
+	public function acting_tenant( int $user_id ): int {
+		$own = $this->tenant_of( $user_id );
+		return $own > 0 ? $own : $this->viewing( $user_id );
+	}
+
+	/**
 	 * @return int[]|null null = all properties of the platform
 	 */
 	public function allowed_ids( int $user_id ): ?array {
@@ -68,7 +94,8 @@ class PropertyScope {
 			return array();
 		}
 		if ( $this->is_platform( $user_id ) ) {
-			return null;
+			$viewing = $this->viewing( $user_id );
+			return $viewing > 0 ? $this->tenant_property_ids( $viewing ) : null;
 		}
 		if ( ! isset( $this->cache[ $user_id ] ) ) {
 			$this->cache[ $user_id ] = $this->compute( $user_id );

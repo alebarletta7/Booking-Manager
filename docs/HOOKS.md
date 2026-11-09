@@ -46,7 +46,20 @@ add_action( 'bkng_booking_confirmed', function ( int $booking_id, array $context
 | `bkng_modules` | moduli opzionali (`Core\ModuleInterface`: `services()` e `hooks()`); se uno fallisce il plugin continua senza |
 | `bkng_accept_status` | stato che prende una richiesta dal sito quando lo staff la accetta: `confirmed`, oppure `option` (il plugin lo fa quando i pagamenti online sono attivi: l'ospite paga e il pagamento conferma) |
 | `bkng_manage_url` | indirizzo «gestisci la prenotazione» inviato agli ospiti |
+| `bkng_login_limits` | tentativi di accesso falliti ammessi in 15 minuti: `array( 'account' => 5, 'address' => 20 )` (0.2.7) |
+| `bkng_force_https` | `true` se pagine e API pubbliche richiedono https (predefinito: quando l'indirizzo del sito è https) (0.2.7) |
+| `bkng_embed_headers` | intestazioni della pagina iframe `/booking/{struttura}/` (es. altre sorgenti `frame-ancestors`) |
 | `bkng_client_ip` | IP del visitatore dietro un proxy diverso da Cloudflare (fidarsi dell'header solo se la richiesta viene davvero dal proxy) |
+
+### Costanti in `wp-config.php`
+
+| Costante | Effetto |
+|---|---|
+| `BKNG_SECRET_KEY` | chiave di cifratura dei segreti (`SecretBox`); consigliata sulla piattaforma |
+| `BKNG_MAIL_FROM` | mittente delle email della piattaforma |
+| `BKNG_CHANNEX_API_KEY`, `BKNG_CHANNEX_WEBHOOK_SECRET`, `BKNG_CHANNEX_BASE_URL` | connessione Channex del sito (non quelle proprie delle strutture) |
+| `BKNG_LOGIN_PROTECTION` | `false` spegne il limite dei tentativi di accesso (0.2.7) |
+| `BKNG_FORCE_HTTPS` | `false` spegne l'obbligo di https (0.2.7) |
 
 ## Canali di vendita (OTA, channel manager)
 
@@ -62,7 +75,7 @@ Un connettore implementa `Channels\ChannelConnector` (`key()`, `label()`, `unava
 
 ## WhatsApp
 
-Come in Night Manager: un numero WhatsApp Business per tutto il sito, collegato in **WhatsApp → Collegamento** con la WhatsApp Cloud API di Meta (ID del numero, ID dell'account Business, token permanente, chiave segreta dell'app facoltativa). Le credenziali sono cifrate con `Core\SecretBox`, non tornano mai dall'API e non finiscono nei registri.
+Come in Night Manager, ma dalla 0.2.6 un numero WhatsApp Business **per cliente** (il cliente predefinito usa quello del sito; gli altri il proprio, con webhook `/whatsapp/webhook/{uuid cliente}`), collegato in **WhatsApp → Collegamento** con la WhatsApp Cloud API di Meta (ID del numero, ID dell'account Business, token permanente, chiave segreta dell'app facoltativa). Le credenziali sono cifrate con `Core\SecretBox`, non tornano mai dall'API e non finiscono nei registri.
 
 - **Testi**: un testo per ogni messaggio all'ospite (richiesta ricevuta, richiesta accettata con «Completa il pagamento», confermata, modificata, annullata, promemoria, pagamento, benvenuto), con `{variabili}`. Salvare un testo lo manda in approvazione come nuovo modello (`bm_{messaggio}_v{n}`, categoria UTILITY): finché non è approvato parte la versione approvata prima. Le approvazioni si controllano ogni ora (`bkng_hourly`) e con «Aggiorna lo stato delle approvazioni».
 - **Pulsante**: WhatsApp non nasconde un link dietro una parola, quindi il link alla pagina della prenotazione è un pulsante sotto il testo. L'URL del pulsante è `home/?bkng_wa=` + `{{1}}` = `CODICE.CHIAVE`; il sito verifica la chiave e porta l'ospite alla pagina della prenotazione.

@@ -174,12 +174,34 @@ class PlatformController extends RestController {
 				),
 			)
 		);
+		// 0.2.7: the customer selector of the panel (enter one customer, or all).
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/platform/viewing',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn() => rest_ensure_response( array( 'tenant_id' => $this->scope->viewing( get_current_user_id() ) ) ),
+					'permission_callback' => $platform,
+				),
+				array(
+					'methods'             => 'PUT',
+					'callback'            => function ( \WP_REST_Request $r ) {
+						$body   = (array) $r->get_json_params();
+						$result = $this->tenants->enter( get_current_user_id(), (int) ( $body['tenant_id'] ?? 0 ) );
+						$this->scope->flush();
+						return self::respond( $result );
+					},
+					'permission_callback' => $platform,
+				),
+			)
+		);
 		register_rest_route(
 			self::REST_NAMESPACE,
 			'/tenant',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => fn() => rest_ensure_response( $this->tenants->own( $this->scope->tenant_of( get_current_user_id() ) ) ),
+				'callback'            => fn() => rest_ensure_response( $this->tenants->own( $this->scope->acting_tenant( get_current_user_id() ) ) ),
 				'permission_callback' => $this->require_cap( 'bkng_access' ),
 			)
 		);
@@ -386,7 +408,7 @@ class PlatformController extends RestController {
 		if ( $asked > 0 && current_user_can( 'bkng_platform_manage' ) ) {
 			return $asked;
 		}
-		return $this->scope->tenant_of( get_current_user_id() );
+		return $this->scope->acting_tenant( get_current_user_id() );
 	}
 
 	/** @return string[]|\WP_Error */

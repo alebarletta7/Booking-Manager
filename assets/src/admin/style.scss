@@ -264,6 +264,10 @@ html.wp-toolbar:has(body.bkng-operational) {
 		min-width: 220px;
 	}
 
+	&__tenant {
+		min-width: 180px;
+	}
+
 	&__name {
 		font-weight: 600;
 		font-size: 15px;

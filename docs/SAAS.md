@@ -11,7 +11,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.4 | Contatti del cliente e pulsante WhatsApp | ✓ |
 | 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | ✓ |
 | 0.2.6 | WhatsApp Meta per cliente, Channex per struttura | ✓ |
-| 0.2.7 | Limiti per cliente, protezione login, documentazione | da fare |
+| 0.2.7 | Limiti per cliente, protezione login, HTTPS, selettore del cliente, documentazione | ✓ |
 
 ## Modello
 
@@ -108,7 +108,7 @@ Lo chiedono i servizi, non le rotte: `BookingService::create`, `InventoryService
 
 Le scritture sono in `WriteGate::ALLOWED`: la piattaforma gestisce i clienti qualunque sia lo stato della licenza. Le azioni sui clienti vanno nel registro attività senza cliente, quindi solo la piattaforma le legge.
 
-Rimandati: il selettore «entra nel gestionale di un cliente» e le viste trasversali con filtro per cliente (oggi la piattaforma vede già tutte le strutture nel selettore in alto) passano alla 0.2.7.
+Il selettore «entra nel gestionale di un cliente» è arrivato con la 0.2.7 (vedi sotto).
 
 ## Modulo nel sito del cliente (0.2.3)
 
@@ -256,3 +256,40 @@ Decisione D3: WhatsApp appartiene al cliente, Channex alla struttura. Senza impo
 `/me` restituisce nel cliente le `features` del piano, che il menu usa per mostrare WhatsApp e Channex. L'uuid nell'indirizzo sceglie solo **quale segreto** controllare: non autorizza nulla da solo.
 
 **Test** (`tests/Integration/TenantChannelsTest.php`): WhatsApp di un cliente nelle sue impostazioni, messaggi solo ai suoi ospiti, registro separato, `?tenant` di un altro cliente rifiutato, piano senza WhatsApp, verifica di Meta sull'indirizzo del cliente; connessione Channex propria cifrata e separata da quella del sito, chiamate con la chiave della struttura, struttura di un altro cliente mai sulla chiave del sito, accesso e piano, webhook che agisce solo sulla propria struttura.
+
+## Limiti, accessi, HTTPS e selettore del cliente (0.2.7)
+
+### Prenotazioni online all'ora per cliente
+
+Nuovo limite di piano **Prenotazioni online all'ora** (`max_bookings_hour`, 0 = nessun limite; predefinito 0, quindi nulla cambia finché la piattaforma non lo imposta). Vale per tutte le strutture del cliente insieme, solo per il modulo pubblico (lo staff non ha tetto), ed è contato **dopo** i limiti per visitatore e il captcha, così chi non supera i controlli non consuma il tetto del cliente. Oltre il tetto: 429 «In questo momento la struttura riceve troppe prenotazioni online». Il conteggio dell'ora corrente è in «Uso del piano».
+
+I limiti per visitatore restano quelli di prima (per IP, /64 per IPv6): 300 letture in 10 minuti, 30 blocchi, 10 prenotazioni e 60 richieste di gestione all'ora.
+
+### Tentativi di accesso (`Access\LoginGuard`)
+
+| Contatore | Limite in 15 minuti | Effetto |
+|---|---|---|
+| per account (login o email, stesso contatore) | 5 errori | quell'account non entra fino alla fine della finestra, nemmeno con la password giusta |
+| per indirizzo | 20 errori | nessun accesso da quell'indirizzo fino alla fine della finestra |
+
+Messaggio uguale per account esistenti e inesistenti. Un accesso riuscito azzera il contatore dell'account. Il blocco di un account esistente scrive `security.login_locked` nel registro (mai la password). Vale per tutti gli accessi WordPress (wp-login.php, XML-RPC). Spegnimento: `define( 'BKNG_LOGIN_PROTECTION', false );` (es. se un plugin di sicurezza lo fa già); limiti: filtro `bkng_login_limits`.
+
+### HTTPS obbligatorio (`Core\Https`)
+
+Se l'indirizzo del sito è `https://`:
+- pagina iframe `/booking/{struttura}/` e link «gestisci la prenotazione» (su qualunque pagina): 301 alla stessa pagina in https;
+- API pubblica `booking-manager/public/v1` in http: **403** `bkng_https_required` (niente redirect: il browser rimanderebbe i dati in chiaro);
+- la pagina di gestione invia anche `Referrer-Policy: strict-origin`.
+
+Un sito ancora in http (sviluppo) non cambia. Dietro un proxy che termina TLS WordPress deve vedere la richiesta come https (`$_SERVER['HTTPS']` da `X-Forwarded-Proto` in `wp-config.php`); altrimenti `define( 'BKNG_FORCE_HTTPS', false );`.
+
+### Selettore del cliente (piattaforma)
+
+In alto nel gestionale la piattaforma sceglie **Tutti i clienti** o un cliente (`PUT /platform/viewing {tenant_id}`, metadato utente `bkng_viewing_tenant`). Dentro un cliente:
+- `PropertyScope::allowed_ids()` restituisce solo le sue strutture: elenchi, prenotazioni, ospiti, planning e ogni rotta per struttura sono quelli che vede il cliente (le strutture degli altri rispondono 404);
+- `/me`, `/tenant`, Attività, Email e WhatsApp lavorano sul cliente scelto (`PropertyScope::acting_tenant()`); una struttura creata nasce in quel cliente;
+- una fascia ricorda in quale cliente si è, con «Torna a tutti i clienti».
+
+Ogni ingresso e uscita scrive `platform.tenant_entered` / `platform.tenant_left` nel registro **con il cliente**, quindi lo vede anche il cliente. Il metadato è ignorato per chi non è della piattaforma. Con «Tutti i clienti» il gestionale è la vista trasversale: tutte le strutture nel selettore delle strutture, ognuna con le sue prenotazioni.
+
+**Test** (`tests/Integration/TenantSecurityTest.php`): tetto orario di un cliente senza effetti sull'altro né sullo staff; blocco dell'account anche con la password giusta e azzeramento dopo un accesso riuscito; blocco dell'indirizzo; API pubblica in http rifiutata solo con il sito in https; selettore con registro, viste limitate al cliente scelto, ritorno a tutti, cliente che non può usarlo neanche scrivendo il metadato.

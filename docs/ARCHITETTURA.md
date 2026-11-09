@@ -10,6 +10,23 @@ Booking Manager è un plugin WordPress autonomo (PHP 8.1+, WordPress 6.6+) per B
 | API dello staff | `booking-manager/v1` (login WordPress + nonce) |
 | API del modulo pubblico | `booking-manager/public/v1` (nessun login) |
 
+## Piattaforma con più clienti
+
+Dalla 0.2.0 un'unica installazione serve più clienti (tenant), ognuno con le proprie strutture, il proprio staff e i propri ospiti. Il dettaglio è in [SAAS.md](SAAS.md); i punti fermi dell'architettura:
+
+```
+Piattaforma (amministratori WordPress: bkng_platform_manage)
+└── Cliente (bkng_tenants: stato, piano, domini, impostazioni proprie)
+    └── Strutture (bkng_properties.tenant_id)
+        └── tutto il resto, per struttura come prima
+```
+
+- **Un solo punto decide cosa si vede**: `Access\PropertyScope::allowed_ids()` (strutture del cliente dell'utente; per la piattaforma tutte, o quelle del cliente scelto nel selettore). Il cliente non viene mai preso da un parametro della richiesta, tranne per la piattaforma (`?tenant=ID`).
+- **Stato e piano**: `Tenants\TenantGate` (come `LicenseGate` per la licenza) blocca nuove prenotazioni e camere ai clienti sospesi o scaduti, applica i limiti del piano (strutture, camere, prenotazioni online all'ora) e viene chiamato dai servizi, non dai controller.
+- **Impostazioni con ambito**: email (`TenantMail`, `TenantTemplates`) e WhatsApp (`WhatsAppSettings::scoped`) per cliente; Channex per struttura (`ChannexSettings::scoped`). Il cliente o la struttura si ricava sempre dalla prenotazione o dal webhook, mai dall'ultimo invio.
+- **Pagina iframe** `/booking/{struttura}/` (`Frontend\EmbedPage`) con `Content-Security-Policy: frame-ancestors` dai domini del cliente.
+- **Protezioni** (0.2.7): `Access\LoginGuard` (tentativi di accesso), `Core\Https` (https obbligatorio sulle parti pubbliche), `Core\RateLimiter` (per visitatore e per cliente).
+
 ## Livelli
 
 ```
@@ -84,6 +101,8 @@ Cinque ruoli WordPress dedicati, modificabili da **Staff → Ruoli e permessi** 
 
 Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_properties`); i record di altre strutture rispondono **404**, così non si scopre nemmeno che esistono. L'housekeeping non vede importi né contatti degli ospiti.
 
+Con i clienti (0.2.1) `access_all_properties` vuol dire «tutte le strutture **del mio cliente**»; `manage_settings`, `manage_roles` e `platform_manage` valgono solo per gli amministratori di WordPress (`RoleManager::strip_platform_caps`). L'amministratore di un cliente gestisce il proprio WhatsApp, le proprie email e il Channex delle proprie strutture.
+
 ## Attività pianificate
 
 - ogni ora (`bkng_hourly`): scadenza delle opzioni in attesa di pagamento; stato delle approvazioni dei testi WhatsApp;
@@ -97,6 +116,7 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 
 Il plugin resta l'unica fonte di verità: Channex riceve ciò che il plugin calcola e manda le prenotazioni dei portali, che il plugin salva con le sue regole.
 
+- **Per struttura** (0.2.6): ogni struttura può avere la propria connessione (`bkng_channex_p{ID}`); quelle dei clienti diversi dal predefinito usano solo la propria. Tutte le operazioni girano dentro `ChannexSettings::scoped( $property_id, … )`. Vedi [SAAS.md](SAAS.md#whatsapp-per-cliente-e-channex-per-struttura-026).
 - **Configurazione**: `Channels\Channex\ChannexSettings` (opzione `bkng_channex`, `autoload = no`; chiave API e chiave del webhook cifrate con `Core\SecretBox`; la chiave del webhook è generata dal sito e Channex la rimanda nell'intestazione `X-Bkng-Webhook-Token`, impostata alla creazione del webhook; è accettata anche una firma HMAC `x-hmac-signature-256`). Le costanti `BKNG_CHANNEX_API_KEY`, `BKNG_CHANNEX_WEBHOOK_SECRET` e `BKNG_CHANNEX_BASE_URL` in `wp-config.php` hanno la precedenza. I segreti non tornano mai dall'API e non finiscono nei registri.
 - **Mappatura**: in `bkng_channel_refs` con canale `channex` (proprietà, tipologie, coppie tipologia × tariffa; tariffa 0 = prezzo base della tipologia).
 - **Uscita (ARI)**: non ci sono tabelle di inventario; i valori si calcolano al momento dell'invio. `AriProjector` legge le camere libere da `Availability\Ledger`, il prezzo da `PricingEngine` e le regole da `restrictions` e dalle impostazioni della struttura. Ogni modifica (`bkng_availability_changed`, `bkng_rates_changed`, azioni delle prenotazioni) segna le notti in `cx_dirty` (una riga per tipo, tipologia, tariffa e notte, con `dirty_seq`). `ChannexSync` prende una fotografia della coda, unisce le notti uguali in intervalli, manda **una** chiamata `availability` e **una** `restrictions` per struttura e cancella solo le righe con lo stesso `dirty_seq`: una notte cambiata durante l'invio parte con la chiamata dopo. Almeno 6 secondi tra due chiamate dello stesso tipo (10 al minuto), pausa crescente su 429/5xx (1, 2, 4… fino a 30 minuti), sospensione su 401. Stato in `cx_state`, attività di Channex in `cx_tasks`.
@@ -107,11 +127,17 @@ Il plugin resta l'unica fonte di verità: Channex riceve ciò che il plugin calc
 
 ## WhatsApp
 
-`Notifications\Channels\WhatsAppChannel` è un canale della coda come l'email: prende il testo approvato da `WhatsApp\WhatsAppSettings` (opzione `bkng_whatsapp`, una per il sito), lo riempie con `WhatsApp\WhatsAppVariables` e lo invia con il servizio scelto (`WhatsApp\MetaCloudProvider`). `WhatsApp\WhatsAppService` gestisce la schermata (collegamento, testi e approvazioni, prova, registro, webhook di Meta). Le colonne `delivery_status` e `delivery_at` di `bkng_notifications` tengono «consegnato» e «letto».
+`Notifications\Channels\WhatsAppChannel` è un canale della coda come l'email: prende il testo approvato da `WhatsApp\WhatsAppSettings` (opzione `bkng_whatsapp` per il cliente predefinito, `bkng_tenants.settings['whatsapp']` per gli altri, dalla 0.2.6: si sceglie con `WhatsAppSettings::scoped()` dal cliente della struttura della prenotazione), lo riempie con `WhatsApp\WhatsAppVariables` e lo invia con il servizio scelto (`WhatsApp\MetaCloudProvider`). `WhatsApp\WhatsAppService` gestisce la schermata (collegamento, testi e approvazioni, prova, registro, webhook di Meta). Le colonne `delivery_status` e `delivery_at` di `bkng_notifications` tengono «consegnato» e «letto».
 
 ## Email
 
 `Notifications\EmailDesign` scrive l'HTML (tabelle e stili in linea, colonne che si impilano su telefono); `Notifications\EmailBrand` porta l'aspetto scelto in Email → Aspetto (impostazioni `email_*` della struttura). Logo, foto e icone sono allegati in linea (`cid:`): le icone di `assets/email` sono tracciate in nero e prendono il colore scelto con GD al momento dell'invio (senza GD l'email esce senza icone). L'anteprima nel gestionale sostituisce i `cid:` con indirizzi `data:`.
+
+## Sicurezza dell'accesso (0.2.7)
+
+- **Tentativi di accesso** (`Access\LoginGuard`, su `authenticate` e `wp_login_failed`): 5 errori per account (login o email) o 20 per indirizzo in 15 minuti bloccano gli accessi successivi, anche con la password giusta, fino alla fine della finestra. Un accesso riuscito azzera il contatore dell'account. Il blocco di un account esistente finisce nel registro (`security.login_locked`). Disattivabile con `define( 'BKNG_LOGIN_PROTECTION', false )`; limiti con il filtro `bkng_login_limits`.
+- **HTTPS** (`Core\Https`): se l'indirizzo del sito è https, la pagina iframe e il link «gestisci la prenotazione» passano a https con un 301 e l'API pubblica risponde 403 a una richiesta in http (un redirect farebbe rimandare il corpo in chiaro). Disattivabile con `define( 'BKNG_FORCE_HTTPS', false )`, filtro `bkng_force_https`.
+- **Limiti di frequenza** (`Core\RateLimiter`, finestre fisse, atomici con una cache persistente): per visitatore (lettura, blocchi, prenotazioni, gestione) e, dopo captcha e controlli del visitatore, per cliente (`max_bookings_hour` del piano).
 
 ## Privacy e registri
 

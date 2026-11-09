@@ -145,9 +145,10 @@ class TenantGate {
 	}
 
 	/**
-	 * Properties and rooms in use (archived ones do not count).
+	 * Properties and rooms in use (archived ones do not count), online bookings counted in
+	 * the current hour.
 	 *
-	 * @return array{max_properties: int, max_units: int}
+	 * @return array{max_properties: int, max_units: int, max_bookings_hour: int}
 	 */
 	public function usage( int $tenant_id ): array {
 		global $wpdb;
@@ -158,6 +159,7 @@ class TenantGate {
 			'max_properties' => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$properties} WHERE tenant_id = %d AND status <> 'archived'", $tenant_id ) ),
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- internal table names.
 			'max_units'      => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$units} u JOIN {$properties} p ON p.id = u.property_id WHERE p.tenant_id = %d AND p.status <> 'archived' AND u.status <> 'archived'", $tenant_id ) ),
+			'max_bookings_hour' => \BookingManager\Core\RateLimiter::count( 'tenant_book', (string) $tenant_id ),
 		);
 	}
 
@@ -198,6 +200,28 @@ class TenantGate {
 			}
 		}
 		return $count;
+	}
+
+	/**
+	 * Counts one online booking of the customer against its hourly cap (plan limit
+	 * max_bookings_hour, 0 = none). Asked after the visitor's own limits and the captcha,
+	 * so strangers cannot use up a customer's cap cheaply. The staff app is never capped.
+	 */
+	public function online_quota( int $tenant_id ): ?\WP_Error {
+		if ( ! Tenancy::migrated() || $tenant_id <= 0 ) {
+			return null;
+		}
+		$tenant = $this->tenants->find( $tenant_id );
+		if ( ! $tenant ) {
+			return null;
+		}
+		$max = (int) ( $this->plans->limits_of( $tenant )['max_bookings_hour'] ?? 0 );
+		// Counted also without a cap: the platform sees the hour's bookings in «Uso del piano».
+		$within = \BookingManager\Core\RateLimiter::hit( 'tenant_book', (string) $tenant_id, $max > 0 ? $max : PHP_INT_MAX, HOUR_IN_SECONDS );
+		if ( $max <= 0 || $within ) {
+			return null;
+		}
+		return new \WP_Error( 'bkng_rate_limited', __( 'In questo momento la struttura riceve troppe prenotazioni online. Riprova tra poco o contatta la struttura.', 'booking-manager' ), array( 'status' => 429 ) );
 	}
 
 	private function within( int $tenant_id, string $limit, int $adding ): ?\WP_Error {

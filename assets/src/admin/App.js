@@ -257,6 +257,81 @@ function TenantBand( { tenant } ) {
 	);
 }
 
+/**
+ * The platform's customer selector (0.2.7): enter one customer's dashboard and see what
+ * it sees, or all of them. Every change is written in the activity log by the server.
+ */
+function TenantSwitch( { viewing } ) {
+	const [ tenants, setTenants ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	useEffect( () => {
+		get( '/platform/tenants' )
+			.then( ( list ) => setTenants( list || [] ) )
+			.catch( () => setTenants( [] ) );
+	}, [] );
+	if ( ! tenants || ! tenants.length ) {
+		return null;
+	}
+	const change = async ( value ) => {
+		setBusy( true );
+		try {
+			await put( '/platform/viewing', { tenant_id: Number( value ) } );
+			window.location.reload();
+		} catch ( e ) {
+			setBusy( false );
+		}
+	};
+	return (
+		<SelectControl
+			__nextHasNoMarginBottom
+			__next40pxDefaultSize
+			className="bkng-topbar__tenant"
+			label={ __( 'Cliente', 'booking-manager' ) }
+			hideLabelFromVision
+			disabled={ busy }
+			value={ String( viewing || 0 ) }
+			options={ [
+				{
+					value: '0',
+					label: __( 'Tutti i clienti', 'booking-manager' ),
+				},
+				...tenants.map( ( t ) => ( {
+					value: String( t.id ),
+					label: t.name,
+				} ) ),
+			] }
+			onChange={ change }
+		/>
+	);
+}
+
+function ViewingBand( { me } ) {
+	if ( ! me.is_platform || ! me.viewing || ! me.tenant ) {
+		return null;
+	}
+	return (
+		<Notice status="info" isDismissible={ false } className="bkng-band">
+			{ sprintf(
+				/* translators: %s: customer name */
+				__(
+					'Stai vedendo il gestionale di «%s» come lo vede il cliente. L’accesso è scritto nel registro attività.',
+					'booking-manager'
+				),
+				me.tenant.name
+			) }{ ' ' }
+			<Button
+				variant="link"
+				onClick={ async () => {
+					await put( '/platform/viewing', { tenant_id: 0 } );
+					window.location.reload();
+				} }
+			>
+				{ __( 'Torna a tutti i clienti', 'booking-manager' ) }
+			</Button>
+		</Notice>
+	);
+}
+
 function LicenseBand( { notice } ) {
 	if ( ! notice ) {
 		return null;
@@ -569,6 +644,9 @@ export default function App() {
 							label={ __( 'Menu', 'booking-manager' ) }
 							onClick={ () => setMenuOpen( ! menuOpen ) }
 						/>
+						{ me.is_platform && (
+							<TenantSwitch viewing={ me.viewing } />
+						) }
 						{ properties.length > 1 ? (
 							<SelectControl
 								__nextHasNoMarginBottom
@@ -614,6 +692,7 @@ export default function App() {
 						) }
 					</div>
 					<LicenseBand notice={ license.notice } />
+					<ViewingBand me={ me } />
 					<TenantBand tenant={ me.tenant } />
 					<main className="bkng-content">{ content }</main>
 				</div>
