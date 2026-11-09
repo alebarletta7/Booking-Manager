@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.8] — 9 novembre 2026
+
+Fase 4: test della piattaforma con più clienti (vedi [docs/TEST-REPORT-SAAS.md](docs/TEST-REPORT-SAAS.md)).
+
+### Correzioni
+
+- Due prenotazioni salvate nello stesso istante, anche in strutture diverse, potevano bloccarsi a vicenda nel database (deadlock): una delle due restava salvata a metà. Ora la prenotazione nuova non prende più quel blocco, e se il database interrompe comunque il salvataggio questo riparte da capo (fino a 3 volte) oppure risponde «Riprova» senza lasciare nulla a metà.
+
+### Test
+
+- Nuovi: scenario completo con due clienti, più strutture e una receptionist (`SaasScenarioTest`), prenotazioni concorrenti su due clienti con 8 processi (`TenantConcurrencyTest`).
+
 ## [0.2.7] — 9 novembre 2026
 
 Ultimo passo della piattaforma con più clienti: limiti, accessi, HTTPS, selettore del cliente e documentazione (vedi [docs/SAAS.md](docs/SAAS.md)).

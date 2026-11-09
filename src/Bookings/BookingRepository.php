@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace BookingManager\Bookings;
 
+use BookingManager\Database\LockFailed;
 use BookingManager\Database\Schema;
 
 defined( 'ABSPATH' ) || exit;
@@ -160,6 +161,9 @@ class BookingRepository {
 		$suppress = $wpdb->suppress_errors( true );
 		$ok       = $wpdb->insert( Schema::table( 'bookings' ), $row );
 		$wpdb->suppress_errors( $suppress );
+		if ( false === $ok ) {
+			LockFailed::check(); // A deadlock starts the whole booking again (Transaction::run_retrying).
+		}
 		return false === $ok ? 0 : (int) $wpdb->insert_id;
 	}
 
@@ -295,6 +299,7 @@ class BookingRepository {
 			$row['nightly'] = wp_json_encode( $row['nightly'] );
 		}
 		$wpdb->insert( Schema::table( 'booking_rooms' ), $row );
+		LockFailed::check();
 		return (int) $wpdb->insert_id;
 	}
 
@@ -383,7 +388,14 @@ class BookingRepository {
 	public function replace_guests( int $booking_id, array $guests ): void {
 		global $wpdb;
 		$table = Schema::table( 'booking_guests' );
-		$wpdb->delete( $table, array( 'booking_id' => $booking_id ), array( '%d' ) );
+		// Only when there is something to delete: on a new booking the DELETE would take a
+		// gap lock on the booking_id index, and two bookings saved at the same instant
+		// (even at different properties) then deadlock on their inserts (found in FASE 4).
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		if ( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE booking_id = %d LIMIT 1", $booking_id ) ) ) {
+			$wpdb->delete( $table, array( 'booking_id' => $booking_id ), array( '%d' ) );
+			LockFailed::check();
+		}
 		$now = gmdate( 'Y-m-d H:i:s' );
 		foreach ( array_values( $guests ) as $i => $g ) {
 			$wpdb->insert(
@@ -400,6 +412,7 @@ class BookingRepository {
 					'created_at'      => $now,
 				)
 			);
+			LockFailed::check();
 		}
 	}
 
