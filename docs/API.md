@@ -192,6 +192,7 @@ Le rotte `/channex`, `/channex/settings`, `/channex/test`, `/channex/webhook*`, 
 | GET, PUT | `/platform/tenants/{id}` | piattaforma |
 | POST | `/platform/tenants/{id}/suspend`, `/activate`, `/archive` | piattaforma |
 | GET, POST, DELETE | `/platform/tenants/{id}/domains` | piattaforma |
+| GET | `/platform/tenants/{id}/embed-check` | piattaforma: per ogni struttura del cliente `{property, url, ok, problems[]}`, cosa impedisce l'iframe (0.2.10) |
 | GET, POST | `/platform/tenants/{id}/users` | piattaforma |
 | GET, PUT | `/platform/plans` (limiti `max_properties`, `max_units`, `max_bookings_hour`; funzioni `online_payment`, `whatsapp_meta`, `channex`, `custom_smtp`) | piattaforma |
 | GET | `/platform/stats` | piattaforma |

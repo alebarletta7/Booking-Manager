@@ -5,6 +5,7 @@
  * - /platform/tenants (GET list, POST create), /platform/tenants/{id} (GET, PUT),
  *   /platform/tenants/{id}/(suspend|activate|archive) (POST, with a reason);
  * - /platform/tenants/{id}/domains (GET, POST {host}, DELETE ?host=);
+ * - /platform/tenants/{id}/embed-check (GET): can the customer's sites frame the form? (0.2.10);
  * - /platform/tenants/{id}/users (GET, POST like /staff, in that customer);
  * - /platform/plans (GET, PUT {plans: [...]}); /platform/stats?from&to (GET).
  *
@@ -27,6 +28,7 @@ use BookingManager\Access\PropertyScope;
 use BookingManager\Core\Validation;
 use BookingManager\Notifications\NotificationService;
 use BookingManager\Notifications\NotificationTemplates;
+use BookingManager\Tenants\EmbedCheck;
 use BookingManager\Tenants\TenantMail;
 use BookingManager\Tenants\TenantTemplates;
 use BookingManager\Tenants\TenantProfile;
@@ -36,7 +38,7 @@ defined( 'ABSPATH' ) || exit;
 
 class PlatformController extends RestController {
 
-	public function __construct( Policy $policy, private TenantService $tenants, private PropertyScope $scope, private TenantProfile $profile, private TenantMail $mail, private ?TenantTemplates $templates = null, private ?NotificationService $notifications = null ) {
+	public function __construct( Policy $policy, private TenantService $tenants, private PropertyScope $scope, private TenantProfile $profile, private TenantMail $mail, private ?TenantTemplates $templates = null, private ?NotificationService $notifications = null, private ?EmbedCheck $embed_check = null ) {
 		parent::__construct( $policy );
 	}
 
@@ -125,6 +127,16 @@ class PlatformController extends RestController {
 					'permission_callback' => $platform,
 					'args'                => $id,
 				),
+			)
+		);
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/platform/tenants/(?P<id>\d+)/embed-check',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->embed_check( (int) $r['id'] ) ),
+				'permission_callback' => $platform,
+				'args'                => $id,
 			)
 		);
 		register_rest_route(
@@ -415,6 +427,15 @@ class PlatformController extends RestController {
 	private function domains( int $id ): array|\WP_Error {
 		$tenant = $this->tenants->get( $id );
 		return $tenant instanceof \WP_Error ? $tenant : $tenant['domains'];
+	}
+
+	/** @return array<string, mixed>|\WP_Error */
+	private function embed_check( int $id ): array|\WP_Error {
+		$tenant = $this->tenants->get( $id );
+		if ( $tenant instanceof \WP_Error ) {
+			return $tenant;
+		}
+		return ( $this->embed_check ?? new EmbedCheck( new \BookingManager\Tenants\TenantRepository() ) )->run( $id );
 	}
 
 	public function stats( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {

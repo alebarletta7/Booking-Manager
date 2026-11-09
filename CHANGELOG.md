@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.10] — 9 novembre 2026
+
+### Correzioni
+
+- Modulo incorporato «rifiutato» dal browser sul sito del cliente: un dominio autorizzato vale ora **con e senza `www`** (hotel.it e www.hotel.it), perché il browser confronta i nomi alla lettera.
+- Una struttura non attiva mostra il suo messaggio «non disponibile» dentro il sito del cliente, invece di una cornice rifiutata.
+
+### Novità
+
+- Pannello piattaforma, scheda del cliente, «Domini autorizzati»: pulsante **«Verifica incorporamento»**. Il server apre la pagina del modulo di ogni struttura come farebbe un browser e dice in chiaro cosa la blocca: intestazione `X-Frame-Options` aggiunta dal server, dall'hosting, da Cloudflare o da un plugin di sicurezza; una seconda regola `frame-ancestors`; nessun dominio; struttura non attiva. Solo per l'amministratore della piattaforma, sola lettura (`GET /platform/tenants/{id}/embed-check`).
+
 ## [0.2.9] — 9 novembre 2026
 
 ### Modifiche

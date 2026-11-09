@@ -54,4 +54,16 @@ final class Domains {
 		}
 		return $input;
 	}
+
+	/**
+	 * The other spelling of the same site: www.hotel.it for hotel.it and back ('' for
+	 * www.it-like hosts). A www. in front of a subdomain is harmless: same owner.
+	 */
+	public static function counterpart( string $host ): string {
+		if ( str_starts_with( $host, 'www.' ) ) {
+			$bare = substr( $host, 4 );
+			return str_contains( $bare, '.' ) ? $bare : '';
+		}
+		return 'www.' . $host;
+	}
 }

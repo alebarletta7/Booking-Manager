@@ -29,6 +29,7 @@ namespace BookingManager\Frontend;
 use BookingManager\Bookings\ManageLink;
 use BookingManager\Core\NoStore;
 use BookingManager\Properties\PropertyRepository;
+use BookingManager\Tenants\Domains;
 use BookingManager\Tenants\Tenancy;
 use BookingManager\Tenants\TenantGate;
 use BookingManager\Tenants\TenantRepository;
@@ -119,8 +120,12 @@ class EmbedPage {
 			// Only what Domains::normalize() lets in: never a quote, a space or a ';'.
 			if ( preg_match( '/^[a-z0-9.-]+$/', (string) $host ) ) {
 				$sources[] = (string) $host;
+				// hotel.it and www.hotel.it are the same site for its owner (0.2.10): the
+				// browser compares hosts exactly, so the other spelling is added too.
+				$sources[] = Domains::counterpart( (string) $host );
 			}
 		}
+		$sources = array_filter( $sources );
 		return 'frame-ancestors ' . implode( ' ', array_unique( $sources ) );
 	}
 
@@ -169,9 +174,12 @@ class EmbedPage {
 		$found    = $property
 			&& ( 'active' === $property['status'] || $manage )
 			&& ! $this->gate->archived( $tenant );
+		// A property that exists but is not bookable still shows its «not available»
+		// message inside the customer's site, instead of a frame the browser refuses.
+		$framed   = $property && $tenant > 0 && ! $this->gate->archived( $tenant );
 		$headers  = array(
 			'Content-Type'            => 'text/html; charset=' . get_bloginfo( 'charset' ),
-			'Content-Security-Policy' => self::csp( $found && $tenant > 0 ? $this->tenants->domains( $tenant ) : array() ),
+			'Content-Security-Policy' => self::csp( $framed ? $this->tenants->domains( $tenant ) : array() ),
 			'Referrer-Policy'         => 'strict-origin',
 			'X-Content-Type-Options'  => 'nosniff',
 			'X-Robots-Tag'            => 'noindex, nofollow',
