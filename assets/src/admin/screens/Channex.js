@@ -84,7 +84,7 @@ function CopyButton( { text, label } ) {
 
 /* ------------------------------------------------------------------ Avvisi */
 
-function Alerts( { overview, setOverview } ) {
+function Alerts( { overview, setOverview, path } ) {
 	const action = useAction();
 	const unread = overview.alerts.filter( ( a ) => ! a.read );
 	if ( ! unread.length ) {
@@ -100,9 +100,7 @@ function Alerts( { overview, setOverview } ) {
 					size="compact"
 					isBusy={ action.busy }
 					onClick={ async () => {
-						const o = await action.run( () =>
-							post( '/channex/alerts/read' )
-						);
+						const o = await action.run( () => post( path ) );
 						if ( o ) {
 							setOverview( o );
 						}
@@ -139,6 +137,7 @@ export function connectionPaths( propertyId ) {
 			key: '/channex/signing-key',
 			webhook: '/channex/webhook',
 			webhookTest: '/channex/webhook/test',
+			alerts: '/channex/alerts/read',
 		};
 	}
 	const base = '/properties/' + propertyId + '/channex/connection';
@@ -149,6 +148,7 @@ export function connectionPaths( propertyId ) {
 		key: base + '/signing-key',
 		webhook: base + '/webhook',
 		webhookTest: base + '/webhook-test',
+		alerts: base + '/alerts-read',
 	};
 }
 
@@ -1383,9 +1383,11 @@ export default function Channex() {
 					{ notice }
 				</Success>
 			) }
-			{ scope === 'site' && (
-				<Alerts overview={ o } setOverview={ overview.setData } />
-			) }
+			<Alerts
+				overview={ o }
+				setOverview={ overview.setData }
+				path={ paths.alerts }
+			/>
 			{ detail.data?.attention > 0 && (
 				<p className="bkng-help is-error" role="status">
 					{ sprintf(

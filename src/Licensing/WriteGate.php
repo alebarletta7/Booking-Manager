@@ -128,7 +128,7 @@ class WriteGate {
 		// Channex: settings, mapping, sends and reads. Reservations from the portals still
 		// go through BookingService, which asks the licence.
 		'#^/channex/(settings|test|webhook|webhook/test|signing-key|alerts/read)$#',
-		'#^/properties/\d+/channex/(mapping|push|pull|full-sync|connection|connection/(test|webhook|webhook-test|signing-key))$#',
+		'#^/properties/\d+/channex/(mapping|push|pull|full-sync|connection|connection/(test|webhook|webhook-test|signing-key|alerts-read))$#',
 		'#^/channex/revisions/[0-9a-fA-F-]{36}/(retry|resolve)$#',
 		'#^/public/channex/webhook(/[0-9a-fA-F-]{36})?$#',
 		// Platform panel (0.2.2): the platform manages its customers whatever the licence says.

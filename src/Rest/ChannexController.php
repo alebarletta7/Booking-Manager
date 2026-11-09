@@ -9,6 +9,7 @@
  *   POST /channex/webhook/test                    asks Channex to call it once
  *   POST /channex/signing-key                     generates the webhook key (kept on the site)
  *   POST /channex/alerts/read                     warnings read
+ *   POST /properties/{id}/channex/connection/alerts-read   a property's warnings read (0.2.18)
  *   GET|PUT|DELETE /properties/{id}/channex/connection   the property's own connection (0.2.6)
  *   POST /properties/{id}/channex/connection/(test|webhook|webhook-test|signing-key)
  *   GET  /properties/{id}/channex                 mapping, Channex's options, sync state, reservations
@@ -99,6 +100,7 @@ class ChannexController extends RestController {
 			'/connection/webhook'        => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'register_webhook' ) ),
 			'/connection/webhook-test'   => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'test_webhook' ) ),
 			'/connection/signing-key'    => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'create_signing_key' ) ),
+			'/connection/alerts-read'    => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'read_alerts' ) ),
 		);
 		foreach ( $routes as $route => $endpoints ) {
 			$endpoints = is_array( $endpoints[0] ) ? $endpoints : array( $endpoints );
