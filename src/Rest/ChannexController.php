@@ -9,14 +9,18 @@
  *   POST /channex/webhook/test                    asks Channex to call it once
  *   POST /channex/signing-key                     generates the webhook key (kept on the site)
  *   POST /channex/alerts/read                     warnings read
+ *   GET|PUT|DELETE /properties/{id}/channex/connection   the property's own connection (0.2.6)
+ *   POST /properties/{id}/channex/connection/(test|webhook|webhook-test|signing-key)
  *   GET  /properties/{id}/channex                 mapping, Channex's options, sync state, reservations
  *   PUT  /properties/{id}/channex/mapping         saves the mapping (starts a full sync)
  *   POST /properties/{id}/channex/(push|pull|full-sync)
  *   POST /channex/revisions/{revision}/(retry|resolve)
  *
- * All need bkng_manage_integrations. Public, signed by Channex:
+ * The site's connection (/channex/*) is the platform's; everything under a property needs
+ * bkng_manage_integrations on it. Public, signed by Channex:
  *
- *   POST /public/channex/webhook
+ *   POST /public/channex/webhook                  the site's connection
+ *   POST /public/channex/webhook/{property uuid}  a property's own connection (0.2.6)
  *
  * @package BookingManager
  */
@@ -29,6 +33,8 @@ use BookingManager\Access\Policy;
 use BookingManager\Channels\Channex\ChannexAdmin;
 use BookingManager\Channels\Channex\ChannexBookings;
 use BookingManager\Channels\Channex\ChannexRevisions;
+use BookingManager\Channels\Channex\ChannexSettings;
+use BookingManager\Properties\PropertyRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,7 +46,9 @@ class ChannexController extends RestController {
 		Policy $policy,
 		private ChannexAdmin $admin,
 		private ChannexBookings $inbound,
-		private ChannexRevisions $revisions
+		private ChannexRevisions $revisions,
+		private ?ChannexSettings $settings = null,
+		private ?PropertyRepository $properties = null
 	) {
 		parent::__construct( $policy );
 	}
@@ -80,15 +88,31 @@ class ChannexController extends RestController {
 			'/pull'      => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->pull_now( (int) $r['property_id'] ) ),
 			'/full-sync' => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->full_sync( (int) $r['property_id'] ) ),
 		);
-		foreach ( $routes as $route => [ $method, $callback ] ) {
+		$pid    = static fn( \WP_REST_Request $r ) => (int) $r['property_id'];
+		$routes += array(
+			'/connection'                => array(
+				array( \WP_REST_Server::READABLE, fn( \WP_REST_Request $r ) => $this->admin->connection( $pid( $r ) ) ),
+				array( 'PUT', fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'save_settings', self::body( $r ) ) ),
+				array( \WP_REST_Server::DELETABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'forget' ) ),
+			),
+			'/connection/test'           => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'test' ) ),
+			'/connection/webhook'        => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'register_webhook' ) ),
+			'/connection/webhook-test'   => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'test_webhook' ) ),
+			'/connection/signing-key'    => array( \WP_REST_Server::CREATABLE, fn( \WP_REST_Request $r ) => $this->admin->on_property( $pid( $r ), 'create_signing_key' ) ),
+		);
+		foreach ( $routes as $route => $endpoints ) {
+			$endpoints = is_array( $endpoints[0] ) ? $endpoints : array( $endpoints );
 			register_rest_route(
 				$ns,
 				$base . $route,
-				array(
-					'methods'             => $method,
-					'callback'            => static fn( \WP_REST_Request $r ) => self::respond( $callback( $r ) ),
-					'permission_callback' => $property,
-					'args'                => array( 'property_id' => self::property_arg() ),
+				array_map(
+					static fn( array $e ) => array(
+						'methods'             => $e[0],
+						'callback'            => static fn( \WP_REST_Request $r ) => self::respond( ( $e[1] )( $r ) ),
+						'permission_callback' => $property,
+						'args'                => array( 'property_id' => self::property_arg() ),
+					),
+					$endpoints
 				)
 			);
 		}
@@ -131,6 +155,22 @@ class ChannexController extends RestController {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => fn( \WP_REST_Request $r ) => $this->webhook( $r ),
 				'permission_callback' => '__return_true', // Authenticated by Channex's HMAC signature.
+			)
+		);
+		register_rest_route(
+			PublicController::REST_NAMESPACE,
+			'/channex/webhook/(?P<property>[0-9a-fA-F-]{36})',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => function ( \WP_REST_Request $r ) {
+					$property = $this->properties ? $this->properties->find_by_uuid( (string) $r['property'] ) : null;
+					if ( ! $property || ! $this->settings ) {
+						return new \WP_REST_Response( array( 'received' => false ), 404 );
+					}
+					// Checked with this property's own secret, acting only on this property.
+					return $this->settings->scoped( (int) $property['id'], fn() => $this->webhook( $r ), true );
+				},
+				'permission_callback' => '__return_true', // Authenticated by the property's own secret.
 			)
 		);
 	}

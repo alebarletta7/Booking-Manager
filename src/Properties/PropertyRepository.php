@@ -45,6 +45,15 @@ class PropertyRepository {
 	}
 
 	/** @return array<string, mixed>|null */
+	/** @return array<string, mixed>|null by its public id (webhook addresses, 0.2.6) */
+	public function find_by_uuid( string $uuid ): ?array {
+		global $wpdb;
+		$table = Schema::table( 'properties' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE uuid = %s", strtolower( $uuid ) ), ARRAY_A );
+		return $row ? self::hydrate( $row ) : null;
+	}
+
 	public function find_by_slug( string $slug ): ?array {
 		global $wpdb;
 		$table = Schema::table( 'properties' );

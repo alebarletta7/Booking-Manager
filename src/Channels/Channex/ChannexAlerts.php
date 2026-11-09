@@ -54,6 +54,15 @@ class ChannexAlerts {
 		return count( array_filter( $this->all(), static fn( array $a ) => empty( $a['read'] ) ) );
 	}
 
+	/**
+	 * The warnings of one property (0.2.6: what its own connection screen shows).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function of_property( int $property_id ): array {
+		return array_values( array_filter( $this->all(), static fn( array $a ) => (int) ( $a['property_id'] ?? 0 ) === $property_id ) );
+	}
+
 	public function mark_read(): void {
 		$alerts = array_map(
 			static fn( array $a ) => array( 'read' => true ) + $a,
@@ -64,7 +73,8 @@ class ChannexAlerts {
 
 	/** Shown on WordPress admin pages (not inside Booking Manager, which has its own list). */
 	public function admin_notice(): void {
-		if ( ! current_user_can( 'bkng_manage_integrations' ) ) {
+		// The count covers every property (0.2.6: only the platform sees all of them).
+		if ( ! current_user_can( 'bkng_platform_manage' ) ) {
 			return;
 		}
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;

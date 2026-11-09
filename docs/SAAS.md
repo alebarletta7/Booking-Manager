@@ -10,7 +10,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.3 | Pagina iframe `/booking/{struttura}`, CSP per cliente, pagamento fuori dall'iframe | ✓ |
 | 0.2.4 | Contatti del cliente e pulsante WhatsApp | ✓ |
 | 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | ✓ |
-| 0.2.6 | WhatsApp Meta per cliente, Channex per struttura | da fare |
+| 0.2.6 | WhatsApp Meta per cliente, Channex per struttura | ✓ |
 | 0.2.7 | Limiti per cliente, protezione login, documentazione | da fare |
 
 ## Modello
@@ -211,3 +211,48 @@ Ogni email ricava struttura e cliente **dalla prenotazione** (`NotificationServi
 Tutte le scritture sono in `WriteGate::ALLOWED` (servono agli ospiti già prenotati).
 
 **Test** (`tests/Integration/TenantMailTest.php`): due clienti, uno con SMTP verificato e uno sul servizio della piattaforma, ogni email esce con server, From e Reply-To del proprio cliente e PHPMailer torna come prima; verifica obbligatoria, password mai in risposta, impostazioni o registro; piano senza SMTP; accessi a un altro cliente rifiutati; catena dei testi con HTML ripulito; variabili; pagamento non riuscito; messaggi personalizzati; oggetto nel registro.
+
+## WhatsApp per cliente e Channex per struttura (0.2.6)
+
+Decisione D3: WhatsApp appartiene al cliente, Channex alla struttura. Senza impostazioni nuove tutto resta com'era: il cliente predefinito (quello creato dalla migrazione) continua a usare l'opzione `bkng_whatsapp`, la connessione Channex del sito (`bkng_channex`, costanti di `wp-config.php` comprese) e i vecchi indirizzi dei webhook. Nessun dato viene spostato.
+
+### WhatsApp (`Notifications\WhatsApp\WhatsAppSettings::scoped`)
+
+| Cliente | Dove sono le impostazioni | Webhook Meta |
+|---|---|---|
+| predefinito (o sito non migrato) | opzione `bkng_whatsapp` | `/wp-json/booking-manager/public/v1/whatsapp/webhook` |
+| altri | `bkng_tenants.settings['whatsapp']` (credenziali cifrate con `SecretBox`) | `/wp-json/booking-manager/public/v1/whatsapp/webhook/{uuid del cliente}` |
+
+- Ogni messaggio sceglie le impostazioni dal cliente della **struttura della prenotazione** (`WhatsAppChannel::for_property`); il modulo pubblico chiede il telefono solo se WhatsApp è attivo per il cliente di quella struttura.
+- **Piano**: serve `whatsapp_meta`. Senza, il collegamento risponde 403 e un WhatsApp già collegato smette di inviare (`connected()` è falso).
+- **Accesso**: la voce WhatsApp torna agli amministratori del cliente (`bkng_manage_properties`) per il proprio cliente; `?tenant=ID` vale solo per la piattaforma (`bkng_manage_settings`), altrimenti 403. Registro, reinvio e aggiornamenti di consegna di Meta toccano solo i messaggi delle strutture di quel cliente.
+- Il controllo delle approvazioni dei testi (cron) passa da ogni cliente che ha impostazioni proprie.
+
+### Channex (`Channels\Channex\ChannexSettings::scoped`)
+
+| Struttura | Connessione |
+|---|---|
+| del cliente predefinito, senza connessione propria | quella del sito, come prima |
+| con connessione propria | opzione `bkng_channex_p{ID}`: chiave API e segreto del webhook (cifrati), ambiente, indirizzo di produzione, interruttore, sincronizzazione notturna, sospensione dopo un 401 |
+| di un altro cliente | **solo** la propria: la connessione del sito non le serve mai |
+
+- Le costanti `BKNG_CHANNEX_*` valgono solo per la connessione del sito.
+- **Piano**: per i clienti diversi da quello predefinito serve `channex`; senza, le operazioni sulla connessione rispondono 403 e la sincronizzazione si ferma.
+- Invii, sincronizzazione completa, riconciliazione, lettura delle prenotazioni e notturna girano struttura per struttura, ognuna con la propria connessione.
+- **Webhook**: la connessione propria registra su Channex `/wp-json/booking-manager/public/v1/channex/webhook/{uuid della struttura}`. Quell'indirizzo verifica la firma (o l'intestazione `X-Bkng-Webhook-Token`) con il segreto della struttura e agisce solo su di essa: un evento che nomina un'altra struttura Channex viene registrato e ignorato. L'indirizzo del sito agisce solo sulle strutture che usano la connessione del sito.
+- Avvisi Channex: quelli della struttura nella sua schermata; l'avviso nella bacheca di WordPress è solo per la piattaforma.
+
+**Dove**: Channex → scheda Collegamento. La piattaforma sceglie tra «Connessione del sito» e una struttura; chi gestisce le integrazioni di una struttura (`bkng_manage_integrations`) vede solo le proprie. «Rimuovi la connessione» cancella solo l'opzione della struttura.
+
+### API
+
+| Rotta | Chi |
+|---|---|
+| `GET/PUT /whatsapp…` (tutte le rotte di prima) | amministratore del cliente (il proprio), piattaforma con `?tenant` |
+| `GET/PUT/DELETE /properties/{id}/channex/connection` | `bkng_manage_integrations` sulla struttura |
+| `POST /properties/{id}/channex/connection/(test\|webhook\|webhook-test\|signing-key)` | come sopra |
+| `POST /public/v1/channex/webhook/{uuid struttura}`, `GET/POST /public/v1/whatsapp/webhook/{uuid cliente}` | pubbliche, autenticate dal segreto (un uuid sconosciuto dà 404) |
+
+`/me` restituisce nel cliente le `features` del piano, che il menu usa per mostrare WhatsApp e Channex. L'uuid nell'indirizzo sceglie solo **quale segreto** controllare: non autorizza nulla da solo.
+
+**Test** (`tests/Integration/TenantChannelsTest.php`): WhatsApp di un cliente nelle sue impostazioni, messaggi solo ai suoi ospiti, registro separato, `?tenant` di un altro cliente rifiutato, piano senza WhatsApp, verifica di Meta sull'indirizzo del cliente; connessione Channex propria cifrata e separata da quella del sito, chiamate con la chiave della struttura, struttura di un altro cliente mai sulla chiave del sito, accesso e piano, webhook che agisce solo sulla propria struttura.

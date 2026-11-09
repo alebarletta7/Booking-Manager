@@ -1,7 +1,9 @@
 <?php
 /**
- * WhatsApp (bkng_manage_settings), like Night Manager's: one WhatsApp Business number for
- * the whole site.
+ * WhatsApp, like Night Manager's: one WhatsApp Business number per customer (0.2.6; before,
+ * one for the whole site). The customer's administrator (bkng_manage_properties) manages
+ * its own; the platform (bkng_manage_settings) its own, or any customer's with ?tenant=ID.
+ * Every request is scoped to that customer (WhatsAppSettings::scoped).
  *
  *   GET    /whatsapp                              settings + messages + variables
  *   PUT    /whatsapp/settings                     active, country_code
@@ -16,8 +18,9 @@
  *
  * And, public (booking-manager/public/v1), for Meta:
  *
- *   GET    /whatsapp/webhook                      subscription check (verify token)
- *   POST   /whatsapp/webhook                      delivery updates (signed with the app secret)
+ *   GET    /whatsapp/webhook[/{customer uuid}]    subscription check (verify token)
+ *   POST   /whatsapp/webhook[/{customer uuid}]    delivery updates (signed with the app secret)
+ *   (without the uuid: the default customer, the address used before 0.2.6)
  *
  * Secrets are never returned: secret fields only say whether they are set.
  *
@@ -29,8 +32,11 @@ declare( strict_types=1 );
 namespace BookingManager\Rest;
 
 use BookingManager\Access\Policy;
+use BookingManager\Access\PropertyScope;
 use BookingManager\Notifications\NotificationRepository;
 use BookingManager\Notifications\WhatsApp\WhatsAppService;
+use BookingManager\Notifications\WhatsApp\WhatsAppSettings;
+use BookingManager\Tenants\TenantRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,13 +46,52 @@ class WhatsAppController extends RestController {
 
 	public function __construct(
 		Policy $policy,
-		private WhatsAppService $service
+		private WhatsAppService $service,
+		private ?WhatsAppSettings $settings = null,
+		private ?PropertyScope $scope = null
 	) {
 		parent::__construct( $policy );
 	}
 
+	/**
+	 * The platform, or the administrator of a customer for its own customer only.
+	 */
+	public function can_manage( \WP_REST_Request $request ): bool|\WP_Error {
+		$asked = (int) $request->get_param( 'tenant' );
+		if ( current_user_can( 'bkng_manage_settings' ) ) {
+			return $this->policy->authorize( 'bkng_manage_settings' );
+		}
+		$basic = $this->policy->authorize( 'bkng_manage_properties' );
+		if ( true !== $basic ) {
+			return $basic;
+		}
+		$own = $this->scope ? $this->scope->tenant_of( get_current_user_id() ) : 0;
+		if ( $own <= 0 || ( $asked > 0 && $asked !== $own ) ) {
+			return $this->policy->authorize( 'bkng_manage_settings' );
+		}
+		return true;
+	}
+
+	/** The customer of the request: never from the request, except for the platform. */
+	private function tenant( \WP_REST_Request $request ): int {
+		$asked = (int) $request->get_param( 'tenant' );
+		if ( $asked > 0 && current_user_can( 'bkng_manage_settings' ) ) {
+			return $asked;
+		}
+		return $this->scope ? $this->scope->tenant_of( get_current_user_id() ) : 0;
+	}
+
+	/**
+	 * @template T
+	 * @param callable(): T $fn
+	 * @return T
+	 */
+	private function in_tenant( int $tenant, callable $fn ): mixed {
+		return $this->settings ? $this->settings->scoped( $tenant, $fn ) : $fn();
+	}
+
 	public function register_routes(): void {
-		$manage = $this->require_cap( 'bkng_manage_settings' );
+		$manage = array( $this, 'can_manage' );
 		$routes = array(
 			'/whatsapp'                                => array(
 				array( \WP_REST_Server::READABLE, fn() => $this->service->view() ),
@@ -89,7 +134,7 @@ class WhatsAppController extends RestController {
 			foreach ( $endpoints as [ $method, $callback ] ) {
 				$args[] = array(
 					'methods'             => $method,
-					'callback'            => static fn( \WP_REST_Request $r ) => self::respond( $callback( $r ) ),
+					'callback'            => fn( \WP_REST_Request $r ) => self::respond( $this->in_tenant( $this->tenant( $r ), fn() => $callback( $r ) ) ),
 					'permission_callback' => $manage,
 				);
 			}
@@ -101,11 +146,14 @@ class WhatsAppController extends RestController {
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => fn( \WP_REST_Request $r ) => self::respond(
-					$this->service->log(
-						array(
-							'status'   => (string) $r->get_param( 'status' ),
-							'page'     => (int) ( $r->get_param( 'page' ) ?: 1 ),
-							'per_page' => (int) ( $r->get_param( 'per_page' ) ?: 30 ),
+					$this->in_tenant(
+						$this->tenant( $r ),
+						fn() => $this->service->log(
+							array(
+								'status'   => (string) $r->get_param( 'status' ),
+								'page'     => (int) ( $r->get_param( 'page' ) ?: 1 ),
+								'per_page' => (int) ( $r->get_param( 'per_page' ) ?: 30 ),
+							)
 						)
 					)
 				),
@@ -127,22 +175,37 @@ class WhatsAppController extends RestController {
 				),
 			)
 		);
-		register_rest_route(
-			PublicController::REST_NAMESPACE,
-			'/whatsapp/webhook',
-			array(
+		foreach ( array( '/whatsapp/webhook', '/whatsapp/webhook/(?P<customer>[0-9a-fA-F-]{36})' ) as $hook ) {
+			register_rest_route(
+				PublicController::REST_NAMESPACE,
+				$hook,
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => fn( \WP_REST_Request $r ) => $this->webhook_verify( $r ),
-					'permission_callback' => '__return_true', // Checked against the verify token.
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => fn( \WP_REST_Request $r ) => $this->webhook( $r ),
-					'permission_callback' => '__return_true', // Authenticated by Meta's signature.
-				),
-			)
-		);
+					array(
+						'methods'             => \WP_REST_Server::READABLE,
+						'callback'            => fn( \WP_REST_Request $r ) => $this->for_webhook( $r, fn() => $this->webhook_verify( $r ) ),
+						'permission_callback' => '__return_true', // Checked against the verify token.
+					),
+					array(
+						'methods'             => \WP_REST_Server::CREATABLE,
+						'callback'            => fn( \WP_REST_Request $r ) => $this->for_webhook( $r, fn() => $this->webhook( $r ) ),
+						'permission_callback' => '__return_true', // Authenticated by Meta's signature.
+					),
+				)
+			);
+		}
+	}
+
+	/** Meta's calls, with the settings of the customer in the address (or the default one). */
+	private function for_webhook( \WP_REST_Request $request, callable $fn ): \WP_REST_Response {
+		$uuid = (string) $request['customer'];
+		if ( '' === $uuid ) {
+			return $fn();
+		}
+		$tenant = ( new TenantRepository() )->find_by_uuid( $uuid );
+		if ( ! $tenant ) {
+			return new \WP_REST_Response( array( 'received' => false ), 404 );
+		}
+		return $this->in_tenant( (int) $tenant['id'], $fn );
 	}
 
 	/** Meta calls this once, when the webhook is saved: it must get the challenge back as is. */

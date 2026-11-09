@@ -13,6 +13,10 @@
  * Credentials are encrypted, never returned by the API (secret fields only say whether
  * they are set) and never logged.
  *
+ * Since 0.2.6 every method works on the customer chosen with WhatsAppSettings::scoped()
+ * (the REST controller scopes each request to the user's customer): its connection,
+ * its texts, its properties' messages in the log, its webhook address.
+ *
  * @package BookingManager
  */
 
@@ -31,6 +35,7 @@ use BookingManager\Notifications\NotificationService;
 use BookingManager\Notifications\SendResult;
 use BookingManager\Properties\PropertyRepository;
 use BookingManager\Rest\PublicController;
+use BookingManager\Tenants\Tenancy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -98,7 +103,9 @@ class WhatsAppService {
 			'active'               => (bool) $config['active'] && $connected,
 			'country_code'         => (string) $config['country_code'],
 			'credentials'          => $fields,
-			'webhook_url'          => rest_url( PublicController::REST_NAMESPACE . '/whatsapp/webhook' ),
+			// Each customer has its own address (0.2.6); the default one keeps the old address.
+			'webhook_url'          => rest_url( PublicController::REST_NAMESPACE . '/whatsapp/webhook' . $this->webhook_suffix() ),
+			'allowed'              => $this->settings->allowed(),
 			'verify_token'         => (string) ( $creds['verify_token'] ?? '' ),
 			'encryption_available' => true,
 			'next_run'             => self::next( Installer::NOTIFICATIONS_HOOK ),
@@ -113,6 +120,35 @@ class WhatsAppService {
 				)
 			),
 		);
+	}
+
+	/** "/{uuid}" of the current customer when it has its own settings, else "". */
+	private function webhook_suffix(): string {
+		$tenant = $this->settings->current_tenant();
+		if ( 0 === $tenant ) {
+			return '';
+		}
+		$row = ( new \BookingManager\Tenants\TenantRepository() )->find( $tenant );
+		return $row ? '/' . (string) $row['uuid'] : '';
+	}
+
+	/**
+	 * Ids of the properties of the current customer; null on a site without customers.
+	 *
+	 * @return int[]|null
+	 */
+	private function own_properties(): ?array {
+		if ( ! Tenancy::ready() ) {
+			return null;
+		}
+		$tenant = $this->settings->current_tenant() ?: Tenancy::default_id();
+		$ids    = array();
+		foreach ( $this->properties->all( null, true ) as $property ) {
+			if ( Tenancy::of_property( (int) $property['id'] ) === $tenant ) {
+				$ids[] = (int) $property['id'];
+			}
+		}
+		return $ids;
 	}
 
 	private static function next( string $hook ): ?string {
@@ -173,6 +209,9 @@ class WhatsAppService {
 	 * @return array<string, mixed>|\WP_Error the section
 	 */
 	public function connect( array $input ): array|\WP_Error {
+		if ( ! $this->settings->allowed() ) {
+			return new \WP_Error( 'bkng_plan_feature', __( 'Il piano non comprende WhatsApp: contatta la piattaforma.', 'booking-manager' ), array( 'status' => 403 ) );
+		}
 		$config   = $this->settings->config();
 		$provider = $this->settings->providers()[ (string) ( $input['provider'] ?? '' ) ] ?? null;
 		if ( ! $provider ) {
@@ -518,6 +557,13 @@ class WhatsAppService {
 	 * text changed by an update of the plugin) are sent; the pending ones are checked.
 	 */
 	public function refresh_all(): void {
+		// The site's option (default customer), then every customer with its own WhatsApp.
+		foreach ( $this->settings->tenants_with_settings() as $tenant ) {
+			$this->settings->scoped( $tenant, fn() => $this->refresh_current() );
+		}
+	}
+
+	private function refresh_current(): void {
 		if ( ! $this->settings->connected() ) {
 			return;
 		}
@@ -616,8 +662,13 @@ class WhatsAppService {
 
 	/** @return array<string, mixed> the property whose name and address the examples show */
 	private function first_property(): array {
-		$all = $this->properties->all( null, false );
-		return $all ? (array) $all[0] : array();
+		$own = $this->own_properties();
+		foreach ( $this->properties->all( null, false ) as $property ) {
+			if ( null === $own || in_array( (int) $property['id'], $own, true ) ) {
+				return (array) $property;
+			}
+		}
+		return array();
 	}
 
 	/* ========================================================== log */
@@ -630,8 +681,15 @@ class WhatsAppService {
 	 */
 	public function log( array $filters ): array {
 		$status = (string) ( $filters['status'] ?? '' );
+		$own    = $this->own_properties();
+		if ( array() === $own ) {
+			return array(
+				'items' => array(),
+				'total' => 0,
+			);
+		}
 		$log    = $this->messages->search(
-			null,
+			$own,
 			array(
 				'channel'  => 'whatsapp',
 				'status'   => in_array( $status, NotificationRepository::STATUSES, true ) ? $status : '',
@@ -658,7 +716,8 @@ class WhatsAppService {
 	 */
 	public function resend( int $id ): array|\WP_Error {
 		$row = $this->messages->find( $id );
-		if ( ! $row || 'whatsapp' !== $row['channel'] ) {
+		$own = $this->own_properties();
+		if ( ! $row || 'whatsapp' !== $row['channel'] || ( null !== $own && ! in_array( (int) $row['property_id'], $own, true ) ) ) {
 			return new \WP_Error( 'bkng_not_found', __( 'Messaggio non trovato.', 'booking-manager' ), array( 'status' => 404 ) );
 		}
 		if ( ! $this->settings->active() ) {
@@ -703,8 +762,13 @@ class WhatsAppService {
 		}
 		$payload = json_decode( $raw, true );
 		$updated = 0;
+		$own     = $this->own_properties();
 		foreach ( self::statuses( is_array( $payload ) ? $payload : array() ) as $status ) {
 			$row = $this->messages->find_by_provider_id( 'whatsapp', $status['id'] );
+			// Only the messages of the customer whose address and secret this is.
+			if ( $row && null !== $own && ! in_array( (int) $row['property_id'], $own, true ) ) {
+				continue;
+			}
 			if ( ! $row || ! self::advances( (string) ( $row['delivery_status'] ?? '' ), $status['status'] ) ) {
 				continue;
 			}

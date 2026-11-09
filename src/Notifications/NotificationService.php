@@ -256,7 +256,7 @@ class NotificationService {
 				continue;
 			}
 			// WhatsApp: the site's number (WhatsApp → Collegamento), switched on, this message active.
-			if ( 'whatsapp' === $channel->key() && ! $this->whatsapp->sends( $key ) ) {
+			if ( 'whatsapp' === $channel->key() && ! $this->whatsapp->sends( $key, (int) $property['id'] ) ) {
 				continue;
 			}
 			$recipient = $channel->recipient( $booking );

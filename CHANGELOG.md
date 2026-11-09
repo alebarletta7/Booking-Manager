@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.6] — 8 novembre 2026
+
+Settimo passo della piattaforma con più clienti: WhatsApp per cliente e Channex per struttura (vedi [docs/SAAS.md](docs/SAAS.md)). Il cliente predefinito continua a usare il WhatsApp e la connessione Channex di prima, con gli stessi indirizzi dei webhook: nessun dato viene spostato.
+
+### Novità
+
+- **WhatsApp per cliente**: ogni attività collega il proprio numero WhatsApp Business (Meta), con testi, approvazioni e registro propri. Ogni messaggio parte con il WhatsApp del cliente della struttura prenotata. Meta richiama l'indirizzo dell'attività (`/whatsapp/webhook/{codice}`), mostrato nella scheda Collegamento. La voce WhatsApp torna agli amministratori dell'attività se il piano comprende WhatsApp.
+- **Channex per struttura**: ogni struttura può avere la propria chiave API, il proprio segreto del webhook, ambiente e interruttore (Channex → Collegamento, scegliendo la struttura). Le strutture delle altre attività usano solo la propria connessione e solo se il piano comprende Channex; quelle dell'attività predefinita possono continuare a usare la connessione del sito. Il webhook di una struttura agisce solo su quella struttura.
+- La voce Channex torna a chi gestisce le integrazioni di una struttura (il collegamento del sito resta della piattaforma).
+
+### Modifiche
+
+- `/me` riporta le funzioni del piano del cliente (`tenant.features`).
+- Nuove rotte `/properties/{id}/channex/connection` (GET, PUT, DELETE) e `/connection/test|webhook|webhook-test|signing-key`; webhook pubblici `/channex/webhook/{uuid struttura}` e `/whatsapp/webhook/{uuid cliente}`.
+- Le rotte `/whatsapp…` accettano l'amministratore dell'attività per la propria; `?tenant=ID` solo per la piattaforma.
+
 ## [0.2.5] — 8 novembre 2026
 
 Sesto passo della piattaforma con più clienti: le email di ogni cliente (vedi [docs/SAAS.md](docs/SAAS.md)). Senza impostazioni le email partono e si presentano come prima.

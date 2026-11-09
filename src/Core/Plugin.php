@@ -353,7 +353,7 @@ final class Plugin {
 		$c->set( TemplateRepository::class, fn() => new TemplateRepository() );
 		$c->set( NotificationTemplates::class, fn( Container $c ) => new NotificationTemplates( $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ), $c->get( RoomTypeRepository::class ), $c->get( TenantTemplates::class ), $c->get( TenantProfile::class ) ) );
 		$c->set( EmailChannel::class, fn( Container $c ) => new EmailChannel( $c->get( TenantMail::class ) ) );
-		$c->set( WhatsAppSettings::class, fn( Container $c ) => new WhatsAppSettings( $c->get( SecretBox::class ) ) );
+		$c->set( WhatsAppSettings::class, fn( Container $c ) => new WhatsAppSettings( $c->get( SecretBox::class ), $c->get( TenantRepository::class ), $c->get( Plans::class ) ) );
 		$c->set( WhatsAppChannel::class, fn( Container $c ) => new WhatsAppChannel( $c->get( WhatsAppSettings::class ), $c->get( GuestRepository::class ), $c->get( ManageLink::class ), $c->get( NotificationTemplates::class ) ) );
 		$c->set(
 			NotificationService::class,
@@ -379,7 +379,7 @@ final class Plugin {
 		$c->set( ChannelService::class, fn( Container $c ) => new ChannelService( $c->get( ChannelRefRepository::class ), $c->get( SyncLogRepository::class ), $c->get( BookingService::class ), $c->get( BookingRepository::class ), $c->get( PropertyRepository::class ) ) );
 
 		// Channex (towards Booking.com and the other portals): deltas out, reservations in.
-		$c->set( ChannexSettings::class, fn( Container $c ) => new ChannexSettings( $c->get( SecretBox::class ) ) );
+		$c->set( ChannexSettings::class, fn( Container $c ) => new ChannexSettings( $c->get( SecretBox::class ), $c->get( Plans::class ), $c->get( TenantRepository::class ) ) );
 		$c->set( ChannexClient::class, fn( Container $c ) => new ChannexClient( $c->get( ChannexSettings::class ) ) );
 		$c->set( ChannexMap::class, fn( Container $c ) => new ChannexMap( $c->get( ChannelRefRepository::class ) ) );
 		$c->set( ChannexQueue::class, fn() => new ChannexQueue() );
@@ -456,9 +456,9 @@ final class Plugin {
 		$c->set( CheckinController::class, fn( Container $c ) => new CheckinController( $p( $c ), $c->get( CheckinService::class ), $c->get( BookingRepository::class ) ) );
 		$c->set( HousekeepingController::class, fn( Container $c ) => new HousekeepingController( $p( $c ), $c->get( HousekeepingService::class ), $c->get( UnitRepository::class ) ) );
 		$c->set( NotificationsController::class, fn( Container $c ) => new NotificationsController( $p( $c ), $c->get( NotificationService::class ), $c->get( NotificationRepository::class ), $c->get( TemplateRepository::class ), $c->get( BookingRepository::class ), $c->get( TenantTemplates::class ) ) );
-		$c->set( WhatsAppController::class, fn( Container $c ) => new WhatsAppController( $p( $c ), $c->get( WhatsAppService::class ) ) );
+		$c->set( WhatsAppController::class, fn( Container $c ) => new WhatsAppController( $p( $c ), $c->get( WhatsAppService::class ), $c->get( WhatsAppSettings::class ), $c->get( PropertyScope::class ) ) );
 		$c->set( ChannelsController::class, fn( Container $c ) => new ChannelsController( $p( $c ), $c->get( ChannelService::class ), $c->get( RoomTypeRepository::class ) ) );
-		$c->set( ChannexController::class, fn( Container $c ) => new ChannexController( $p( $c ), $c->get( ChannexAdmin::class ), $c->get( ChannexBookings::class ), $c->get( ChannexRevisions::class ) ) );
+		$c->set( ChannexController::class, fn( Container $c ) => new ChannexController( $p( $c ), $c->get( ChannexAdmin::class ), $c->get( ChannexBookings::class ), $c->get( ChannexRevisions::class ), $c->get( ChannexSettings::class ), $c->get( PropertyRepository::class ) ) );
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
 		$c->set( StaffEntry::class, fn() => new StaffEntry() );

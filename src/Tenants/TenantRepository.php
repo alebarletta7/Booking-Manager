@@ -27,6 +27,18 @@ class TenantRepository {
 		return $row ? self::hydrate( $row ) : null;
 	}
 
+	/** @return array<string, mixed>|null by its public id (webhook addresses, 0.2.6) */
+	public function find_by_uuid( string $uuid ): ?array {
+		global $wpdb;
+		if ( ! preg_match( '/^[0-9a-f-]{36}$/i', $uuid ) ) {
+			return null;
+		}
+		$table = Schema::table( 'tenants' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE uuid = %s", strtolower( $uuid ) ), ARRAY_A );
+		return $row ? self::hydrate( $row ) : null;
+	}
+
 	/** @return array<string, mixed>|null the tenant marked as default (the first one). */
 	public function find_default(): ?array {
 		global $wpdb;

@@ -43,6 +43,95 @@ class ChannexAdmin {
 		return rest_url( PublicController::REST_NAMESPACE . '/channex/webhook' );
 	}
 
+	/**
+	 * The address Channex calls: the site's, or (own connection, 0.2.6) the property's.
+	 */
+	private function hook_url(): string {
+		if ( $this->settings->is_own() ) {
+			$property = $this->properties->find( $this->settings->current_property() );
+			if ( $property ) {
+				return rest_url( PublicController::REST_NAMESPACE . '/channex/webhook/' . (string) $property['uuid'] );
+			}
+		}
+		return self::webhook_url();
+	}
+
+	/**
+	 * A property's own connection (0.2.6), shaped like overview(): only its data.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function connection( int $property_id ): array {
+		return $this->settings->scoped(
+			$property_id,
+			function () use ( $property_id ) {
+				$uuid   = $this->map->property_uuid( $property_id );
+				$alerts = $this->alerts->of_property( $property_id );
+				return array(
+					'settings'         => $this->settings->view(),
+					'webhook_url'      => $this->hook_url(),
+					'linked'           => null === $uuid ? array() : array( (string) $property_id => (string) $uuid ),
+					'alerts'           => $alerts,
+					'unread'           => count( array_filter( $alerts, static fn( array $a ) => empty( $a['read'] ) ) ),
+					'next_tick'        => self::next( ChannexSync::TICK_HOOK ),
+					'action_scheduler' => function_exists( 'as_enqueue_async_action' ),
+					'property_id'      => $property_id,
+					// Without its own connection the property may still use the site's (default customer).
+					'shares_site'      => ! $this->settings->has_own( $property_id ) && ChannexSettings::may_share( $property_id ),
+				);
+			},
+			true
+		);
+	}
+
+	/**
+	 * Runs an operation of the connection screen on a property's own connection.
+	 *
+	 * @param string $operation save_settings | test | register_webhook | test_webhook | create_signing_key | forget
+	 * @param array<string, mixed> $input
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function on_property( int $property_id, string $operation, array $input = array() ): array|\WP_Error {
+		$result = $this->settings->scoped(
+			$property_id,
+			function () use ( $property_id, $operation, $input ) {
+				if ( ! $this->settings->allowed() ) {
+					return new \WP_Error( 'bkng_plan_feature', __( 'Il piano non comprende Channex: contatta la piattaforma.', 'booking-manager' ), array( 'status' => 403 ) );
+				}
+				switch ( $operation ) {
+					case 'save_settings':
+						return $this->save_settings( $input );
+					case 'test':
+						return $this->test();
+					case 'register_webhook':
+						return $this->register_webhook();
+					case 'test_webhook':
+						return $this->test_webhook();
+					case 'create_signing_key':
+						return $this->create_signing_key();
+					case 'forget':
+						$this->settings->forget_own( $property_id );
+						$this->audit->log(
+							array(
+								'action'      => 'channex.connection_removed',
+								'entity_type' => 'property',
+								'entity_id'   => $property_id,
+								'property_id' => $property_id,
+							)
+						);
+						return array();
+				}
+				return new \WP_Error( 'bkng_invalid', __( 'Operazione non valida.', 'booking-manager' ), array( 'status' => 400 ) );
+			},
+			true
+		);
+		if ( $result instanceof \WP_Error ) {
+			return $result;
+		}
+		// The property's view, never the site's overview (other properties, other customers).
+		return array_intersect_key( (array) $result, array( 'ok' => 1, 'properties' => 1, 'tested' => 1 ) ) + $this->connection( $property_id );
+	}
+
 	/** @return array<string, mixed> */
 	public function overview(): array {
 		$linked = $this->map->properties();
@@ -115,12 +204,14 @@ class ChannexAdmin {
 			array(
 				'action'      => 'channex.settings_updated',
 				'entity_type' => 'integration',
+				'property_id' => $this->settings->is_own() ? $this->settings->current_property() : null,
 				'new'         => array_intersect_key( $changes, array_flip( array( 'active', 'environment', 'base_url', 'nightly' ) ) ) + array( 'secrets' => array_keys( $secrets ) ),
 			)
 		);
 		if ( ! $was_active && $this->settings->active() ) {
-			// Going online: everything once, then only the changes.
-			foreach ( array_keys( $this->map->properties() ) as $property_id ) {
+			// Going online: everything once, then only the changes (a property's own connection: only it).
+			$going = $this->settings->is_own() ? array( $this->settings->current_property() => true ) : $this->map->properties();
+			foreach ( array_keys( $going ) as $property_id ) {
 				$this->schedule_full_sync( $property_id );
 			}
 		}
@@ -149,6 +240,10 @@ class ChannexAdmin {
 	 * @return array<string, mixed>
 	 */
 	public function property( int $property_id ): array {
+		return $this->settings->scoped( $property_id, fn() => $this->property_in_scope( $property_id ) );
+	}
+
+	private function property_in_scope( int $property_id ): array {
 		$uuid   = $this->map->property_uuid( $property_id );
 		$plans  = $this->rates->plans( $property_id );
 		$types  = $this->types->for_property( $property_id );
@@ -227,6 +322,10 @@ class ChannexAdmin {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function save_mapping( int $property_id, array $input ): array|\WP_Error {
+		return $this->settings->scoped( $property_id, fn() => $this->save_mapping_in_scope( $property_id, $input ) );
+	}
+
+	private function save_mapping_in_scope( int $property_id, array $input ): array|\WP_Error {
 		$uuid = strtolower( trim( (string) ( $input['channex_property_id'] ?? '' ) ) );
 		if ( '' === $uuid ) {
 			$this->map->clear( $property_id );
@@ -361,7 +460,7 @@ class ChannexAdmin {
 		}
 		$body = array(
 			'webhook' => array(
-				'callback_url'   => self::webhook_url(),
+				'callback_url'   => $this->hook_url(),
 				'event_mask'     => ChannexBookings::EVENT_MASK,
 				'is_active'      => true,
 				'is_global'      => true,
@@ -409,7 +508,7 @@ class ChannexAdmin {
 			'webhooks/test',
 			array(
 				'webhook' => array(
-					'callback_url' => self::webhook_url(),
+					'callback_url' => $this->hook_url(),
 					'event_mask'   => ChannexBookings::EVENT_MASK,
 					'send_data'    => false,
 					'headers'      => $this->webhook_headers(),
