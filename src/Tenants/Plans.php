@@ -28,7 +28,7 @@ class Plans {
 	public const DEFAULT_PLAN = 'unlimited';
 
 	/** Numeric limits; 0 = no limit. */
-	public const LIMITS = array( 'max_properties', 'max_units' );
+	public const LIMITS = array( 'max_properties', 'max_units', 'max_bookings_hour' );
 
 	public const FEATURES = array( 'online_payment', 'whatsapp_meta', 'channex', 'custom_smtp' );
 
@@ -47,6 +47,8 @@ class Plans {
 		return array(
 			'max_properties' => __( 'Strutture', 'booking-manager' ),
 			'max_units'      => __( 'Camere', 'booking-manager' ),
+			// 0.2.7: online bookings per hour for all the customer's properties (0 = no cap).
+			'max_bookings_hour' => __( 'Prenotazioni online all\'ora', 'booking-manager' ),
 		);
 	}
 

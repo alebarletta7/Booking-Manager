@@ -47,6 +47,27 @@ final class RateLimiter {
 		return true;
 	}
 
+	/** Hits counted so far in the current window, without counting one more. */
+	public static function count( string $bucket, string $key ): int {
+		$id = self::id( $bucket, $key );
+		if ( function_exists( 'wp_using_ext_object_cache' ) && wp_using_ext_object_cache() ) {
+			$cached = wp_cache_get( $id, self::GROUP );
+			if ( false !== $cached ) {
+				return (int) $cached;
+			}
+		}
+		return (int) get_transient( $id );
+	}
+
+	/** Starts the counter again (e.g. after a successful login). */
+	public static function reset( string $bucket, string $key ): void {
+		$id = self::id( $bucket, $key );
+		if ( function_exists( 'wp_using_ext_object_cache' ) && wp_using_ext_object_cache() ) {
+			wp_cache_delete( $id, self::GROUP );
+		}
+		delete_transient( $id );
+	}
+
 	/**
 	 * Cache key of a counter (unit-tested): salted hash, so neither IP addresses nor
 	 * e-mails are stored in clear in the options table, and short enough for a transient.

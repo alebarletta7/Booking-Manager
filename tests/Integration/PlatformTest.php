@@ -182,7 +182,7 @@ final class PlatformTest extends TestCase {
 		$this->as_user( $b['admin'] );
 		$own = $this->call( 'GET', '/tenant' )->get_data();
 		$this->assertSame( $b['tenant'], $own['id'] );
-		$this->assertSame( array( 'max_properties' => 1, 'max_units' => 2 ), $own['usage'] );
+		$this->assertSame( array( 'max_properties' => 1, 'max_units' => 2, 'max_bookings_hour' => 0 ), $own['usage'] );
 		foreach ( array( '/platform/tenants', '/platform/plans', '/platform/stats', '/platform/tenants/' . $b['tenant'] ) as $path ) {
 			$this->assertSame( 403, $this->call( 'GET', $path )->get_status(), $path );
 		}

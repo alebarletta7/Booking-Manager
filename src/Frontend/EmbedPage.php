@@ -132,11 +132,8 @@ class EmbedPage {
 		if ( null === $target ) {
 			return;
 		}
-		if ( ! is_ssl() && 'https' === wp_parse_url( home_url(), PHP_URL_SCHEME ) ) {
-			// Same address over https (the token of a "manage" link never travels in clear twice).
-			wp_safe_redirect( 'https://' . wp_parse_url( home_url(), PHP_URL_HOST ) . ( wp_parse_url( home_url(), PHP_URL_PORT ) ? ':' . wp_parse_url( home_url(), PHP_URL_PORT ) : '' ) . $uri, 301 );
-			exit;
-		}
+		// Same address over https (the token of a "manage" link never travels in clear twice).
+		\BookingManager\Core\Https::redirect_if_needed();
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only page; the token is the credential.
 		$manage = ! empty( $_GET[ ManageLink::ARG_CODE ] ) && ! empty( $_GET[ ManageLink::ARG_TOKEN ] );
 		// phpcs:enable

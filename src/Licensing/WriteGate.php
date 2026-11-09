@@ -134,6 +134,7 @@ class WriteGate {
 		// Platform panel (0.2.2): the platform manages its customers whatever the licence says.
 		'#^/platform/tenants(/\d+(/(suspend|activate|archive|domains|users))?)?$#',
 		'#^/platform/plans$#',
+		'#^/platform/viewing$#',
 		// The customer's contacts and look (0.2.4): no booking, no room.
 		'#^/tenant/profile$#',
 		// How the customer's e-mails leave (0.2.5).

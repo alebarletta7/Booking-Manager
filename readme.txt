@@ -4,7 +4,7 @@ Tags: booking, b&b, hotel, prenotazioni, affittacamere
 Requires at least: 6.6
 Tested up to: 6.6
 Requires PHP: 8.1
-Stable tag: 0.2.6
+Stable tag: 0.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,9 @@ Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
 3. Segui la configurazione guidata.
 
 == Changelog ==
+
+= 0.2.7 =
+* Selettore del cliente per la piattaforma (ogni accesso nel registro), tetto orario di prenotazioni online per piano, blocco dopo troppi tentativi di accesso, HTTPS obbligatorio per modulo e API pubblica quando il sito è in https, documentazione aggiornata.
 
 = 0.2.6 =
 * WhatsApp per cliente: ogni attività collega il proprio numero WhatsApp Business, con testi e registro propri e un proprio indirizzo per Meta. Channex per struttura: chiave API, segreto del webhook e interruttore di ogni struttura; le altre attività non usano mai la connessione del sito. Entrambi secondo il piano del cliente.

@@ -122,12 +122,16 @@ class PublicFrontend {
 			return;
 		}
 		// phpcs:enable
+		// The link carries the guest's token: never over plain http, on any page.
+		\BookingManager\Core\Https::redirect_if_needed();
 		$post = get_queried_object();
 		if ( $post instanceof \WP_Post && has_shortcode( (string) $post->post_content, self::SHORTCODE ) ) {
 			return; // The page with the form shows it.
 		}
 		NoStore::send();
 		header( 'X-Robots-Tag: noindex, nofollow' );
+		// The token in the address never reaches another site.
+		header( 'Referrer-Policy: strict-origin' );
 		$this->enqueue();
 		$title = __( 'La tua prenotazione', 'booking-manager' );
 		?><!doctype html>

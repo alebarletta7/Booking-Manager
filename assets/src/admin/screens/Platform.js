@@ -998,7 +998,11 @@ function PlansEditor( { meta, onSaved } ) {
 							{
 								key: '',
 								name: '',
-								limits: { max_properties: 0, max_units: 0 },
+								limits: {
+									max_properties: 0,
+									max_units: 0,
+									max_bookings_hour: 0,
+								},
 								features: {},
 							},
 						] )

@@ -386,6 +386,53 @@ class TenantService {
 	 *
 	 * @return array<string, mixed>|null
 	 */
+	/**
+	 * The platform's customer selector (0.2.7): enters a customer (the panel then shows
+	 * what that customer sees) or goes back to all with 0. Every entry and exit is in
+	 * the activity log, also visible to the customer.
+	 *
+	 * @return array{tenant_id: int, name: string}|\WP_Error
+	 */
+	public function enter( int $user_id, int $tenant_id ): array|\WP_Error {
+		$meta     = \BookingManager\Access\PropertyScope::VIEWING_META;
+		$previous = (int) get_user_meta( $user_id, $meta, true );
+		if ( $tenant_id <= 0 ) {
+			delete_user_meta( $user_id, $meta );
+			if ( $previous > 0 ) {
+				$this->audit->log(
+					array(
+						'action'      => 'platform.tenant_left',
+						'entity_type' => 'tenant',
+						'entity_id'   => $previous,
+						'tenant_id'   => $previous,
+					)
+				);
+			}
+			return array(
+				'tenant_id' => 0,
+				'name'      => '',
+			);
+		}
+		$tenant = $this->tenants->find( $tenant_id );
+		if ( ! $tenant ) {
+			return self::not_found();
+		}
+		update_user_meta( $user_id, $meta, $tenant_id );
+		$this->audit->log(
+			array(
+				'action'      => 'platform.tenant_entered',
+				'entity_type' => 'tenant',
+				'entity_id'   => $tenant_id,
+				'tenant_id'   => $tenant_id,
+				'new'         => array( 'name' => (string) $tenant['name'] ),
+			)
+		);
+		return array(
+			'tenant_id' => $tenant_id,
+			'name'      => (string) $tenant['name'],
+		);
+	}
+
 	public function own( int $tenant_id ): ?array {
 		$tenant = $tenant_id > 0 ? $this->tenants->find( $tenant_id ) : null;
 		if ( ! $tenant ) {

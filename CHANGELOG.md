@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.7] — 9 novembre 2026
+
+Ultimo passo della piattaforma con più clienti: limiti, accessi, HTTPS, selettore del cliente e documentazione (vedi [docs/SAAS.md](docs/SAAS.md)).
+
+### Novità
+
+- **Selettore del cliente** per la piattaforma, in alto nel gestionale: «Tutti i clienti» oppure un cliente, di cui si vede il gestionale come lo vede lui (strutture, prenotazioni, ospiti, attività, email, WhatsApp). Ogni ingresso e uscita è scritto nel registro attività, visibile anche al cliente.
+- **Prenotazioni online all'ora** come nuovo limite di piano (0 = nessun limite): il tetto vale per tutte le strutture del cliente, solo per il modulo pubblico, e si vede in «Uso del piano».
+- **Protezione degli accessi**: dopo 5 password sbagliate su un account, o 20 dallo stesso indirizzo, gli accessi si fermano per 15 minuti, anche con la password giusta. Si spegne con `BKNG_LOGIN_PROTECTION` a `false`.
+- **HTTPS obbligatorio** quando il sito è in https: pagina iframe e link «gestisci la prenotazione» passano a https, l'API pubblica rifiuta le richieste in http. Si spegne con `BKNG_FORCE_HTTPS` a `false`.
+
+### Modifiche
+
+- `/me` ha il campo `viewing`; nuova rotta `/platform/viewing`.
+- La pagina «gestisci la prenotazione» invia `Referrer-Policy: strict-origin`.
+- Documentazione: architettura (piattaforma e sicurezza), API (rotte della piattaforma e del cliente, WhatsApp e Channex per cliente e struttura), hook e costanti.
+
 ## [0.2.6] — 8 novembre 2026
 
 Settimo passo della piattaforma con più clienti: WhatsApp per cliente e Channex per struttura (vedi [docs/SAAS.md](docs/SAAS.md)). Il cliente predefinito continua a usare il WhatsApp e la connessione Channex di prima, con gli stessi indirizzi dei webhook: nessun dato viene spostato.

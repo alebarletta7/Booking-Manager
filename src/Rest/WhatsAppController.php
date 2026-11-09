@@ -78,7 +78,7 @@ class WhatsAppController extends RestController {
 		if ( $asked > 0 && current_user_can( 'bkng_manage_settings' ) ) {
 			return $asked;
 		}
-		return $this->scope ? $this->scope->tenant_of( get_current_user_id() ) : 0;
+		return $this->scope ? $this->scope->acting_tenant( get_current_user_id() ) : 0;
 	}
 
 	/**
