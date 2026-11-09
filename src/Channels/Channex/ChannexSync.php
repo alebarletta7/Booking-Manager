@@ -170,7 +170,8 @@ class ChannexSync {
 
 	/** Property linked to Channex and sync switched on. */
 	private function live( int $property_id ): bool {
-		return $property_id > 0 && $this->settings->active() && null !== $this->map->property_uuid( $property_id );
+		// The property's own connection, or the site's where it may share it (0.2.6).
+		return $property_id > 0 && $this->settings->scoped( $property_id, fn() => $this->settings->active() ) && null !== $this->map->property_uuid( $property_id );
 	}
 
 	/** Sends the queue of a property shortly (a few changes in a row go in one call). */
@@ -191,7 +192,8 @@ class ChannexSync {
 
 	/** Every minute: holds that ran out, queues of every property, feed when due. */
 	public function tick( ?callable $pull = null ): void {
-		if ( ! $this->settings->active() ) {
+		// Each property with its own connection or the site's (0.2.6): checked one by one.
+		if ( ! $this->map->properties() ) {
 			return;
 		}
 		foreach ( $this->holds->expire_due() as $hold ) {
@@ -205,6 +207,9 @@ class ChannexSync {
 			);
 		}
 		foreach ( array_keys( $this->map->properties() ) as $property_id ) {
+			if ( ! $this->live( $property_id ) ) {
+				continue;
+			}
 			$this->push_all( $property_id );
 			if ( null !== $pull ) {
 				$state = $this->log->state( $property_id );
@@ -228,6 +233,10 @@ class ChannexSync {
 	 * @return string sent | empty | inactive | locked | paused | wait | error
 	 */
 	public function push( int $property_id, string $kind ): string {
+		return $this->settings->scoped( $property_id, fn() => $this->push_in_scope( $property_id, $kind ) );
+	}
+
+	private function push_in_scope( int $property_id, string $kind ): string {
 		if ( ! $this->live( $property_id ) ) {
 			return 'inactive';
 		}
@@ -273,6 +282,10 @@ class ChannexSync {
 	 * @return true|\WP_Error
 	 */
 	public function full_sync( int $property_id ): bool|\WP_Error {
+		return $this->settings->scoped( $property_id, fn() => $this->full_sync_in_scope( $property_id ) );
+	}
+
+	private function full_sync_in_scope( int $property_id ): bool|\WP_Error {
 		if ( ! $this->live( $property_id ) ) {
 			return new \WP_Error( 'bkng_channex_inactive', __( 'Collega la struttura a Channex e attiva la sincronizzazione.', 'booking-manager' ), array( 'status' => 409 ) );
 		}
@@ -351,6 +364,10 @@ class ChannexSync {
 	 * queued again (ours wins). Returns the nights queued, or an error.
 	 */
 	public function reconcile( int $property_id ): int|\WP_Error {
+		return $this->settings->scoped( $property_id, fn() => $this->reconcile_in_scope( $property_id ) );
+	}
+
+	private function reconcile_in_scope( int $property_id ): int|\WP_Error {
 		if ( ! $this->live( $property_id ) ) {
 			return 0;
 		}
@@ -397,12 +414,12 @@ class ChannexSync {
 
 	/** Once a night for every property linked: reconciliation, then the full sync if chosen. */
 	public function nightly(): void {
-		if ( ! $this->settings->active() ) {
-			return;
-		}
 		foreach ( array_keys( $this->map->properties() ) as $property_id ) {
+			if ( ! $this->live( $property_id ) ) {
+				continue;
+			}
 			$this->reconcile( $property_id );
-			if ( ! empty( $this->settings->config()['nightly'] ) ) {
+			if ( ! empty( $this->settings->scoped( $property_id, fn() => $this->settings->config() )['nightly'] ) ) {
 				$this->full_sync( $property_id );
 			}
 		}

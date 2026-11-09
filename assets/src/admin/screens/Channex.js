@@ -13,6 +13,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import { get, post, put } from '../lib/api';
+import { can } from '../lib/boot';
 import { date, dateTime } from '../lib/format';
 import { useAction, useLoad } from '../lib/hooks';
 import { useProperty } from '../lib/property';
@@ -128,7 +129,30 @@ function Alerts( { overview, setOverview } ) {
 
 /* ------------------------------------------------------------------ Collegamento */
 
-function ConnectionTab( { overview, setOverview, notify } ) {
+/** Addresses of the site's connection, or of a property's own one (0.2.6). */
+export function connectionPaths( propertyId ) {
+	if ( ! propertyId ) {
+		return {
+			load: '/channex',
+			save: '/channex/settings',
+			test: '/channex/test',
+			key: '/channex/signing-key',
+			webhook: '/channex/webhook',
+			webhookTest: '/channex/webhook/test',
+		};
+	}
+	const base = '/properties/' + propertyId + '/channex/connection';
+	return {
+		load: base,
+		save: base,
+		test: base + '/test',
+		key: base + '/signing-key',
+		webhook: base + '/webhook',
+		webhookTest: base + '/webhook-test',
+	};
+}
+
+function ConnectionTab( { overview, setOverview, notify, paths } ) {
 	const s = overview.settings;
 	const [ form, setForm ] = useState( {
 		environment: s.environment,
@@ -143,7 +167,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 
 	const save = async ( extra = {} ) => {
 		const o = await action.run( () =>
-			put( '/channex/settings', { ...form, ...extra } )
+			put( paths.save, { ...form, ...extra } )
 		);
 		if ( o ) {
 			setOverview( o );
@@ -167,6 +191,22 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 		<div className="bkng-stack">
 			<Card title={ __( 'Account Channex', 'booking-manager' ) }>
 				<ErrorNotice error={ action.error } />
+				{ overview.shares_site && (
+					<p className="bkng-help">
+						{ __(
+							'Questa struttura usa il collegamento Channex della piattaforma. Inserisci qui una chiave per darle un collegamento suo.',
+							'booking-manager'
+						) }
+					</p>
+				) }
+				{ s.allowed === false && (
+					<p className="bkng-help is-error" role="alert">
+						{ __(
+							'Il piano non comprende Channex: contatta la piattaforma per attivarlo.',
+							'booking-manager'
+						) }
+					</p>
+				) }
 				{ s.suspended && (
 					<p className="bkng-help is-error" role="alert">
 						{ __(
@@ -262,7 +302,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 						onClick={ async () => {
 							setTest( null );
 							const r = await action.run( () =>
-								post( '/channex/test' )
+								post( paths.test )
 							);
 							if ( r ) {
 								setTest( r.properties );
@@ -327,7 +367,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 						disabled={ action.busy || ! s.has_api_key }
 						onClick={ () =>
 							run(
-								'/channex/signing-key',
+								paths.key,
 								__(
 									'Chiave del webhook generata. Ora crea o aggiorna il webhook su Channex.',
 									'booking-manager'
@@ -349,7 +389,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 						}
 						onClick={ () =>
 							run(
-								'/channex/webhook',
+								paths.webhook,
 								__(
 									'Webhook creato (o aggiornato) su Channex.',
 									'booking-manager'
@@ -372,7 +412,7 @@ function ConnectionTab( { overview, setOverview, notify } ) {
 						disabled={ action.busy || ! s.webhook_id }
 						onClick={ () =>
 							run(
-								'/channex/webhook/test',
+								paths.webhookTest,
 								__(
 									'Channex ha inviato la prova: controlla il registro in «Prenotazioni ricevute».',
 									'booking-manager'
@@ -1212,7 +1252,19 @@ export default function Channex() {
 	const { property } = useProperty();
 	const [ tab, setTab ] = useState( 'connection' );
 	const [ notice, setNotice ] = useState( null );
-	const overview = useLoad( () => get( '/channex' ), [] );
+	// 0.2.6: the platform also has the site's connection; a customer only its properties'.
+	const platform = can( 'bkng_platform_manage' );
+	const [ scope, setScope ] = useState( platform ? 'site' : 'property' );
+	const paths = connectionPaths(
+		scope === 'property' && property ? property.id : 0
+	);
+	const overview = useLoad(
+		() =>
+			scope === 'property' && ! property
+				? Promise.resolve( null )
+				: get( paths.load ),
+		[ paths.load ]
+	);
 	const detail = useLoad(
 		() =>
 			property
@@ -1230,6 +1282,15 @@ export default function Channex() {
 
 	if ( overview.loading && ! overview.data ) {
 		return <Loading />;
+	}
+	if ( ! overview.data && ! overview.error ) {
+		return (
+			<Page title="Channex">
+				<Empty
+					title={ __( 'Scegli una struttura', 'booking-manager' ) }
+				/>
+			</Page>
+		);
 	}
 	if ( overview.error ) {
 		return (
@@ -1262,7 +1323,9 @@ export default function Channex() {
 					{ notice }
 				</Success>
 			) }
-			<Alerts overview={ o } setOverview={ overview.setData } />
+			{ scope === 'site' && (
+				<Alerts overview={ o } setOverview={ overview.setData } />
+			) }
 			{ detail.data?.attention > 0 && (
 				<p className="bkng-help is-error" role="status">
 					{ sprintf(
@@ -1276,8 +1339,37 @@ export default function Channex() {
 				</p>
 			) }
 			<Tabs tabs={ TABS } current={ tab } onChange={ setTab } />
+			{ tab === 'connection' && platform && (
+				<Select
+					label={ __( 'Collegamento', 'booking-manager' ) }
+					value={ scope }
+					options={ [
+						{
+							value: 'site',
+							label: __(
+								'Della piattaforma (strutture del cliente predefinito)',
+								'booking-manager'
+							),
+						},
+						{
+							value: 'property',
+							label: sprintf(
+								/* translators: %s: property name */
+								__(
+									'Solo di questa struttura (%s)',
+									'booking-manager'
+								),
+								property?.name || '—'
+							),
+						},
+					] }
+					onChange={ setScope }
+				/>
+			) }
 			{ tab === 'connection' && (
 				<ConnectionTab
+					key={ paths.load }
+					paths={ paths }
 					overview={ o }
 					setOverview={ overview.setData }
 					notify={ ( text ) => {

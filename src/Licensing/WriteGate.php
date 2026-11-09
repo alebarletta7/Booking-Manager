@@ -74,9 +74,9 @@ class WriteGate {
 		// Money already taken must still be settled (confirmed or refunded).
 		'#^/webhooks/[a-z0-9_-]{2,20}/\d+$#',
 		// Delivery updates of WhatsApp messages already sent.
-		'#^/public/whatsapp/webhook$#',
+		'#^/public/whatsapp/webhook(/[0-9a-fA-F-]{36})?$#',
 		// Signals from Channex: only logged (reservations are read by a job, which asks the licence).
-		'#^/public/channex/webhook$#',
+		'#^/public/channex/webhook(/[0-9a-fA-F-]{36})?$#',
 	);
 
 	/**
@@ -124,13 +124,13 @@ class WriteGate {
 		'#^/properties/\d+/templates/[a-z0-9_]+(/preview)?$#',
 		'#^/properties/\d+/channels/[a-z0-9_-]{2,40}/mappings$#',
 		'#^/whatsapp/(settings|connection|templates/refresh|templates/[a-z_]{3,30}(/(preview|test))?|messages/\d+/resend)$#',
-		'#^/public/whatsapp/webhook$#',
+		'#^/public/whatsapp/webhook(/[0-9a-fA-F-]{36})?$#',
 		// Channex: settings, mapping, sends and reads. Reservations from the portals still
 		// go through BookingService, which asks the licence.
 		'#^/channex/(settings|test|webhook|webhook/test|signing-key|alerts/read)$#',
-		'#^/properties/\d+/channex/(mapping|push|pull|full-sync)$#',
+		'#^/properties/\d+/channex/(mapping|push|pull|full-sync|connection|connection/(test|webhook|webhook-test|signing-key))$#',
 		'#^/channex/revisions/[0-9a-fA-F-]{36}/(retry|resolve)$#',
-		'#^/public/channex/webhook$#',
+		'#^/public/channex/webhook(/[0-9a-fA-F-]{36})?$#',
 		// Platform panel (0.2.2): the platform manages its customers whatever the licence says.
 		'#^/platform/tenants(/\d+(/(suspend|activate|archive|domains|users))?)?$#',
 		'#^/platform/plans$#',

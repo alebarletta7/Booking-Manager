@@ -53,19 +53,30 @@ class WhatsAppChannel implements NotificationChannel {
 		return $this->settings;
 	}
 
-	/** Connected, switched on and this message active: it is queued. */
-	public function sends( string $key ): bool {
-		return $this->settings->active() && WhatsAppTemplates::is_active( $this->settings->config(), $key );
+	/**
+	 * Connected, switched on and this message active: it is queued. With a property, its
+	 * customer's WhatsApp (0.2.6); without, the current one.
+	 */
+	public function sends( string $key, int $property_id = 0 ): bool {
+		return $this->for_property(
+			$property_id,
+			fn() => $this->settings->active() && WhatsAppTemplates::is_active( $this->settings->config(), $key )
+		);
 	}
 
 	public function unavailable( array $property ): ?string {
-		if ( ! $this->settings->connected() ) {
-			return __( 'WhatsApp non è collegato (WhatsApp → Collegamento).', 'booking-manager' );
-		}
-		if ( ! $this->settings->active() ) {
-			return __( 'I messaggi WhatsApp sono spenti (WhatsApp → Messaggi).', 'booking-manager' );
-		}
-		return null;
+		return $this->for_property(
+			(int) ( $property['id'] ?? 0 ),
+			function () {
+				if ( ! $this->settings->connected() ) {
+					return __( 'WhatsApp non è collegato (WhatsApp → Collegamento).', 'booking-manager' );
+				}
+				if ( ! $this->settings->active() ) {
+					return __( 'I messaggi WhatsApp sono spenti (WhatsApp → Messaggi).', 'booking-manager' );
+				}
+				return null;
+			}
+		);
 	}
 
 	/** The guest's mobile number as WhatsApp wants it; '' without one or after an opt-out. */
@@ -73,7 +84,21 @@ class WhatsAppChannel implements NotificationChannel {
 		if ( $this->opted_out( $booking ) ) {
 			return '';
 		}
-		return (string) WhatsAppSettings::wa_phone( (string) ( $booking['phone'] ?? '' ), $this->settings->country_code() );
+		return $this->for_property(
+			(int) ( $booking['property_id'] ?? 0 ),
+			fn() => (string) WhatsAppSettings::wa_phone( (string) ( $booking['phone'] ?? '' ), $this->settings->country_code() )
+		);
+	}
+
+	/**
+	 * Runs $fn with the WhatsApp of the property's customer (never another customer's).
+	 *
+	 * @template T
+	 * @param callable(): T $fn
+	 * @return T
+	 */
+	private function for_property( int $property_id, callable $fn ): mixed {
+		return $property_id > 0 ? $this->settings->scoped( WhatsAppSettings::tenant_of_property( $property_id ), $fn ) : $fn();
 	}
 
 	/** @param array<string, mixed> $booking */
@@ -83,6 +108,10 @@ class WhatsAppChannel implements NotificationChannel {
 	}
 
 	public function send( Message $message ): SendResult {
+		return $this->for_property( (int) ( $message->property['id'] ?? 0 ), fn() => $this->send_scoped( $message ) );
+	}
+
+	private function send_scoped( Message $message ): SendResult {
 		$booking = $message->booking;
 		if ( $this->opted_out( $booking ) ) {
 			return SendResult::skipped( __( 'L’ospite non vuole ricevere messaggi WhatsApp.', 'booking-manager' ) );

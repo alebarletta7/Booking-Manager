@@ -1,8 +1,13 @@
 <?php
 /**
- * WhatsApp configuration (option bkng_whatsapp), like Night Manager's: one for the whole
- * site, because Booking Manager sends from one WhatsApp Business number for all its
- * properties (the property's name, address and phone go in the text).
+ * WhatsApp configuration, like Night Manager's: one WhatsApp Business number for all the
+ * properties of a customer (the property's name, address and phone go in the text).
+ *
+ * Since 0.2.6 each customer has its own (bkng_tenants.settings['whatsapp']), used only if
+ * its plan has «WhatsApp (Meta)» (whatsapp_meta). The default customer, and a site
+ * without customers, keep the option bkng_whatsapp, so nothing moves on an update.
+ * Which customer is read is set with scoped(): from the booking's property when
+ * sending, from the user when editing, from the webhook address for Meta.
  *
  *   provider      meta | test (WhatsAppProvider ids)
  *   active        «I messaggi WhatsApp partono da soli»
@@ -22,6 +27,9 @@ declare( strict_types=1 );
 namespace BookingManager\Notifications\WhatsApp;
 
 use BookingManager\Core\SecretBox;
+use BookingManager\Tenants\Plans;
+use BookingManager\Tenants\Tenancy;
+use BookingManager\Tenants\TenantRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,10 +37,74 @@ class WhatsAppSettings {
 
 	public const OPTION = 'bkng_whatsapp';
 
+	/** Key in bkng_tenants.settings. */
+	public const TENANT_KEY = 'whatsapp';
+
 	/** @var array<string, WhatsAppProvider>|null */
 	private ?array $providers = null;
 
-	public function __construct( private SecretBox $box ) {}
+	/** The customer being read or written; 0 = the site's option (default customer). */
+	private int $tenant = 0;
+
+	public function __construct( private SecretBox $box, private ?TenantRepository $tenants = null, private ?Plans $plans = null ) {}
+
+	/**
+	 * Runs $fn with the settings of a customer, then goes back to the previous one.
+	 *
+	 * @template T
+	 * @param callable(): T $fn
+	 * @return T
+	 */
+	public function scoped( int $tenant_id, callable $fn ): mixed {
+		$previous     = $this->tenant;
+		$this->tenant = $this->own_settings( $tenant_id ) ? $tenant_id : 0;
+		try {
+			return $fn();
+		} finally {
+			$this->tenant = $previous;
+		}
+	}
+
+	/** The customer of a property (0 on a site without customers). */
+	public static function tenant_of_property( int $property_id ): int {
+		return Tenancy::ready() && $property_id > 0 ? Tenancy::of_property( $property_id ) : 0;
+	}
+
+	/** The customer whose settings are being read now (0 = the site's option). */
+	public function current_tenant(): int {
+		return $this->tenant;
+	}
+
+	/** A customer other than the default one keeps its settings in its own row. */
+	private function own_settings( int $tenant_id ): bool {
+		return $tenant_id > 0 && null !== $this->tenants && Tenancy::ready() && $tenant_id !== Tenancy::default_id();
+	}
+
+	/**
+	 * 0 (the site's option) and every customer with WhatsApp settings of its own.
+	 *
+	 * @return int[]
+	 */
+	public function tenants_with_settings(): array {
+		$out = array( 0 );
+		if ( $this->tenants && Tenancy::ready() ) {
+			foreach ( $this->tenants->all() as $tenant ) {
+				if ( $this->own_settings( (int) $tenant['id'] ) && ! empty( $tenant['settings'][ self::TENANT_KEY ] ) ) {
+					$out[] = (int) $tenant['id'];
+				}
+			}
+		}
+		return $out;
+	}
+
+	/** The plan of the customer allows WhatsApp (Meta); always on the site's option. */
+	public function allowed(): bool {
+		if ( 0 === $this->tenant || ! $this->plans ) {
+			return true;
+		}
+		$tenant = $this->tenants->find( $this->tenant );
+		return $tenant && ! empty( $this->plans->features_of( $tenant )['whatsapp_meta'] );
+	}
 
 	/** @return array<string, mixed> */
 	public static function defaults(): array {
@@ -55,7 +127,12 @@ class WhatsAppSettings {
 	 * @return array<string, mixed>
 	 */
 	public function config(): array {
-		$value  = get_option( self::OPTION, array() );
+		if ( 0 !== $this->tenant ) {
+			$row   = $this->tenants->find( $this->tenant );
+			$value = $row['settings'][ self::TENANT_KEY ] ?? array();
+		} else {
+			$value = get_option( self::OPTION, array() );
+		}
 		$config = array_merge( self::defaults(), is_array( $value ) ? $value : array() );
 		foreach ( array( 'texts', 'templates' ) as $key ) {
 			$config[ $key ] = array_filter( is_array( $config[ $key ] ) ? $config[ $key ] : array(), 'is_array' );
@@ -65,7 +142,15 @@ class WhatsAppSettings {
 
 	/** @param array<string, mixed> $config */
 	public function save( array $config ): void {
-		update_option( self::OPTION, array_intersect_key( $config, self::defaults() ), false );
+		$config = array_intersect_key( $config, self::defaults() );
+		if ( 0 === $this->tenant ) {
+			update_option( self::OPTION, $config, false );
+			return;
+		}
+		$row      = $this->tenants->find( $this->tenant );
+		$settings = is_array( $row['settings'] ?? null ) ? $row['settings'] : array();
+		$settings[ self::TENANT_KEY ] = $config;
+		$this->tenants->update( $this->tenant, array( 'settings' => $settings ) );
 	}
 
 	/** @return array<string, WhatsAppProvider> */
@@ -114,7 +199,7 @@ class WhatsAppSettings {
 	 */
 	public function connected( ?array $config = null ): bool {
 		$config ??= $this->config();
-		return null !== $this->provider_for( $config ) && '' !== (string) $config['account'] && null !== $this->credentials( $config );
+		return $this->allowed() && null !== $this->provider_for( $config ) && '' !== (string) $config['account'] && null !== $this->credentials( $config );
 	}
 
 	/** Connected and switched on: messages are queued and sent. */

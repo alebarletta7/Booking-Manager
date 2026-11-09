@@ -118,7 +118,7 @@ class MeController extends RestController {
 		);
 	}
 
-	/** @return array{id: int, name: string, status: string, status_label: string, can_sell: bool, reason: string|null}|null the user's customer */
+	/** @return array{id: int, name: string, status: string, status_label: string, can_sell: bool, reason: string|null, features: array<string, bool>}|null the user's customer */
 	private function tenant( int $user_id ): ?array {
 		$id = $this->scope->tenant_of( $user_id );
 		$t  = $id > 0 ? ( new TenantRepository() )->find( $id ) : null;
@@ -134,6 +134,8 @@ class MeController extends RestController {
 			// The app shows a band when the customer cannot take new bookings.
 			'can_sell'     => in_array( $state, \BookingManager\Tenants\TenantStatus::CAN_SELL, true ),
 			'reason'       => \BookingManager\Tenants\TenantStatus::SUSPENDED === $state ? $t['suspend_reason'] : null,
+			// What the plan includes (0.2.6: the menu shows WhatsApp and Channex only then).
+			'features'     => ( new \BookingManager\Tenants\Plans() )->features_of( $t ),
 		);
 	}
 

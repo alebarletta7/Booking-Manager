@@ -124,11 +124,17 @@ class ChannexBookings {
 		$event       = substr( sanitize_key( (string) ( $data['event'] ?? '' ) ), 0, 64 );
 		$cx_property = (string) ( $data['property_id'] ?? '' );
 		$property_id = ChannexMap::is_uuid( $cx_property ) ? $this->map->property_for( $cx_property ) : null;
+		// 0.2.6: a property's address and secret act only on that property; the site's
+		// address only on the properties that use the site's connection.
+		$scoped = $this->settings->current_property();
+		if ( null !== $property_id && ( $scoped > 0 ? $property_id !== $scoped : $this->settings->has_own( $property_id ) || ! ChannexSettings::may_share( $property_id ) ) ) {
+			$property_id = null;
+		}
 		$this->log->webhook( $event, $property_id, ChannexMap::is_uuid( $cx_property ) ? $cx_property : null, $valid, $raw );
 		if ( ! $valid ) {
 			return 401;
 		}
-		if ( null === $property_id || ! $this->settings->active() ) {
+		if ( null === $property_id || ! $this->settings->scoped( $property_id, fn() => $this->settings->active() ) ) {
 			return 200;
 		}
 		if ( in_array( $event, self::ALERT_EVENTS, true ) ) {
@@ -173,6 +179,10 @@ class ChannexBookings {
 	 * @return array{processed: int, errors: int}|\WP_Error
 	 */
 	public function pull( int $property_id ): array|\WP_Error {
+		return $this->settings->scoped( $property_id, fn() => $this->pull_in_scope( $property_id ) );
+	}
+
+	private function pull_in_scope( int $property_id ): array|\WP_Error {
 		$uuid = $this->map->property_uuid( $property_id );
 		if ( ! $this->settings->active() || null === $uuid ) {
 			return array(
@@ -251,6 +261,10 @@ class ChannexBookings {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function handle( int $property_id, array $item ): array|\WP_Error {
+		return $this->settings->scoped( $property_id, fn() => $this->handle_in_scope( $property_id, $item ) );
+	}
+
+	private function handle_in_scope( int $property_id, array $item ): array|\WP_Error {
 		$attributes  = is_array( $item['attributes'] ?? null ) ? $item['attributes'] : array();
 		$revision_id = (string) ( $item['id'] ?? $attributes['id'] ?? '' );
 		if ( ! ChannexMap::is_uuid( $revision_id ) ) {
@@ -284,6 +298,11 @@ class ChannexBookings {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function retry( string $revision_id ): array|\WP_Error {
+		$row = $this->revisions->find( $revision_id );
+		return $this->settings->scoped( (int) ( $row['property_id'] ?? 0 ), fn() => $this->retry_in_scope( $revision_id ) );
+	}
+
+	private function retry_in_scope( string $revision_id ): array|\WP_Error {
 		$row = $this->revisions->find( $revision_id );
 		if ( ! $row || ! $row['property_id'] ) {
 			return new \WP_Error( 'bkng_not_found', __( 'Prenotazione ricevuta non trovata.', 'booking-manager' ), array( 'status' => 404 ) );

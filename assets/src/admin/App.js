@@ -125,13 +125,17 @@ const NAV = [
 			{
 				path: '/whatsapp',
 				label: __( 'WhatsApp', 'booking-manager' ),
-				cap: 'bkng_manage_settings',
+				// 0.2.6: each customer its own number, if the plan includes it.
+				cap: 'bkng_manage_properties',
+				feature: 'whatsapp_meta',
 				icon: whatsappIcon,
 			},
 			{
 				path: '/channex',
 				label: __( 'Channex', 'booking-manager' ),
-				cap: 'bkng_platform_manage',
+				// 0.2.6: each property its own connection, if the plan includes it.
+				cap: 'bkng_manage_integrations',
+				feature: 'channex',
 				icon: globeIcon,
 			},
 		],
@@ -356,6 +360,9 @@ export default function App() {
 
 	const visible = ( item ) =>
 		can( item.cap ) &&
+		( ! item.feature ||
+			can( 'bkng_manage_settings' ) ||
+			!! me.tenant?.features?.[ item.feature ] ) &&
 		( ! item.tenant || me.tenant ) &&
 		( ! item.housekeeping || ! property || property.housekeeping );
 	const groups = NAV.map( ( group ) => ( {

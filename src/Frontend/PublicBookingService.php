@@ -200,7 +200,7 @@ class PublicBookingService {
 			'privacy_url'       => $privacy,
 			'marketing_consent' => (bool) $s['marketing_consent'],
 			// WhatsApp messages on: the mobile number is required, with the «no WhatsApp» box.
-			'whatsapp'          => $this->whatsapp->active(),
+			'whatsapp'          => $this->whatsapp_on( (int) $property['id'] ),
 			'room_types'        => $types,
 			'extras'            => $this->extras( (int) $property['id'], (bool) $s['show_prices'] ),
 			'available'         => (bool) $types && $this->sells( $property ),
@@ -483,7 +483,7 @@ class PublicBookingService {
 		if ( ! empty( $property['settings']['marketing_consent'] ) ) {
 			$data['marketing_consent'] = rest_sanitize_boolean( $input['marketing_consent'] ?? false );
 		}
-		if ( $this->whatsapp->active() ) {
+		if ( $this->whatsapp_on( (int) $property['id'] ) ) {
 			if ( '' === trim( (string) ( $guest['phone'] ?? '' ) ) ) {
 				return Validation::error( array( 'phone' => __( 'Scrivi il numero di cellulare.', 'booking-manager' ) ) );
 			}
@@ -851,5 +851,10 @@ class PublicBookingService {
 		}
 		$url = wp_get_attachment_image_url( $id, 'full' );
 		return $url ? (string) $url : null;
+	}
+
+	/** WhatsApp messages on for the property's customer (0.2.6). */
+	private function whatsapp_on( int $property_id ): bool {
+		return $this->whatsapp->scoped( WhatsAppSettings::tenant_of_property( $property_id ), fn() => $this->whatsapp->active() );
 	}
 }
