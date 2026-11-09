@@ -27,6 +27,7 @@ import {
 	listView as listViewIcon,
 	arrowLeft as logoutIcon,
 	people as peopleIcon,
+	plus as plusIcon,
 	seen as seenIcon,
 	settings as settingsIcon,
 	shield as shieldIcon,
@@ -360,6 +361,21 @@ function LicenseBand( { notice } ) {
 }
 
 /**
+ * Up to two initials, like Beach Manager («Ale Maka» → «AM»).
+ *
+ * @param {string} name Display name.
+ * @return {string} Initials.
+ */
+function initials( name ) {
+	return String( name || '' )
+		.trim()
+		.split( /\s+/ )
+		.slice( 0, 2 )
+		.map( ( part ) => part.charAt( 0 ).toUpperCase() )
+		.join( '' );
+}
+
+/**
  * The user's menu in the top bar (0.2.12): only the WordPress administrator opens it
  * (profile, WordPress dashboard, logout); the others see their name only and leave
  * with «Esci dall'account» in the side menu (0.2.13).
@@ -370,7 +386,7 @@ function LicenseBand( { notice } ) {
 function UserMenu( { me } ) {
 	const avatar = (
 		<span className="bkng-topbar__avatar" aria-hidden="true">
-			{ me.display_name.charAt( 0 ).toUpperCase() }
+			{ initials( me.display_name ) }
 		</span>
 	);
 	// 0.2.13: only the WordPress administrator can open it; everybody else sees the name.
@@ -744,6 +760,8 @@ export default function App() {
 						{ can( 'bkng_create_booking' ) && property && (
 							<Button
 								variant="primary"
+								icon={ plusIcon }
+								className="bkng-topbar__new"
 								onClick={ () => navigate( '/bookings/new' ) }
 							>
 								{ __(

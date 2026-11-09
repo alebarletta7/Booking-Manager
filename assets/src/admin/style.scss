@@ -1894,3 +1894,118 @@ html.wp-toolbar:has(body.bkng-operational) {
 		}
 	}
 }
+
+// 0.2.14: the same feel as Beach Manager, so a customer moving between the two
+// gestionali finds the same shapes: rounded buttons and fields, outlined secondary
+// buttons, the yellow avatar with initials, larger page titles.
+$sun: #f2b705;
+$radius-s: 6px;
+
+.bkng-root,
+.bkng-modal,
+.bkng-user-menu {
+	.components-button {
+		border-radius: $radius-s;
+
+		&.is-primary,
+		&.is-secondary {
+			height: auto;
+			min-height: 40px;
+			padding: 0 16px;
+			font-weight: 600;
+
+			&.is-small,
+			&.is-compact {
+				min-height: 32px;
+				padding: 0 12px;
+			}
+
+			&.has-icon.has-text {
+				gap: 6px;
+				padding-left: 12px;
+			}
+		}
+
+		&.is-primary:hover:not(:disabled) {
+			background: #174734;
+		}
+
+		&.is-secondary:not(:disabled) {
+			background: #fff;
+			color: $text;
+			box-shadow: inset 0 0 0 1px $line;
+
+			&:hover {
+				background: $soft;
+				color: $primary;
+				box-shadow: inset 0 0 0 1px $accent;
+			}
+
+			&:focus-visible {
+				box-shadow: inset 0 0 0 1px $line, 0 0 0 2px #fff, 0 0 0 4px $accent;
+			}
+		}
+
+		&.is-tertiary:hover:not(:disabled) {
+			background: $soft;
+		}
+	}
+
+	.components-input-control__backdrop,
+	.components-text-control__input,
+	.components-textarea-control__input,
+	.components-select-control__input,
+	input[type="text"],
+	input[type="email"],
+	input[type="tel"],
+	input[type="number"],
+	input[type="search"],
+	input[type="date"],
+	input[type="time"],
+	input[type="url"],
+	input[type="password"],
+	select,
+	textarea {
+		border-radius: $radius-s;
+	}
+
+	// The frame of WordPress inputs and selects is drawn by an inner element with its
+	// own generated class, more specific than ours.
+	.components-input-control__backdrop {
+		border-radius: $radius-s !important;
+	}
+}
+
+.bkng-topbar {
+	gap: 16px;
+
+	&__name {
+		font-size: 16px;
+		font-weight: 650;
+	}
+
+	&__new.components-button.is-primary {
+		min-height: 44px;
+	}
+
+	&__user-toggle {
+		min-height: 44px;
+		padding: 0 10px 0 4px;
+		border-radius: 22px;
+	}
+
+	&__avatar {
+		width: 36px;
+		height: 36px;
+		background: $sun;
+		color: $sidebar;
+		font-size: 14px;
+	}
+}
+
+.bkng-page__title {
+	font-size: 26px;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+}

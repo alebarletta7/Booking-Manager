@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.14] — 9 novembre 2026
+
+### Aspetto
+
+- Gestionale con lo stesso aspetto di Beach Manager, per dare al cliente l'impressione di usare un'unica famiglia di software: **pulsanti e campi arrotondati**, pulsanti secondari bianchi con bordo leggero, «+ Nuova prenotazione» nella barra in alto, avatar giallo con le iniziali (es. «AM»), titoli di pagina più grandi. Colori verdi di Booking Manager invariati; nessuna funzione cambiata.
+
 ## [0.2.13] — 9 novembre 2026
 
 ### Modifiche
