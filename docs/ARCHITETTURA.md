@@ -103,6 +103,8 @@ Chi non ha `access_all_properties` vede solo le strutture assegnate (`user_prope
 
 Con i clienti (0.2.1) `access_all_properties` vuol dire «tutte le strutture **del mio cliente**»; `manage_settings`, `manage_roles` e `platform_manage` valgono solo per gli amministratori di WordPress (`RoleManager::strip_platform_caps`). L'amministratore di un cliente gestisce il proprio WhatsApp, le proprie email e il Channex delle proprie strutture.
 
+Dalla 0.2.9 tutti gli utenti con accesso a Booking Manager lavorano in **modalità operativa** (solo il gestionale, niente bacheca di WordPress) e non possono uscirne; solo gli amministratori di WordPress scelgono (`MeController::operational_by_default`, `Admin\StaffEntry`).
+
 ## Attività pianificate
 
 - ogni ora (`bkng_hourly`): scadenza delle opzioni in attesa di pagamento; stato delle approvazioni dei testi WhatsApp;

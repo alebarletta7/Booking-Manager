@@ -150,7 +150,7 @@ class MeController extends RestController {
 		$stored = is_array( $stored ) ? $stored : array();
 		$locked = self::operational_by_default( $user_id );
 		return array(
-			// Staff always work in operational mode; administrators choose.
+			// Everyone works in operational mode; only WordPress administrators choose.
 			'operational_mode'   => $locked || ! empty( $stored['operational_mode'] ),
 			'operational_locked' => $locked,
 			'property_id'        => isset( $stored['property_id'] ) ? (int) $stored['property_id'] : null,
@@ -158,14 +158,14 @@ class MeController extends RestController {
 	}
 
 	/**
-	 * Staff (any Booking Manager access, but not an administrator of WordPress or of
-	 * Booking Manager) always work in operational mode, without the WordPress menus.
+	 * Everyone with access to Booking Manager works in operational mode, without the
+	 * WordPress menus, and cannot leave it: only WordPress administrators (manage_options)
+	 * choose. Customers' administrators included (0.2.9).
 	 */
 	public static function operational_by_default( int $user_id ): bool {
 		return $user_id > 0
 			&& user_can( $user_id, 'bkng_access' )
-			&& ! user_can( $user_id, 'manage_options' )
-			&& ! user_can( $user_id, 'bkng_manage_settings' );
+			&& ! user_can( $user_id, 'manage_options' );
 	}
 
 	public function update_preferences( \WP_REST_Request $request ): \WP_REST_Response|\WP_Error {

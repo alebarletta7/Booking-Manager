@@ -2,8 +2,9 @@
 /**
  * Staff land straight in the app, in operational mode, and stay there: after logging in,
  * and whatever page of the WordPress dashboard they open (profile included), they are
- * taken to Booking Manager; they leave only with «Esci dall'account». WordPress and
- * Booking Manager administrators keep the usual WordPress behaviour.
+ * taken to Booking Manager; they leave only with «Esci dall'account». Only WordPress
+ * administrators keep the usual WordPress behaviour (0.2.9: customers' administrators too
+ * stay in the app).
  *
  * Who counts as staff: MeController::operational_by_default().
  *

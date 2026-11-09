@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.9] — 9 novembre 2026
+
+### Modifiche
+
+- Menu laterale: nuove voci **«Cambia Gestionale»** (porta alla home del sito, dove si sceglie il gestionale) e, sotto, **«Esci dall'account»**, sempre visibili.
+- **Modalità operativa obbligatoria per tutti** tranne l'amministratore di WordPress: anche gli amministratori dei clienti lavorano solo dentro il gestionale e non vedono «Esci da modalità operativa».
+
+### Correzioni
+
+- La pagina del modulo da incorporare (`/booking/{struttura}/`) prendeva **qualunque** indirizzo che inizia con `/booking/`, anche le pagine del sito o di altri plugin (per esempio il modulo del ristorante su una pagina figlia di «booking»). Ora risponde solo per le proprie strutture e lascia a WordPress gli altri indirizzi, comprese le pagine del sito con lo stesso indirizzo.
+
+### Sicurezza
+
+- Controlli su tutto il plugin: regole di sicurezza WordPress (escape, nonce, input, query preparate, redirect), funzioni pericolose, rotte pubbliche, confronti dei segreti, dipendenze (`composer audit`, `npm audit`), contenuto dello zip. Nessuna vulnerabilità trovata; dettagli in [docs/TEST-REPORT-SAAS.md](docs/TEST-REPORT-SAAS.md#6-controlli-di-sicurezza-029).
+
 ## [0.2.8] — 9 novembre 2026
 
 Fase 4: test della piattaforma con più clienti (vedi [docs/TEST-REPORT-SAAS.md](docs/TEST-REPORT-SAAS.md)).

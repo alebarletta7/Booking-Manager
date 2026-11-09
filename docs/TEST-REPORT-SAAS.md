@@ -104,3 +104,17 @@ Le immagini sono nella cartella del progetto `booking-manager/saas/`: `fase4-ifr
 | SMTP reale | server di un cliente, email di prova, poi una conferma vera |
 | Cloudflare | regole e Turnstile sul dominio della piattaforma |
 | HTTPS dietro un proxy | se il sito è dietro un proxy che termina TLS, controllare che WordPress veda https (altrimenti `BKNG_FORCE_HTTPS` a `false`) |
+
+## 6. Controlli di sicurezza (0.2.9)
+
+| Controllo | Esito |
+|---|---|
+| Regole di sicurezza WordPress (`WordPress.Security.*`, `WordPress.DB.PreparedSQL*`, funzioni PHP vietate) su tutto `src` | 63 segnalazioni, **tutte esaminate: nessuna vulnerabilità**. 33 sono eccezioni (`throw new …`) scambiate per output; le altre sono query con nomi di tabella interni, colonne prese da liste fisse e liste di numeri passate da `intval`, sempre con `$wpdb->prepare()` per i valori; `base64_encode` serve solo alle immagini delle email |
+| Funzioni pericolose (`eval`, `exec`, `unserialize`, `extract`, `$_REQUEST`, caricamenti di file) | nessuna |
+| Rotte REST pubbliche (`__return_true`) | solo i webhook (Stripe/Nexi, Channex, Meta), tutti autenticati da firma o segreto con confronto a tempo costante (`hash_equals`); il modulo pubblico ha i suoi controlli (token del modulo, captcha, limiti) |
+| Isolamento tra clienti su ogni rotta | `TenantIsolationTest`, `SaasScenarioTest`: SUPERATO |
+| Segreti (SMTP, WhatsApp, Channex, pagamenti) | cifrati con `SecretBox`, mai restituiti dall'API né scritti nel registro: SUPERATO |
+| Anteprime HTML delle email nel gestionale | in iframe `sandbox` senza permessi |
+| Dipendenze | `composer audit`: nessuna vulnerabilità; `npm audit --omit=dev`: 0 vulnerabilità |
+| Zip distribuito | niente test, sorgenti JS, `node_modules`, file di configurazione; ogni file PHP di `src` si ferma se aperto direttamente (`ABSPATH`) |
+| Accessi | limite dei tentativi, https obbligatorio, modalità operativa obbligatoria per chi non è amministratore di WordPress |
