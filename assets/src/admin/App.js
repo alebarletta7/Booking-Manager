@@ -1,7 +1,14 @@
 /**
  * The shell: licence gate, guided setup, navigation, property switcher, routes.
  */
-import { Button, Notice, SelectControl } from '@wordpress/components';
+import {
+	Button,
+	Dropdown,
+	MenuGroup,
+	MenuItem,
+	Notice,
+	SelectControl,
+} from '@wordpress/components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
@@ -352,6 +359,60 @@ function LicenseBand( { notice } ) {
 	);
 }
 
+/**
+ * The user's menu in the top bar (0.2.12): profile and WordPress dashboard only for
+ * WordPress administrators, «Esci dall'account» for everybody.
+ *
+ * @param {Object} props
+ * @param {Object} props.me The current user.
+ */
+function UserMenu( { me } ) {
+	return (
+		<Dropdown
+			className="bkng-topbar__user"
+			popoverProps={ { placement: 'bottom-end' } }
+			renderToggle={ ( { isOpen, onToggle } ) => (
+				<button
+					type="button"
+					className="bkng-topbar__user-toggle"
+					onClick={ onToggle }
+					aria-expanded={ isOpen }
+				>
+					<span className="bkng-topbar__avatar" aria-hidden="true">
+						{ me.display_name.charAt( 0 ).toUpperCase() }
+					</span>
+					{ me.display_name }
+				</button>
+			) }
+			renderContent={ () => (
+				<div className="bkng-user-menu">
+					<p className="bkng-user-menu__who">
+						<strong>{ me.display_name }</strong>
+						{ me.roles?.length > 0 && (
+							<span>{ me.roles.join( ', ' ) }</span>
+						) }
+					</p>
+					<MenuGroup>
+						{ me.is_wp_admin && boot.profileUrl && (
+							<MenuItem href={ boot.profileUrl }>
+								{ __( 'Il mio profilo', 'booking-manager' ) }
+							</MenuItem>
+						) }
+						{ me.is_wp_admin && boot.wpAdminUrl && (
+							<MenuItem href={ boot.wpAdminUrl }>
+								{ __( 'Bacheca WordPress', 'booking-manager' ) }
+							</MenuItem>
+						) }
+						<MenuItem href={ boot.logoutUrl }>
+							{ __( 'Esci dall’account', 'booking-manager' ) }
+						</MenuItem>
+					</MenuGroup>
+				</div>
+			) }
+		/>
+	);
+}
+
 export default function App() {
 	const route = useRoute();
 	const [ me, setMe ] = useState(
@@ -678,19 +739,7 @@ export default function App() {
 								) }
 							</Button>
 						) }
-						{ me.display_name && (
-							<span className="bkng-topbar__user">
-								<span
-									className="bkng-topbar__avatar"
-									aria-hidden="true"
-								>
-									{ me.display_name
-										.charAt( 0 )
-										.toUpperCase() }
-								</span>
-								{ me.display_name }
-							</span>
-						) }
+						{ me.display_name && <UserMenu me={ me } /> }
 					</div>
 					<LicenseBand notice={ license.notice } />
 					<ViewingBand me={ me } />

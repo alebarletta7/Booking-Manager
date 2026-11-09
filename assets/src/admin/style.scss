@@ -286,6 +286,30 @@ html.wp-toolbar:has(body.bkng-operational) {
 		white-space: nowrap;
 	}
 
+	&__user-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 4px 12px 4px 4px;
+		border: 0;
+		border-radius: 999px;
+		background: transparent;
+		font: inherit;
+		font-weight: 600;
+		color: inherit;
+		cursor: pointer;
+
+		&:hover,
+		&[aria-expanded="true"] {
+			background: $soft;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $primary;
+			outline-offset: 2px;
+		}
+	}
+
 	&__avatar {
 		display: grid;
 		place-items: center;
@@ -1846,5 +1870,27 @@ html.wp-toolbar:has(body.bkng-operational) {
 	&:hover,
 	&:focus {
 		border-color: var(--bkng-green, #1f7a4d);
+	}
+}
+
+// User menu of the top bar (0.2.12).
+.bkng-user-menu {
+	min-width: 220px;
+	padding: 8px;
+
+	&__who {
+		margin: 0 0 8px;
+		padding: 4px 8px 8px;
+		border-bottom: 1px solid $line;
+
+		strong,
+		span {
+			display: block;
+		}
+
+		span {
+			color: #50575e;
+			font-size: 13px;
+		}
 	}
 }
