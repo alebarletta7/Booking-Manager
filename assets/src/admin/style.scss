@@ -332,7 +332,7 @@ html.wp-toolbar:has(body.bkng-operational) {
 
 // Pages and cards.
 .bkng-page {
-	max-width: 1180px;
+	max-width: none;
 
 	&.is-wide {
 		max-width: none;
@@ -803,8 +803,8 @@ html.wp-toolbar:has(body.bkng-operational) {
 		border-bottom: 1px solid $line;
 		height: 38px;
 		padding: 0;
-		width: 44px;
-		min-width: 44px;
+		width: var(--bkng-cell, 44px);
+		min-width: var(--bkng-cell, 44px);
 		text-align: center;
 		font-size: 12px;
 	}
@@ -2008,4 +2008,198 @@ $radius-s: 6px;
 	font-weight: 650;
 	letter-spacing: -0.01em;
 	line-height: 1.2;
+}
+
+// 0.2.15: details.
+.bkng-root,
+.bkng-modal {
+	// «Modifica» «Togli» and similar text buttons side by side were glued together.
+	.components-button.is-link + .components-button.is-link,
+	.components-button.is-tertiary + .components-button.is-tertiary {
+		margin-left: 14px;
+	}
+
+	// A checkbox right above buttons (e.g. Channex «Risincronizza… ogni notte» / Salva).
+	.components-checkbox-control + .bkng-row,
+	.components-checkbox-control + .components-button,
+	.components-checkbox-control + .bkng-card__actions {
+		margin-top: 18px;
+	}
+}
+
+// Bottom bar of the sections: phones only.
+.bkng-tabbar {
+	display: none;
+}
+
+@media (max-width: 782px) {
+	// Top bar like Beach Manager on the phone: menu, property, «+», avatar on one line.
+	.bkng-topbar {
+		gap: 10px;
+		min-height: 60px;
+
+		&__name {
+			flex: 1;
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			font-size: 17px;
+		}
+
+		&__property {
+			flex: 1;
+		}
+
+		&__new.components-button.is-primary {
+			flex-shrink: 0;
+			justify-content: center;
+			width: 44px;
+			min-height: 44px;
+			padding: 0;
+		}
+
+		&__new-label,
+		&__user-name {
+			display: none;
+		}
+
+		&__user {
+			display: inline-flex;
+			flex-shrink: 0;
+			margin-left: 0;
+		}
+
+		&__user-toggle {
+			padding: 0;
+		}
+
+		&__avatar {
+			width: 44px;
+			height: 44px;
+			font-size: 15px;
+		}
+	}
+
+	// Platform: the customer selector goes on its own line below.
+	.bkng-topbar {
+		flex-wrap: wrap;
+	}
+
+	.bkng-topbar__tenant-wrap {
+		order: 10;
+		flex-basis: 100%;
+	}
+
+	.bkng-tabbar {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 90;
+		display: flex;
+		background: #fff;
+		border-top: 1px solid $line;
+		padding-bottom: env(safe-area-inset-bottom);
+
+		&__item {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 2px;
+			min-height: 62px;
+			padding: 6px 2px;
+			border: 0;
+			background: transparent;
+			color: $muted;
+			font: inherit;
+			font-size: 12px;
+			text-decoration: none;
+			cursor: pointer;
+
+			svg {
+				fill: currentcolor;
+			}
+
+			&.is-current {
+				color: $primary;
+				font-weight: 700;
+			}
+
+			&:focus-visible {
+				outline: 2px solid $accent;
+				outline-offset: -4px;
+			}
+		}
+	}
+
+	// The last lines of a page stay above the bottom bar.
+	.bkng-content {
+		padding-bottom: calc(80px + env(safe-area-inset-bottom));
+	}
+
+	.bkng-page__title {
+		font-size: 26px;
+	}
+
+	.bkng-planning .bkng-planning__room {
+		width: 96px;
+		min-width: 96px;
+		padding: 0 6px;
+		font-size: 12px;
+	}
+}
+
+// Buttons at the bottom of a card (e.g. «Aggiungi camera» under the rooms of a type).
+.bkng-card__foot {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px solid $line;
+}
+
+@media (max-width: 782px) {
+	// Card title on its own line, its buttons below it.
+	.bkng-card__header {
+		flex-wrap: wrap;
+		padding: 14px 16px;
+	}
+
+	.bkng-card__title {
+		font-size: 17px;
+		flex: 1 1 auto;
+	}
+
+	.bkng-card__body {
+		padding: 14px 16px;
+	}
+
+	// Page heading: title, then its buttons in a row.
+	.bkng-page__header {
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+
+	.bkng-page__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 10px 14px;
+		width: 100%;
+	}
+
+	// Rows of a list: name first, its badge and links wrap below when the line is full.
+	.bkng-list > li {
+		flex-wrap: wrap;
+		row-gap: 6px;
+	}
+
+	.bkng-card__foot .components-button {
+		flex: 1 1 auto;
+		justify-content: center;
+	}
 }

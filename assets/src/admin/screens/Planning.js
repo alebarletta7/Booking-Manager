@@ -4,7 +4,7 @@
  * is free); an empty cell starts a booking; closures are shown and can be added.
  */
 import { Button } from '@wordpress/components';
-import { useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import { del, get, post } from '../lib/api';
@@ -35,6 +35,40 @@ import {
 } from '../components/ui';
 
 const CELL = 44;
+// Width of the room column (keep in line with .bkng-planning__room in style.scss).
+const ROOM_COL = 150;
+const ROOM_COL_PHONE = 96;
+
+/**
+ * Day columns stretch to fill the width of the screen (0.2.15), never below CELL:
+ * with few days the grid fills the card, with many it scrolls as before.
+ *
+ * @param {HTMLElement|null} el   The scrolling box of the grid.
+ * @param {number}           days Columns shown.
+ * @return {number} Width of a day column, in pixels.
+ */
+function useCellWidth( el, days ) {
+	const [ width, setWidth ] = useState( 0 );
+	useEffect( () => {
+		if ( ! el ) {
+			return undefined;
+		}
+		const measure = () => setWidth( el.clientWidth );
+		measure();
+		if ( typeof window.ResizeObserver !== 'function' ) {
+			window.addEventListener( 'resize', measure );
+			return () => window.removeEventListener( 'resize', measure );
+		}
+		const observer = new window.ResizeObserver( measure );
+		observer.observe( el );
+		return () => observer.disconnect();
+	}, [ el ] );
+	if ( ! width || days <= 0 ) {
+		return CELL;
+	}
+	const room = width < 600 ? ROOM_COL_PHONE : ROOM_COL;
+	return Math.max( CELL, Math.floor( ( width - room - 2 ) / days ) );
+}
 
 /** Highlight of the cell under a dragged stay: red when the room type differs. */
 function dropClass( isOver, drag, row ) {
@@ -204,6 +238,8 @@ export default function Planning( { query } ) {
 	const [ over, setOver ] = useState( null );
 	const [ modal, setModal ] = useState( null );
 	const [ notice, setNotice ] = useState( '' );
+	const [ box, setBox ] = useState( null );
+	const cell = useCellWidth( box, days );
 	const remove = useAction();
 	const canMove = can( 'bkng_edit_booking' );
 	const canBlock =
@@ -263,11 +299,11 @@ export default function Planning( { query } ) {
 		if ( n <= 0 ) {
 			return null;
 		}
-		const left = start < from ? 0 : CELL / 2;
+		const left = start < from ? 0 : cell / 2;
 		const width =
-			n * CELL +
-			( start < from ? CELL / 2 : 0 ) -
-			( end > to ? CELL / 2 : 0 ) -
+			n * cell +
+			( start < from ? cell / 2 : 0 ) -
+			( end > to ? cell / 2 : 0 ) -
 			4;
 		return {
 			key: s,
@@ -507,7 +543,11 @@ export default function Planning( { query } ) {
 			) }
 			{ plan.data && plan.data.units.length > 0 && (
 				<>
-					<div className="bkng-planning">
+					<div
+						className="bkng-planning"
+						ref={ setBox }
+						style={ { '--bkng-cell': cell + 'px' } }
+					>
 						<table>
 							<thead>
 								<tr>

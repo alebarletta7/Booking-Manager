@@ -670,34 +670,6 @@ export default function Rooms() {
 							t.status === 'active' && (
 								<>
 									<Button
-										variant="secondary"
-										onClick={ () =>
-											setModal( {
-												kind: 'unit',
-												type: t.id,
-											} )
-										}
-									>
-										{ __(
-											'Aggiungi camera',
-											'booking-manager'
-										) }
-									</Button>
-									<Button
-										variant="secondary"
-										onClick={ () =>
-											setModal( {
-												kind: 'series',
-												type: t.id,
-											} )
-										}
-									>
-										{ __(
-											'Aggiungi più camere',
-											'booking-manager'
-										) }
-									</Button>
-									<Button
 										variant="tertiary"
 										onClick={ () =>
 											setModal( {
@@ -847,6 +819,38 @@ export default function Rooms() {
 									</li>
 								) ) }
 							</ul>
+						) }
+						{ manage && t.status === 'active' && (
+							<div className="bkng-card__foot">
+								<Button
+									variant="secondary"
+									onClick={ () =>
+										setModal( {
+											kind: 'unit',
+											type: t.id,
+										} )
+									}
+								>
+									{ __(
+										'Aggiungi camera',
+										'booking-manager'
+									) }
+								</Button>
+								<Button
+									variant="secondary"
+									onClick={ () =>
+										setModal( {
+											kind: 'series',
+											type: t.id,
+										} )
+									}
+								>
+									{ __(
+										'Aggiungi più camere',
+										'booking-manager'
+									) }
+								</Button>
+							</div>
 						) }
 					</Card>
 				);
