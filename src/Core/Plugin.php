@@ -464,6 +464,7 @@ final class Plugin {
 		$c->set( PublicController::class, fn( Container $c ) => new PublicController( $c->get( PublicBookingService::class ) ) );
 		$c->set( AdminApp::class, fn( Container $c ) => new AdminApp( $c->get( MeController::class ), $c->get( LicenseManager::class ), $c->get( SetupController::class ) ) );
 		$c->set( StaffEntry::class, fn() => new StaffEntry() );
+		$c->set( \BookingManager\Admin\Backoffice::class, fn() => new \BookingManager\Admin\Backoffice() );
 	}
 
 	/**
@@ -538,6 +539,7 @@ final class Plugin {
 		$c->get( \BookingManager\Access\LoginGuard::class )->hooks();
 		$c->get( Https::class )->hooks();
 		$c->get( StaffEntry::class )->hooks();
+		$c->get( \BookingManager\Admin\Backoffice::class )->hooks();
 		$c->get( TenantAccess::class )->hooks();
 		$c->get( TenantGate::class )->hooks();
 		if ( is_admin() ) {

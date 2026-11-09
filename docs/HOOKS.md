@@ -92,3 +92,8 @@ Una classe che implementa `Payments\Providers\PaymentProvider` (configurazione, 
 ## PHP
 
 `bkng()` restituisce l'istanza di `BookingManager\Core\Plugin`; `bkng()->get( Classe::class )` dà un servizio. Preferire l'API REST quando possibile: i servizi interni possono cambiare tra versioni minori, gli hook e le rotte no.
+
+
+## Backoffice del sito (0.2.11)
+
+Booking Manager risponde al filtro `cbm_user_can_access_manager` di Custom Backoffice Manager (`Admin\Backoffice`): per il gestionale `booking`, se l'amministratore non ha scelto ruoli nel Backoffice (o Members non è attivo), decide il permesso `bkng_access`. Non apre mai un gestionale non installato, non attivo o a cui mancano capability.

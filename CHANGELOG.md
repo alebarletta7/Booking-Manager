@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.11] — 9 novembre 2026
+
+### Compatibilità
+
+- **Backoffice del sito** (Custom Backoffice Manager): la scheda Booking Manager risultava «Accesso non autorizzato» anche per gli utenti con un ruolo di Booking Manager, perché il Backoffice parte senza ruoli scelti. Ora, se in Custom Backoffice → Gestione ruoli non è scelto nessun ruolo per Booking Manager, entra chi ha il permesso `bkng_access` (tutti i ruoli di Booking Manager), come nella pagina del gestionale stesso. I ruoli scelti dall'amministratore nel Backoffice restano rispettati.
+- «Cambia Gestionale» porta alla pagina Backoffice quando c'è (altrimenti alla home del sito).
+
 ## [0.2.10] — 9 novembre 2026
 
 ### Correzioni
