@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.17] — 9 novembre 2026
+
+### Correzioni
+
+- **Channex, «Chiave API non valida» in Mappatura anche con il collegamento riuscito**: una struttura con un collegamento suo (o di un cliente diverso da quello predefinito) usa la propria chiave, non quella della piattaforma che si prova in «Collegamento». Ora per l'amministratore della piattaforma la scheda Collegamento si apre già sul collegamento che la struttura usa davvero, e in Mappatura, se la chiave viene rifiutata, si vede quale collegamento è (con le ultime cifre della chiave) e un pulsante per aprirlo.
+
 ## [0.2.16] — 9 novembre 2026
 
 ### Correzioni (mobile)

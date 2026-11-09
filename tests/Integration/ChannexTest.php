@@ -226,6 +226,29 @@ final class ChannexTest extends TestCase {
 		$this->assertSame( array(), $this->calls );
 	}
 
+	public function test_the_property_view_says_which_connection_it_used(): void {
+		$admin    = $this->service( ChannexAdmin::class );
+		$settings = $this->service( ChannexSettings::class );
+		$view     = $admin->property( $this->p['id'] );
+		$this->assertSame( 'site', $view['connection']['scope'], 'without its own key the property uses the site\'s' );
+		$this->assertSame( '…6789', $view['connection']['api_key_hint'] );
+
+		// Its own key (e.g. an old one) wins: the screen must point there, not to the site's.
+		$settings->scoped(
+			$this->p['id'],
+			function () use ( $settings ) {
+				$settings->save_credentials( array( 'api_key' => 'own_key_of_the_property_abcd' ) );
+				$settings->save( array( 'suspended' => 'refused' ) ); // No call to the fake Channex.
+			},
+			true
+		);
+		$view = $admin->property( $this->p['id'] );
+		$this->assertSame( 'property', $view['connection']['scope'] );
+		$this->assertSame( '…abcd', $view['connection']['api_key_hint'] );
+		$this->assertStringNotContainsString( 'own_key_of_the_property', (string) wp_json_encode( $view ), 'never the key itself' );
+		delete_option( ChannexSettings::PROPERTY_OPTION . $this->p['id'] );
+	}
+
 	public function test_calls_are_spaced_and_paused_after_429(): void {
 		$this->book( $this->p['id'], $this->twin['type']['id'], 5, 6 );
 		$this->responder = static fn() => array( 429, array( 'errors' => array( 'title' => 'Too Many Requests' ) ) );

@@ -447,7 +447,54 @@ function ConnectionTab( { overview, setOverview, notify, paths } ) {
 
 /* ------------------------------------------------------------------ Mappatura */
 
-function MappingTab( { data, setData, notify } ) {
+/** Where the key used for this property is: its own connection or the platform's. */
+function ConnectionUsed( { connection, onOpen } ) {
+	if ( ! connection ) {
+		return null;
+	}
+	const own = 'property' === connection.scope;
+	const hint = connection.api_key_hint || '—';
+	const text = own
+		? sprintf(
+				/* translators: %s: last characters of the API key */
+				__(
+					'Questa struttura usa il suo collegamento Channex (chiave %s), non quello della piattaforma: la chiave va aggiornata lì.',
+					'booking-manager'
+				),
+				hint
+		  )
+		: sprintf(
+				/* translators: %s: last characters of the API key */
+				__(
+					'Questa struttura usa il collegamento Channex della piattaforma (chiave %s).',
+					'booking-manager'
+				),
+				hint
+		  );
+	return (
+		<>
+			<p className="bkng-help">{ text }</p>
+			{ onOpen && (
+				<Button
+					variant="secondary"
+					onClick={ () => onOpen( connection.scope ) }
+				>
+					{ own
+						? __(
+								'Apri il collegamento della struttura',
+								'booking-manager'
+						  )
+						: __(
+								'Apri il collegamento della piattaforma',
+								'booking-manager'
+						  ) }
+				</Button>
+			) }
+		</>
+	);
+}
+
+function MappingTab( { data, setData, notify, onConnection } ) {
 	const action = useAction();
 	const { local, remote, mapping } = data;
 	const [ propertyUuid, setPropertyUuid ] = useState(
@@ -507,6 +554,10 @@ function MappingTab( { data, setData, notify } ) {
 		return (
 			<Card>
 				<p className="bkng-help is-error">{ remote.error }</p>
+				<ConnectionUsed
+					connection={ data.connection }
+					onOpen={ onConnection }
+				/>
 			</Card>
 		);
 	}
@@ -1273,6 +1324,15 @@ export default function Channex() {
 		[ property?.id ]
 	);
 
+	// The platform sees first the connection the property really uses: a property with
+	// its own key (or of another customer) is not served by the platform's one.
+	const usedScope = detail.data?.connection?.scope;
+	useEffect( () => {
+		if ( platform && usedScope ) {
+			setScope( usedScope );
+		}
+	}, [ platform, usedScope, property?.id ] );
+
 	// Opens on the property's work once it is set up.
 	useEffect( () => {
 		if ( overview.data?.settings.active && detail.data?.linked ) {
@@ -1402,6 +1462,12 @@ export default function Channex() {
 							data={ detail.data }
 							setData={ detail.setData }
 							notify={ notify }
+							onConnection={ ( which ) => {
+								if ( platform ) {
+									setScope( which );
+								}
+								setTab( 'connection' );
+							} }
 						/>
 					) }
 					{ tab !== 'mapping' && ! detail.data.linked && (

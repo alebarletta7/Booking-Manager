@@ -308,6 +308,12 @@ class ChannexAdmin {
 				'rate_plans' => $pairs,
 			),
 			'remote'      => $remote,
+			// 0.2.17: which connection these calls used (its own or the platform's), so
+			// the screen can point to the right one when its key is refused.
+			'connection'  => array(
+				'scope'        => $this->settings->is_own() ? 'property' : 'site',
+				'api_key_hint' => (string) $this->settings->view()['api_key_hint'],
+			),
 			'status'      => $this->sync->status( $property_id ),
 			'revisions'   => $this->revisions->recent( $property_id, 50 ),
 			'attention'   => $this->revisions->attention_count( $property_id ),
