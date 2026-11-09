@@ -297,4 +297,23 @@ final class TenantSecurityTest extends TestCase {
 		$this->assertSame( array( (int) $b['property']['id'] ), $this->service( PropertyScope::class )->allowed_ids( $b['admin'] ) );
 		$this->assertSame( 404, $this->call( 'GET', '/properties/' . $c['property']['id'] )->get_status() );
 	}
+
+	/* ============================================================ operational mode */
+
+	public function test_only_wordpress_administrators_may_leave_operational_mode(): void {
+		$b = $this->customer( 'Hotel Bianchi' );
+		$this->assertFalse( \BookingManager\Rest\MeController::operational_by_default( $this->platform ) );
+		$this->assertTrue( \BookingManager\Rest\MeController::operational_by_default( $b['admin'] ), 'the customer\'s administrator too' );
+
+		$this->as_user( $b['admin'] );
+		$me = $this->call( 'GET', '/me' )->get_data();
+		$this->assertTrue( $me['preferences']['operational_mode'] );
+		$this->assertTrue( $me['preferences']['operational_locked'] );
+		$this->assertSame( 403, $this->call( 'PUT', '/me/preferences', array( 'operational_mode' => false ) )->get_status() );
+
+		$this->as_user( $this->platform );
+		$this->assertFalse( $this->call( 'GET', '/me' )->get_data()['preferences']['operational_locked'] );
+		$this->assertSame( 200, $this->call( 'PUT', '/me/preferences', array( 'operational_mode' => true ) )->get_status() );
+		$this->assertSame( 200, $this->call( 'PUT', '/me/preferences', array( 'operational_mode' => false ) )->get_status() );
+	}
 }

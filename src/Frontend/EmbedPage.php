@@ -129,7 +129,7 @@ class EmbedPage {
 		$uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page.
 		$target = self::match( $uri, (array) wp_unslash( $_GET ), (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ) );
-		if ( null === $target ) {
+		if ( null === $target || ! $this->owns( $target, $uri ) ) {
 			return;
 		}
 		// Same address over https (the token of a "manage" link never travels in clear twice).
@@ -139,6 +139,23 @@ class EmbedPage {
 		// phpcs:enable
 		$this->send( $this->render( $target, $manage ) );
 		exit;
+	}
+
+	/**
+	 * The address is ours only when it names one of our properties and no page of the
+	 * site sits at the same address: /booking/… can be a page of the site or of another
+	 * plugin (e.g. a restaurant form under a «booking» page), which must keep working.
+	 */
+	public function owns( string $slug, string $request_uri ): bool {
+		if ( ! $this->properties->find_by_slug( sanitize_title( $slug ) ) ) {
+			return false;
+		}
+		$path = trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' );
+		$home = trim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
+		if ( '' !== $home && str_starts_with( $path, $home . '/' ) ) {
+			$path = substr( $path, strlen( $home ) + 1 );
+		}
+		return '' === $path || ! get_page_by_path( $path, OBJECT, array( 'page', 'post' ) );
 	}
 
 	/**

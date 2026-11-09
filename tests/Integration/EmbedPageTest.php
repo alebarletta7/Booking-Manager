@@ -140,6 +140,21 @@ final class EmbedPageTest extends TestCase {
 		$this->assertSame( 404, $this->page()->render( (string) $b['property']['slug'] )['status'] );
 	}
 
+	public function test_other_pages_under_booking_are_left_to_wordpress(): void {
+		$b    = $this->customer( 'Hotel Bianchi', 'www.hotel-bianchi.it' );
+		$slug = (string) $b['property']['slug'];
+		$this->assertTrue( $this->page()->owns( $slug, '/booking/' . $slug . '/' ) );
+		// Not one of our properties: e.g. another plugin's form on a page /booking/ristorante/.
+		$parent = self::factory()->post->create( array( 'post_type' => 'page', 'post_name' => 'booking', 'post_status' => 'publish' ) );
+		self::factory()->post->create( array( 'post_type' => 'page', 'post_name' => 'ristorante', 'post_parent' => $parent, 'post_status' => 'publish', 'post_content' => '[restaurant_manager_prenota]' ) );
+		$this->assertFalse( $this->page()->owns( 'ristorante', '/booking/ristorante/' ) );
+		$this->assertFalse( $this->page()->owns( 'non-esiste', '/booking/non-esiste/' ) );
+		// A page of the site at the same address as a property wins.
+		self::factory()->post->create( array( 'post_type' => 'page', 'post_name' => $slug, 'post_parent' => $parent, 'post_status' => 'publish' ) );
+		$this->assertFalse( $this->page()->owns( $slug, '/booking/' . $slug . '/' ) );
+		$this->assertTrue( $this->page()->owns( $slug, '/?bkng_embed=' . $slug ) );
+	}
+
 	public function test_manage_link_and_payment_return_open_the_page_when_no_page_has_the_form(): void {
 		$b       = $this->customer( 'Hotel Bianchi', 'www.hotel-bianchi.it' );
 		$slug    = (string) $b['property']['slug'];

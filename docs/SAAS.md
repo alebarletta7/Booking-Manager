@@ -12,6 +12,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.5 | Email: mittente e SMTP del cliente, modelli, variabili, registro | ✓ |
 | 0.2.6 | WhatsApp Meta per cliente, Channex per struttura | ✓ |
 | 0.2.7 | Limiti per cliente, protezione login, HTTPS, selettore del cliente, documentazione | ✓ |
+| 0.2.9 | Menu «Cambia Gestionale», modalità operativa per tutti tranne WordPress, pagina /booking/… solo per le proprie strutture, controlli di sicurezza | ✓ |
 | 0.2.8 | Fase 4: test della piattaforma ([report](TEST-REPORT-SAAS.md)), correzione del blocco tra prenotazioni simultanee | ✓ |
 
 ## Modello

@@ -622,15 +622,16 @@ export default function App() {
 									  ) }
 							</button>
 						) }
-						{ operational && (
-							<a
-								className="bkng-nav__item"
-								href={ boot.logoutUrl }
-							>
-								<Icon icon={ logoutIcon } size={ 20 } />
-								{ __( 'Esci', 'booking-manager' ) }
+						{ boot.homeUrl && (
+							<a className="bkng-nav__item" href={ boot.homeUrl }>
+								<Icon icon={ homeIcon } size={ 20 } />
+								{ __( 'Cambia Gestionale', 'booking-manager' ) }
 							</a>
 						) }
+						<a className="bkng-nav__item" href={ boot.logoutUrl }>
+							<Icon icon={ logoutIcon } size={ 20 } />
+							{ __( 'Esci dall’account', 'booking-manager' ) }
+						</a>
 						{ boot.version && (
 							<p className="bkng-version">v{ boot.version }</p>
 						) }
