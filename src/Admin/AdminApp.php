@@ -126,7 +126,7 @@ class AdminApp {
 			'logoutUrl'       => html_entity_decode( wp_logout_url( wp_login_url() ), ENT_QUOTES ),
 			'profileUrl'      => admin_url( 'profile.php' ),
 			// «Cambia Gestionale»: the site's home page, where the other dashboards are.
-			'homeUrl'         => home_url( '/' ),
+			'homeUrl'         => Backoffice::switch_url(),
 			'wpAdminUrl'      => admin_url(),
 			'logoUrl'         => BKNG_URL . 'assets/images/logo.svg',
 			'locale'          => str_replace( '_', '-', determine_locale() ),

@@ -14,6 +14,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.7 | Limiti per cliente, protezione login, HTTPS, selettore del cliente, documentazione | ✓ |
 | 0.2.9 | Menu «Cambia Gestionale», modalità operativa per tutti tranne WordPress, pagina /booking/… solo per le proprie strutture, controlli di sicurezza | ✓ |
 | 0.2.10 | Domini con e senza www, struttura non attiva incorporabile, «Verifica incorporamento» | ✓ |
+| 0.2.11 | Compatibilità con il Backoffice del sito (Custom Backoffice Manager) | ✓ |
 | 0.2.8 | Fase 4: test della piattaforma ([report](TEST-REPORT-SAAS.md)), correzione del blocco tra prenotazioni simultanee | ✓ |
 
 ## Modello
