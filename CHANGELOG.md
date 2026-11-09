@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.16] — 9 novembre 2026
+
+### Correzioni (mobile)
+
+- Camere: «Modifica» e «Archivia» della tipologia stanno **sempre sotto il nome**, allineati al titolo, qualunque sia la lunghezza del nome (prima con un nome corto finivano di fianco).
+- Il **menu laterale scorre fino in fondo**: l'altezza segue lo schermo visibile del telefono, così la barra degli indirizzi del browser non nasconde più «Esci dall'account» e la versione.
+
 ## [0.2.15] — 9 novembre 2026
 
 ### Aspetto

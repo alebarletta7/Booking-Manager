@@ -19,6 +19,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.13 | Menu sul nome utente cliccabile solo dall'amministratore di WordPress | ✓ |
 | 0.2.14 | Aspetto allineato a Beach Manager (pulsanti e campi arrotondati, avatar con iniziali) | ✓ |
 | 0.2.15 | Planning e pagine a tutta larghezza, spaziature, mobile con barra in basso, Camere riordinata | ✓ |
+| 0.2.16 | Mobile: tasti tipologia sotto il titolo, menu laterale scorre fino in fondo | ✓ |
 | 0.2.8 | Fase 4: test della piattaforma ([report](TEST-REPORT-SAAS.md)), correzione del blocco tra prenotazioni simultanee | ✓ |
 
 ## Modello
