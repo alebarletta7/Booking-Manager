@@ -1300,12 +1300,16 @@ html.wp-toolbar:has(body.bkng-operational) {
 		min-height: calc(100vh - 46px);
 	}
 
+	// Height of the visible screen (dvh): with «bottom: 0» or 100vh the phone browser's
+	// address bar pushed the last entries («Esci dall'account», version) off screen.
 	.bkng-sidebar {
 		position: fixed;
 		top: 46px;
 		left: 0;
-		bottom: 0;
-		height: auto;
+		bottom: auto;
+		height: calc(100vh - 46px);
+		height: calc(100dvh - 46px);
+		padding-bottom: env(safe-area-inset-bottom);
 		width: min(300px, 86vw);
 		z-index: 100;
 		transform: translateX(-105%);
@@ -1317,6 +1321,8 @@ html.wp-toolbar:has(body.bkng-operational) {
 
 		body.bkng-operational & {
 			top: 0;
+			height: 100vh;
+			height: 100dvh;
 		}
 	}
 
@@ -2169,9 +2175,26 @@ $radius-s: 6px;
 		padding: 14px 16px;
 	}
 
+	// Always the same layout, whatever the length of the title: title on its own line,
+	// its buttons below, aligned with the title (before, a short title kept them beside).
+	.bkng-card__header {
+		row-gap: 4px;
+	}
+
 	.bkng-card__title {
 		font-size: 17px;
-		flex: 1 1 auto;
+		flex: 1 1 100%;
+	}
+
+	.bkng-card__header > .bkng-card__actions {
+		flex: 1 1 100%;
+		gap: 4px;
+		margin-left: -12px;
+
+		.components-button.is-tertiary + .is-tertiary,
+		.components-button.is-link + .is-link {
+			margin-left: 0;
+		}
 	}
 
 	.bkng-card__body {
