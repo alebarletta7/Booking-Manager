@@ -13,6 +13,7 @@ declare( strict_types=1 );
 
 namespace BookingManager\Guests;
 
+use BookingManager\Database\LockFailed;
 use BookingManager\Database\Schema;
 use BookingManager\Tenants\Tenancy;
 
@@ -113,6 +114,7 @@ class GuestRepository {
 		$row['created_at'] = $now;
 		$row['updated_at'] = $now;
 		$wpdb->insert( Schema::table( 'guests' ), $row );
+		LockFailed::check();
 		return (int) $wpdb->insert_id;
 	}
 
@@ -183,6 +185,7 @@ class GuestRepository {
 			'created_at'   => gmdate( 'Y-m-d H:i:s' ),
 		);
 		$wpdb->insert( Schema::table( 'guest_consents' ), Tenancy::ready() ? $row + array( 'tenant_id' => $this->tenant_of( (int) $data['guest_id'] ) ) : $row );
+		LockFailed::check();
 	}
 
 	/** The guest's last answer for a purpose (true granted, false refused), null when never asked. */
