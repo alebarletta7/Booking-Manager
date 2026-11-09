@@ -24,7 +24,7 @@ Piattaforma (amministratori WordPress: bkng_platform_manage)
 - **Un solo punto decide cosa si vede**: `Access\PropertyScope::allowed_ids()` (strutture del cliente dell'utente; per la piattaforma tutte, o quelle del cliente scelto nel selettore). Il cliente non viene mai preso da un parametro della richiesta, tranne per la piattaforma (`?tenant=ID`).
 - **Stato e piano**: `Tenants\TenantGate` (come `LicenseGate` per la licenza) blocca nuove prenotazioni e camere ai clienti sospesi o scaduti, applica i limiti del piano (strutture, camere, prenotazioni online all'ora) e viene chiamato dai servizi, non dai controller.
 - **Impostazioni con ambito**: email (`TenantMail`, `TenantTemplates`) e WhatsApp (`WhatsAppSettings::scoped`) per cliente; Channex per struttura (`ChannexSettings::scoped`). Il cliente o la struttura si ricava sempre dalla prenotazione o dal webhook, mai dall'ultimo invio.
-- **Pagina iframe** `/booking/{struttura}/` (`Frontend\EmbedPage`) con `Content-Security-Policy: frame-ancestors` dai domini del cliente.
+- **Pagina iframe** `/booking/{struttura}/` (`Frontend\EmbedPage`) con `Content-Security-Policy: frame-ancestors` dai domini del cliente (ognuno anche con/senza `www`, 0.2.10). `Tenants\EmbedCheck` («Verifica incorporamento», `GET /platform/tenants/{id}/embed-check`) apre la pagina via HTTP e segnala `X-Frame-Options` o un secondo `frame-ancestors` aggiunti da server, CDN o altri plugin, che PHP non può togliere.
 - **Protezioni** (0.2.7): `Access\LoginGuard` (tentativi di accesso), `Core\Https` (https obbligatorio sulle parti pubbliche), `Core\RateLimiter` (per visitatore e per cliente).
 
 ## Livelli

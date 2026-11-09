@@ -92,6 +92,9 @@ final class EmbedPageTest extends TestCase {
 			"frame-ancestors 'self' www.hotel-bianchi.it hotel-bianchi.it",
 			EmbedPage::csp( array( 'www.hotel-bianchi.it', 'hotel-bianchi.it', "evil.it 'unsafe-inline'", 'a.it; script-src *', 'www.hotel-bianchi.it' ) )
 		);
+		// The other spelling of the same site comes along: with or without www.
+		$this->assertSame( "frame-ancestors 'self' hotel-bianchi.it www.hotel-bianchi.it", EmbedPage::csp( array( 'hotel-bianchi.it' ) ) );
+		$this->assertSame( "frame-ancestors 'self' prenota.lerose.it www.prenota.lerose.it", EmbedPage::csp( array( 'prenota.lerose.it' ) ) );
 	}
 
 	public function test_page_of_a_customer_is_framed_only_by_its_domains(): void {
@@ -101,7 +104,7 @@ final class EmbedPageTest extends TestCase {
 		$response = $this->page()->render( (string) $b['property']['slug'] );
 
 		$this->assertSame( 200, $response['status'] );
-		$this->assertSame( "frame-ancestors 'self' www.hotel-bianchi.it", $response['headers']['Content-Security-Policy'] );
+		$this->assertSame( "frame-ancestors 'self' www.hotel-bianchi.it hotel-bianchi.it", $response['headers']['Content-Security-Policy'] );
 		$this->assertStringNotContainsString( 'lerose', $response['headers']['Content-Security-Policy'] );
 		$this->assertSame( 'strict-origin', $response['headers']['Referrer-Policy'] );
 		$this->assertSame( 'nosniff', $response['headers']['X-Content-Type-Options'] );
@@ -116,7 +119,7 @@ final class EmbedPageTest extends TestCase {
 		$this->assertStringNotContainsString( 'wp-block-library', $response['body'] );
 
 		$other = $this->page()->render( (string) $c['property']['slug'] );
-		$this->assertSame( "frame-ancestors 'self' www.lerose.it", $other['headers']['Content-Security-Policy'] );
+		$this->assertSame( "frame-ancestors 'self' www.lerose.it lerose.it", $other['headers']['Content-Security-Policy'] );
 	}
 
 	public function test_unknown_inactive_or_archived_gives_404_and_suspended_keeps_the_page(): void {
@@ -137,7 +140,43 @@ final class EmbedPageTest extends TestCase {
 
 		$this->tenants->update( $b['tenant'], array( 'status' => TenantStatus::ACTIVE ) );
 		( new PropertyRepository() )->set_status( (int) $b['property']['id'], 'inactive' );
-		$this->assertSame( 404, $this->page()->render( (string) $b['property']['slug'] )['status'] );
+		$inactive = $this->page()->render( (string) $b['property']['slug'] );
+		$this->assertSame( 404, $inactive['status'] );
+		// Its «not available» message still shows on the customer's site, not a refused frame.
+		$this->assertStringContainsString( 'www.hotel-bianchi.it', $inactive['headers']['Content-Security-Policy'] );
+		$this->assertStringNotContainsString( 'data-bkng', $inactive['body'] );
+	}
+
+	public function test_embed_check_reports_headers_added_by_the_server(): void {
+		$b     = $this->customer( 'Hotel Bianchi', 'www.hotel-bianchi.it' );
+		$asked = array();
+		$fake  = function ( $pre, $args, $url ) use ( &$asked ) {
+			$asked[] = $url;
+			return array(
+				'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary(
+					array(
+						'x-frame-options'         => 'SAMEORIGIN',
+						'content-security-policy' => "frame-ancestors 'self' www.hotel-bianchi.it hotel-bianchi.it",
+					)
+				),
+				'body'     => '',
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'cookies'  => array(),
+				'filename' => null,
+			);
+		};
+		add_filter( 'pre_http_request', $fake, 10, 3 );
+		$report = ( new \BookingManager\Tenants\EmbedCheck( $this->tenants ) )->run( $b['tenant'] );
+		remove_filter( 'pre_http_request', $fake, 10 );
+
+		$this->assertSame( array( EmbedPage::url( (string) $b['property']['slug'] ) ), $asked );
+		$this->assertSame( array( 'www.hotel-bianchi.it' ), $report['domains'] );
+		$this->assertCount( 1, $report['pages'] );
+		$this->assertFalse( $report['pages'][0]['ok'] );
+		$this->assertStringContainsString( 'X-Frame-Options: SAMEORIGIN', $report['pages'][0]['problems'][0] );
 	}
 
 	public function test_other_pages_under_booking_are_left_to_wordpress(): void {

@@ -459,12 +459,14 @@ function EditTenant( { tenant, meta, onClose, onDone } ) {
 
 function Domains( { tenant, onChange } ) {
 	const action = useAction();
+	const check = useAction();
 	const [ host, setHost ] = useState( '' );
+	const [ report, setReport ] = useState( null );
 	return (
 		<Card title={ __( 'Domini autorizzati', 'booking-manager' ) }>
 			<p className="bkng-help">
 				{ __(
-					'I siti che potranno mostrare il modulo di prenotazione del cliente in un iframe. Solo il nome del dominio, per esempio www.hotel-esempio.it. Il dominio non dà alcun accesso ai dati.',
+					'I siti che potranno mostrare il modulo di prenotazione del cliente in un iframe. Solo il nome del dominio, per esempio hotel-esempio.it: vale anche con www davanti, e viceversa. Il dominio non dà alcun accesso ai dati.',
 					'booking-manager'
 				) }
 			</p>
@@ -533,6 +535,69 @@ function Domains( { tenant, onChange } ) {
 					{ __( 'Aggiungi', 'booking-manager' ) }
 				</Button>
 			</form>
+			<div className="bkng-row" style={ { marginTop: 16 } }>
+				<Button
+					variant="secondary"
+					isBusy={ check.busy }
+					disabled={ check.busy }
+					onClick={ async () => {
+						const result = await check.run( () =>
+							get(
+								'/platform/tenants/' +
+									tenant.id +
+									'/embed-check'
+							)
+						);
+						if ( result ) {
+							setReport( result );
+						}
+					} }
+				>
+					{ __( 'Verifica incorporamento', 'booking-manager' ) }
+				</Button>
+				<span className="bkng-help">
+					{ __(
+						'Controlla che il modulo possa comparire nei siti del cliente.',
+						'booking-manager'
+					) }
+				</span>
+			</div>
+			<ErrorNotice error={ check.error } />
+			{ report && (
+				<ul className="bkng-list">
+					{ report.pages.length === 0 && (
+						<li className="bkng-muted">
+							{ __(
+								'Il cliente non ha strutture.',
+								'booking-manager'
+							) }
+						</li>
+					) }
+					{ report.pages.map( ( page ) => (
+						<li key={ page.url }>
+							<strong>
+								{ page.ok ? '✓ ' : '✗ ' }
+								{ page.property }
+							</strong>{ ' ' }
+							<code>{ page.url }</code>
+							{ page.ok ? (
+								<p className="bkng-help">
+									{ __(
+										'Nessun blocco: il modulo può comparire nei domini autorizzati.',
+										'booking-manager'
+									) }
+								</p>
+							) : (
+								<ul>
+									{ page.problems.map( ( p ) => (
+										<li key={ p }>{ p }</li>
+									) ) }
+								</ul>
+							) }
+						</li>
+					) ) }
+				</ul>
+			) }
 		</Card>
 	);
 }
