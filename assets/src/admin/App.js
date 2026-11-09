@@ -360,13 +360,28 @@ function LicenseBand( { notice } ) {
 }
 
 /**
- * The user's menu in the top bar (0.2.12): profile and WordPress dashboard only for
- * WordPress administrators, «Esci dall'account» for everybody.
+ * The user's menu in the top bar (0.2.12): only the WordPress administrator opens it
+ * (profile, WordPress dashboard, logout); the others see their name only and leave
+ * with «Esci dall'account» in the side menu (0.2.13).
  *
  * @param {Object} props
  * @param {Object} props.me The current user.
  */
 function UserMenu( { me } ) {
+	const avatar = (
+		<span className="bkng-topbar__avatar" aria-hidden="true">
+			{ me.display_name.charAt( 0 ).toUpperCase() }
+		</span>
+	);
+	// 0.2.13: only the WordPress administrator can open it; everybody else sees the name.
+	if ( ! me.is_wp_admin ) {
+		return (
+			<span className="bkng-topbar__user">
+				{ avatar }
+				{ me.display_name }
+			</span>
+		);
+	}
 	return (
 		<Dropdown
 			className="bkng-topbar__user"
@@ -378,9 +393,7 @@ function UserMenu( { me } ) {
 					onClick={ onToggle }
 					aria-expanded={ isOpen }
 				>
-					<span className="bkng-topbar__avatar" aria-hidden="true">
-						{ me.display_name.charAt( 0 ).toUpperCase() }
-					</span>
+					{ avatar }
 					{ me.display_name }
 				</button>
 			) }
@@ -393,12 +406,12 @@ function UserMenu( { me } ) {
 						) }
 					</p>
 					<MenuGroup>
-						{ me.is_wp_admin && boot.profileUrl && (
+						{ boot.profileUrl && (
 							<MenuItem href={ boot.profileUrl }>
 								{ __( 'Il mio profilo', 'booking-manager' ) }
 							</MenuItem>
 						) }
-						{ me.is_wp_admin && boot.wpAdminUrl && (
+						{ boot.wpAdminUrl && (
 							<MenuItem href={ boot.wpAdminUrl }>
 								{ __( 'Bacheca WordPress', 'booking-manager' ) }
 							</MenuItem>

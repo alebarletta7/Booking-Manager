@@ -16,6 +16,7 @@ Booking Manager può girare su un'unica installazione WordPress centrale che ser
 | 0.2.10 | Domini con e senza www, struttura non attiva incorporabile, «Verifica incorporamento» | ✓ |
 | 0.2.11 | Compatibilità con il Backoffice del sito (Custom Backoffice Manager) | ✓ |
 | 0.2.12 | Menu utente: profilo e bacheca WordPress solo per l'amministratore di WordPress | ✓ |
+| 0.2.13 | Menu sul nome utente cliccabile solo dall'amministratore di WordPress | ✓ |
 | 0.2.8 | Fase 4: test della piattaforma ([report](TEST-REPORT-SAAS.md)), correzione del blocco tra prenotazioni simultanee | ✓ |
 
 ## Modello

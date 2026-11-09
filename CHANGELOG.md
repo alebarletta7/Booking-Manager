@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.13] — 9 novembre 2026
+
+### Modifiche
+
+- Il menu sul nome dell'utente (barra in alto) si apre **solo per l'amministratore di WordPress**. Gli altri utenti vedono il proprio nome senza menu ed escono con «Esci dall'account» nel menu laterale.
+
 ## [0.2.12] — 9 novembre 2026
 
 ### Modifiche
