@@ -109,6 +109,9 @@ class ChannexAdmin {
 						return $this->test_webhook();
 					case 'create_signing_key':
 						return $this->create_signing_key();
+					case 'read_alerts':
+						$this->alerts->mark_read( $property_id );
+						return array();
 					case 'forget':
 						$this->settings->forget_own( $property_id );
 						$this->audit->log(
@@ -444,8 +447,14 @@ class ChannexAdmin {
 	/** @return array<string, mixed> */
 	public function resolve( string $revision_id ): array {
 		$this->revisions->resolve( $revision_id );
-		$row = $this->revisions->find( $revision_id );
-		return $this->property( (int) ( $row['property_id'] ?? 0 ) );
+		$row         = $this->revisions->find( $revision_id );
+		$property_id = (int) ( $row['property_id'] ?? 0 );
+		// 0.2.18: with nothing left to handle, the reservation warnings are closed too
+		// (before, the WordPress notice stayed after «Risolta»).
+		if ( $property_id > 0 && 0 === $this->revisions->attention_count( $property_id ) ) {
+			$this->alerts->mark_read( $property_id, ChannexAlerts::BOOKING_CODES );
+		}
+		return $this->property( $property_id );
 	}
 
 	/** @return array<string, mixed> */

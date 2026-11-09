@@ -63,9 +63,25 @@ class ChannexAlerts {
 		return array_values( array_filter( $this->all(), static fn( array $a ) => (int) ( $a['property_id'] ?? 0 ) === $property_id ) );
 	}
 
-	public function mark_read(): void {
+	/** Warnings about a reservation: closed when the staff has handled every one of them. */
+	public const BOOKING_CODES = array( 'overbooking', 'import_failed', 'cancel_refused', 'booking_unmapped_room', 'booking_unmapped_rate', 'non_acked_booking' );
+
+	/**
+	 * Marks warnings as read: all, those of one property, or only some codes of it.
+	 *
+	 * @param string[]|null $codes
+	 */
+	public function mark_read( ?int $property_id = null, ?array $codes = null ): void {
 		$alerts = array_map(
-			static fn( array $a ) => array( 'read' => true ) + $a,
+			static function ( array $a ) use ( $property_id, $codes ): array {
+				if ( null !== $property_id && (int) ( $a['property_id'] ?? 0 ) !== $property_id ) {
+					return $a;
+				}
+				if ( null !== $codes && ! in_array( (string) ( $a['code'] ?? '' ), $codes, true ) ) {
+					return $a;
+				}
+				return array( 'read' => true ) + $a;
+			},
 			$this->all()
 		);
 		update_option( self::OPTION, $alerts, false );

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.18] — 9 novembre 2026
+
+### Correzioni
+
+- Channex: dopo aver premuto **«Risolta»** su una prenotazione da controllare (es. overbooking), l'avviso rosso nella Bacheca di WordPress restava. Ora, quando non resta nulla da controllare per quella struttura, si chiudono anche i suoi avvisi sulle prenotazioni (gli altri avvisi, come un portale scollegato, restano).
+- Il riquadro **«Avvisi da controllare»** con «Segna come letti» compare anche quando si guarda il collegamento della singola struttura (dalla 0.2.17 la schermata si apre lì), non solo su quello della piattaforma.
+
 ## [0.2.17] — 9 novembre 2026
 
 ### Correzioni

@@ -476,6 +476,14 @@ final class ChannexTest extends TestCase {
 		$this->sync()->push( $this->p['id'], ChannexQueue::AVAILABILITY );
 		$last = end( $this->calls );
 		$this->assertSame( 0, $last['body']['values'][0]['availability'] );
+
+		// «Risolta» closes the warning too: the WordPress notice goes away.
+		$alerts = $this->service( ChannexAlerts::class );
+		$alerts->raise( null, 'disconnect_channel', 'site warning, not about a reservation' );
+		$this->assertSame( 2, $alerts->unread() );
+		$this->service( ChannexAdmin::class )->resolve( 'dddddddd-0000-4000-8000-000000000010' );
+		$this->assertSame( 1, $alerts->unread(), 'only the reservation warning is closed' );
+		$this->assertSame( 'disconnect_channel', array_values( array_filter( $alerts->all(), static fn( $a ) => empty( $a['read'] ) ) )[0]['code'] );
 	}
 
 	public function test_an_unmapped_room_is_kept_and_imported_after_the_mapping(): void {
