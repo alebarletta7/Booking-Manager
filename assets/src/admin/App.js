@@ -26,6 +26,7 @@ import {
 	key as keyIcon,
 	listView as listViewIcon,
 	arrowLeft as logoutIcon,
+	moreHorizontal as moreIcon,
 	people as peopleIcon,
 	plus as plusIcon,
 	seen as seenIcon,
@@ -394,7 +395,9 @@ function UserMenu( { me } ) {
 		return (
 			<span className="bkng-topbar__user">
 				{ avatar }
-				{ me.display_name }
+				<span className="bkng-topbar__user-name">
+					{ me.display_name }
+				</span>
 			</span>
 		);
 	}
@@ -410,7 +413,9 @@ function UserMenu( { me } ) {
 					aria-expanded={ isOpen }
 				>
 					{ avatar }
-					{ me.display_name }
+					<span className="bkng-topbar__user-name">
+						{ me.display_name }
+					</span>
 				</button>
 			) }
 			renderContent={ () => (
@@ -439,6 +444,59 @@ function UserMenu( { me } ) {
 				</div>
 			) }
 		/>
+	);
+}
+
+/**
+ * Phones only (0.2.15, as in Beach Manager): the main sections at the bottom of the
+ * screen, «Altro» opens the full menu. Only the sections the user may open.
+ *
+ * @param {Object}   props
+ * @param {Array}    props.groups Visible menu groups.
+ * @param {string}   props.path   Current route.
+ * @param {Function} props.onMore Opens the side menu.
+ */
+function TabBar( { groups, path, onMore } ) {
+	const wanted = [ '/', '/planning', '/frontdesk', '/bookings' ];
+	const items = groups
+		.flatMap( ( group ) => group.items )
+		.filter( ( item ) => wanted.includes( item.path ) )
+		.sort(
+			( a, b ) => wanted.indexOf( a.path ) - wanted.indexOf( b.path )
+		);
+	const short = {
+		'/frontdesk': __( 'Check-in', 'booking-manager' ),
+	};
+	const isCurrent = ( p ) =>
+		p === '/' ? path === '/' : path === p || path.startsWith( p + '/' );
+	return (
+		<nav
+			className="bkng-tabbar"
+			aria-label={ __( 'Sezioni principali', 'booking-manager' ) }
+		>
+			{ items.map( ( item ) => (
+				<a
+					key={ item.path }
+					href={ '#' + item.path }
+					className={
+						'bkng-tabbar__item' +
+						( isCurrent( item.path ) ? ' is-current' : '' )
+					}
+					aria-current={ isCurrent( item.path ) ? 'page' : undefined }
+				>
+					{ item.icon && <Icon icon={ item.icon } size={ 24 } /> }
+					<span>{ short[ item.path ] || item.label }</span>
+				</a>
+			) ) }
+			<button
+				type="button"
+				className="bkng-tabbar__item"
+				onClick={ onMore }
+			>
+				<Icon icon={ moreIcon } size={ 24 } />
+				<span>{ __( 'Altro', 'booking-manager' ) }</span>
+			</button>
+		</nav>
 	);
 }
 
@@ -736,7 +794,9 @@ export default function App() {
 							onClick={ () => setMenuOpen( ! menuOpen ) }
 						/>
 						{ me.is_platform && (
-							<TenantSwitch viewing={ me.viewing } />
+							<div className="bkng-topbar__tenant-wrap">
+								<TenantSwitch viewing={ me.viewing } />
+							</div>
 						) }
 						{ properties.length > 1 ? (
 							<SelectControl
@@ -762,12 +822,19 @@ export default function App() {
 								variant="primary"
 								icon={ plusIcon }
 								className="bkng-topbar__new"
-								onClick={ () => navigate( '/bookings/new' ) }
-							>
-								{ __(
+								label={ __(
 									'Nuova prenotazione',
 									'booking-manager'
 								) }
+								showTooltip={ false }
+								onClick={ () => navigate( '/bookings/new' ) }
+							>
+								<span className="bkng-topbar__new-label">
+									{ __(
+										'Nuova prenotazione',
+										'booking-manager'
+									) }
+								</span>
 							</Button>
 						) }
 						{ me.display_name && <UserMenu me={ me } /> }
@@ -777,6 +844,11 @@ export default function App() {
 					<TenantBand tenant={ me.tenant } />
 					<main className="bkng-content">{ content }</main>
 				</div>
+				<TabBar
+					groups={ groups }
+					path={ route.path }
+					onMore={ () => setMenuOpen( true ) }
+				/>
 			</div>
 		</PropertyContext.Provider>
 	);

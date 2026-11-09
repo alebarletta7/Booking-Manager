@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.15] — 9 novembre 2026
+
+### Aspetto
+
+- **Planning adattato alla larghezza dello schermo**: le colonne dei giorni si allargano per riempire tutto lo spazio disponibile (su telefono la colonna delle camere è più stretta).
+- **Tutte le pagine a tutta larghezza** (prima si fermavano a 1180 px).
+- Pulsanti **«Modifica» e «Togli»** (e simili) separati invece che attaccati.
+- **Spazio tra casella di spunta e «Salva»** nei moduli (es. Channex).
+- **Versione mobile come Beach Manager**: barra in alto compatta (menu, struttura, «+», avatar) e **barra di navigazione in basso** con Dashboard, Planning, Check-in, Prenotazioni e «Altro» (apre il menu completo).
+- **Pagina Camere su mobile riordinata**: in testa a ogni tipologia solo nome, «Modifica» e «Archivia»; sotto l'elenco delle camere; «Aggiungi camera» e «Aggiungi più camere» in fondo alla scheda.
+
 ## [0.2.14] — 9 novembre 2026
 
 ### Aspetto

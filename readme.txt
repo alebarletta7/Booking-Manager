@@ -4,7 +4,7 @@ Tags: booking, b&b, hotel, prenotazioni, affittacamere
 Requires at least: 6.6
 Tested up to: 6.6
 Requires PHP: 8.1
-Stable tag: 0.2.14
+Stable tag: 0.2.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,9 @@ Richiede una licenza attiva: senza, il plugin mostra solo la schermata Licenza.
 3. Segui la configurazione guidata.
 
 == Changelog ==
+
+= 0.2.15 =
+* Planning e pagine a tutta larghezza, spaziature di pulsanti e caselle, versione mobile con barra in basso come Beach Manager, pagina Camere riordinata su mobile.
 
 = 0.2.14 =
 * Aspetto allineato a Beach Manager: pulsanti e campi arrotondati, avatar con le iniziali, titoli più grandi.
