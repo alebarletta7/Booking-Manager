@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.12] — 9 novembre 2026
+
+### Modifiche
+
+- Barra in alto: il nome dell'utente apre un **menu** con nome e ruolo. L'amministratore di WordPress vi trova **«Il mio profilo»** e **«Bacheca WordPress»**, come in Beach Manager; tutti gli altri solo «Esci dall'account». Lato server il personale resta comunque confinato nel gestionale (profilo e bacheca riportano all'app).
+
 ## [0.2.11] — 9 novembre 2026
 
 ### Compatibilità
