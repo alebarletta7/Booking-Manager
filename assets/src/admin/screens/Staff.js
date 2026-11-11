@@ -14,8 +14,8 @@ import {
 	Card,
 	Check,
 	Confirm,
+	Drawer,
 	ErrorNotice,
-	FormModal,
 	Grid,
 	Loading,
 	Page,
@@ -47,6 +47,12 @@ function PropertyChecks( { properties, value, onChange } ) {
 					/>
 				) ) }
 			</div>
+			<p className="bkng-note">
+				{ __(
+					"L'operatore vede solo le strutture selezionate. Puoi assegnare solo quelle in cui lavori anche tu.",
+					'booking-manager'
+				) }
+			</p>
 		</fieldset>
 	);
 }
@@ -78,7 +84,14 @@ function memberBody( member, mode, form ) {
 	};
 }
 
-function MemberModal( { member, roles, properties, onClose, onDone } ) {
+function MemberDrawer( {
+	member,
+	roles,
+	properties,
+	onClose,
+	onDone,
+	onRemove,
+} ) {
 	const action = useAction();
 	// Searching the site's users is for the platform: a customer adds new people (0.2.1).
 	const searchable = ! boot.me || boot.me.is_platform !== false;
@@ -100,15 +113,29 @@ function MemberModal( { member, roles, properties, onClose, onDone } ) {
 	} ) );
 
 	return (
-		<FormModal
+		<Drawer
 			title={
 				member
 					? member.display_name
-					: __( 'Aggiungi allo staff', 'booking-manager' )
+					: __( 'Aggiungi operatore', 'booking-manager' )
 			}
 			onClose={ onClose }
 			busy={ action.busy }
 			error={ action.error }
+			submitLabel={
+				member ? undefined : __( 'Aggiungi', 'booking-manager' )
+			}
+			danger={
+				member && onRemove
+					? {
+							label: __(
+								'Rimuovi dallo staff',
+								'booking-manager'
+							),
+							onClick: onRemove,
+					  }
+					: null
+			}
 			onSubmit={ async () => {
 				const body = memberBody( member, mode, form );
 				const res = await action.run( () =>
@@ -128,6 +155,9 @@ function MemberModal( { member, roles, properties, onClose, onDone } ) {
 				}
 			} }
 		>
+			{ member && (
+				<p className="bkng-small bkng-muted">{ member.email }</p>
+			) }
 			{ ! member && searchable && (
 				<Tabs
 					current={ mode }
@@ -230,6 +260,10 @@ function MemberModal( { member, roles, properties, onClose, onDone } ) {
 					value={ form.role }
 					options={ roleOptions }
 					onChange={ set( 'role' ) }
+					help={ __(
+						'Puoi assegnare solo ruoli con permessi che hai anche tu.',
+						'booking-manager'
+					) }
 				/>
 				{ ! member?.all_properties && (
 					<PropertyChecks
@@ -239,7 +273,7 @@ function MemberModal( { member, roles, properties, onClose, onDone } ) {
 					/>
 				) }
 			</div>
-		</FormModal>
+		</Drawer>
 	);
 }
 
@@ -360,14 +394,14 @@ export default function Staff() {
 	);
 	return (
 		<Page
-			title={ __( 'Staff', 'booking-manager' ) }
+			title={ __( 'Staff e permessi', 'booking-manager' ) }
 			actions={
 				tab === 'people' && (
 					<Button
 						variant="primary"
 						onClick={ () => setModal( { kind: 'member' } ) }
 					>
-						{ __( 'Aggiungi', 'booking-manager' ) }
+						{ __( 'Aggiungi operatore', 'booking-manager' ) }
 					</Button>
 				)
 			}
@@ -382,7 +416,7 @@ export default function Staff() {
 					current={ tab }
 					onChange={ setTab }
 					tabs={ [
-						[ 'people', __( 'Persone', 'booking-manager' ) ],
+						[ 'people', __( 'Operatori', 'booking-manager' ) ],
 						[
 							'roles',
 							__( 'Ruoli e permessi', 'booking-manager' ),
@@ -391,105 +425,137 @@ export default function Staff() {
 				/>
 			) }
 			{ tab === 'people' && (
-				<Card className="is-flush">
-					<div className="bkng-table-wrap">
-						<table className="bkng-table">
-							<thead>
-								<tr>
-									<th>{ __( 'Nome', 'booking-manager' ) }</th>
-									<th>
-										{ __( 'Ruolo', 'booking-manager' ) }
-									</th>
-									<th>
-										{ __( 'Strutture', 'booking-manager' ) }
-									</th>
-									<th />
-								</tr>
-							</thead>
-							<tbody>
-								{ data.data.staff.map( ( m ) => (
-									<tr key={ m.id }>
-										<td>
-											{ m.display_name }{ ' ' }
-											{ m.is_me && (
-												<span className="bkng-badge">
-													{ __(
-														'tu',
-														'booking-manager'
-													) }
-												</span>
-											) }
-											<div className="bkng-small bkng-muted">
-												{ m.email }
-											</div>
-										</td>
-										<td>{ m.role_label }</td>
-										<td className="bkng-small">
-											{ m.all_properties
-												? __(
-														'Tutte',
-														'booking-manager'
-												  )
-												: ( m.properties || [] )
-														.map(
-															( id ) =>
-																names[ id ] ||
-																'#' + id
-														)
-														.join( ', ' ) || '—' }
-										</td>
-										<td className="bkng-right bkng-nowrap">
-											{ m.editable && (
-												<>
-													<Button
-														variant="link"
-														onClick={ () =>
-															setModal( {
-																kind: 'member',
-																member: m,
-															} )
-														}
-													>
-														{ __(
-															'Modifica',
-															'booking-manager'
-														) }
-													</Button>
-													<Button
-														variant="link"
-														isDestructive
-														onClick={ () =>
-															setModal( {
-																kind: 'remove',
-																member: m,
-															} )
-														}
-													>
-														{ __(
-															'Togli',
-															'booking-manager'
-														) }
-													</Button>
-												</>
-											) }
-										</td>
-									</tr>
-								) ) }
-							</tbody>
-						</table>
+				<section className="bkng-staff">
+					<div className="bkng-staff__intro">
+						<h2 className="bkng-section-title">
+							{ __( 'Operatori', 'booking-manager' ) }
+						</h2>
+						<p className="bkng-muted">
+							{ __(
+								'Chi lavora con Booking Manager, con quale ruolo e in quali strutture. Gli amministratori di WordPress hanno sempre accesso completo e il tuo account non si modifica da qui.',
+								'booking-manager'
+							) }
+						</p>
 					</div>
-				</Card>
+					<Card className="is-flush">
+						<div className="bkng-table-wrap">
+							<table className="bkng-table bkng-staff__table">
+								<thead>
+									<tr>
+										<th>
+											{ __( 'Nome', 'booking-manager' ) }
+										</th>
+										<th>
+											{ __( 'Email', 'booking-manager' ) }
+										</th>
+										<th>
+											{ __( 'Ruolo', 'booking-manager' ) }
+										</th>
+										<th>
+											{ __(
+												'Strutture',
+												'booking-manager'
+											) }
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									{ data.data.staff.map( ( m ) => {
+										const open = () =>
+											setModal( {
+												kind: 'member',
+												member: m,
+											} );
+										return (
+											<tr
+												key={ m.id }
+												className={
+													m.editable
+														? 'is-clickable'
+														: ''
+												}
+												onClick={
+													m.editable
+														? open
+														: undefined
+												}
+											>
+												<td>
+													{ m.editable ? (
+														<button
+															type="button"
+															className="bkng-staff__name"
+															onClick={ ( e ) => {
+																e.stopPropagation();
+																open();
+															} }
+														>
+															{ m.display_name }
+														</button>
+													) : (
+														<span className="bkng-staff__name">
+															{ m.display_name }
+														</span>
+													) }
+													<div className="bkng-small bkng-muted bkng-staff__mail">
+														{ m.email }
+													</div>
+													{ m.is_me && (
+														<div className="bkng-small bkng-muted">
+															{ __(
+																'Sei tu: chiedi a un altro amministratore',
+																'booking-manager'
+															) }
+														</div>
+													) }
+												</td>
+												<td className="bkng-muted">
+													{ m.email }
+												</td>
+												<td>
+													<span className="bkng-role-badge">
+														{ m.role_label || '—' }
+													</span>
+												</td>
+												<td className="bkng-small">
+													{ m.all_properties
+														? __(
+																'Tutte',
+																'booking-manager'
+														  )
+														: ( m.properties || [] )
+																.map(
+																	( id ) =>
+																		names[
+																			id
+																		] ||
+																		'#' + id
+																)
+																.join( ', ' ) ||
+														  '—' }
+												</td>
+											</tr>
+										);
+									} ) }
+								</tbody>
+							</table>
+						</div>
+					</Card>
+				</section>
 			) }
 			{ tab === 'roles' && (
 				<RolesTab roles={ data.data.roles } onSaved={ done } />
 			) }
 			{ modal?.kind === 'member' && (
-				<MemberModal
+				<MemberDrawer
 					member={ modal.member }
 					roles={ data.data.roles }
 					properties={ properties }
 					onClose={ () => setModal( null ) }
 					onDone={ done }
+					onRemove={ () =>
+						setModal( { kind: 'remove', member: modal.member } )
+					}
 				/>
 			) }
 			{ modal?.kind === 'remove' && (
@@ -497,7 +563,7 @@ export default function Staff() {
 					destructive
 					title={ sprintf(
 						/* translators: %s: person. */ __(
-							'Togli %s dallo staff',
+							'Rimuovi %s dallo staff',
 							'booking-manager'
 						),
 						modal.member.display_name
@@ -506,7 +572,7 @@ export default function Staff() {
 						"L'account WordPress resta, ma non potrà più usare Booking Manager.",
 						'booking-manager'
 					) }
-					confirmLabel={ __( 'Togli', 'booking-manager' ) }
+					confirmLabel={ __( 'Rimuovi', 'booking-manager' ) }
 					busy={ action.busy }
 					onCancel={ () => setModal( null ) }
 					onConfirm={ async () =>
@@ -515,7 +581,7 @@ export default function Staff() {
 						) )
 							? done(
 									__(
-										'Tolto dallo staff.',
+										'Rimosso dallo staff.',
 										'booking-manager'
 									)
 							  )
