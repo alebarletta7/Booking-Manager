@@ -2226,3 +2226,205 @@ $radius-s: 6px;
 		justify-content: center;
 	}
 }
+
+// ---------------------------------------------------------------- Side panel (0.2.19)
+// Like Restaurant Manager: the person's details open on the right, over the page.
+.bkng-drawer__overlay.components-modal__screen-overlay {
+	align-items: stretch;
+	justify-content: flex-end;
+	background: rgba(23, 35, 29, 0.35);
+}
+
+.components-modal__frame.bkng-drawer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: auto;
+	width: min(460px, 100vw);
+	max-width: 100vw;
+	height: 100%;
+	max-height: 100%;
+	margin: 0;
+	border-radius: 0;
+	transform: none;
+	animation: bkng-drawer-in 0.18s ease-out;
+
+	.components-modal__header {
+		position: relative;
+		flex-shrink: 0;
+		height: auto;
+		min-height: 62px;
+		padding: 16px 24px;
+		border-bottom: 1px solid $line;
+
+		h1 {
+			font-size: 19px;
+			font-weight: 700;
+		}
+	}
+
+	.components-modal__content {
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+		margin-top: 0;
+		overflow: hidden;
+
+		> div:not([class]) {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			min-height: 0;
+		}
+	}
+}
+
+.bkng-drawer__form {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.bkng-drawer__body {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	.components-base-control__help {
+		margin-top: 6px;
+		color: $muted;
+		font-size: 12px;
+	}
+}
+
+.bkng-drawer__foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 14px 24px calc(14px + env(safe-area-inset-bottom));
+	border-top: 1px solid $line;
+	background: #f7f9f8;
+}
+
+@keyframes bkng-drawer-in {
+	from {
+		transform: translateX(40px);
+		opacity: 0;
+	}
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.components-modal__frame.bkng-drawer {
+		animation: none;
+	}
+}
+
+// Yellow note under a field (e.g. which properties an operator sees).
+.bkng-note {
+	margin: 14px 0 0;
+	padding: 12px 16px;
+	border-left: 3px solid $sun;
+	border-radius: $radius-s;
+	background: #fffaeb;
+	color: #3d3a2a;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+// ---------------------------------------------------------------- Staff (0.2.19)
+.bkng-staff__intro {
+	margin: 4px 0 14px;
+
+	.bkng-section-title {
+		margin: 0 0 6px;
+		font-size: 19px;
+		font-weight: 700;
+	}
+
+	p {
+		max-width: 640px;
+		margin: 0;
+		font-size: 13px;
+		line-height: 1.6;
+	}
+}
+
+.bkng-staff__table {
+	tr.is-clickable {
+		cursor: pointer;
+
+		&:hover td {
+			background: $soft;
+		}
+	}
+}
+
+.bkng-staff__name {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	font-weight: 600;
+	text-align: left;
+	cursor: inherit;
+
+	&:focus-visible {
+		outline: 2px solid $accent;
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+}
+
+.bkng-role-badge {
+	display: inline-block;
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: $soft;
+	color: $primary;
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+// Properties one per line in the side panel, like Restaurant Manager.
+.bkng-drawer .bkng-checks {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.bkng-staff__mail {
+	display: none;
+}
+
+@media (max-width: 782px) {
+	// Phones: the e-mail goes under the name, the table keeps name, role, properties.
+	.bkng-staff__table {
+		th:nth-child(2),
+		td:nth-child(2) {
+			display: none;
+		}
+
+		.bkng-role-badge {
+			white-space: normal;
+		}
+	}
+
+	.bkng-staff__mail {
+		display: block;
+		word-break: break-all;
+	}
+}

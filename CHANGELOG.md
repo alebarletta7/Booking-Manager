@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.19] — 11 novembre 2026
+
+### Aspetto
+
+- **Staff e permessi** con la stessa impostazione di Restaurant Manager: schede «Operatori» e «Ruoli e permessi»; tabella con Nome, Email, Ruolo (etichetta colorata) e Strutture; un clic sulla persona apre una **scheda laterale a destra** con email, ruolo, strutture una per riga e la nota su cosa vede l'operatore, con «Rimuovi dallo staff» in basso a sinistra e «Salva» a destra. Anche «Aggiungi operatore» si apre nella scheda laterale. Su telefono l'email va sotto il nome. Permessi e regole invariati.
+
 ## [0.2.18] — 9 novembre 2026
 
 ### Correzioni

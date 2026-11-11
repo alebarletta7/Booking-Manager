@@ -471,6 +471,66 @@ export function FormModal( {
 	);
 }
 
+/**
+ * Side panel (like Restaurant Manager): opens on the right, its form scrolls, the
+ * buttons stay at the bottom. «Salva» on the right; an optional destructive link on
+ * the left (e.g. «Rimuovi dallo staff»).
+ */
+export function Drawer( {
+	title,
+	onClose,
+	onSubmit,
+	busy,
+	error,
+	submitLabel,
+	children,
+	danger,
+} ) {
+	return (
+		<Modal
+			title={ title }
+			onRequestClose={ onClose }
+			className="bkng-modal bkng-drawer"
+			overlayClassName="bkng-drawer__overlay"
+		>
+			<form
+				className="bkng-drawer__form"
+				onSubmit={ ( e ) => {
+					e.preventDefault();
+					onSubmit();
+				} }
+			>
+				<div className="bkng-drawer__body">
+					<ErrorNotice error={ error } />
+					{ children }
+				</div>
+				<div className="bkng-drawer__foot">
+					{ danger ? (
+						<Button
+							variant="tertiary"
+							isDestructive
+							onClick={ danger.onClick }
+							disabled={ busy }
+						>
+							{ danger.label }
+						</Button>
+					) : (
+						<span />
+					) }
+					<Button
+						variant="primary"
+						type="submit"
+						isBusy={ busy }
+						disabled={ busy }
+					>
+						{ submitLabel || __( 'Salva', 'booking-manager' ) }
+					</Button>
+				</div>
+			</form>
+		</Modal>
+	);
+}
+
 /** One image of the media library: its thumbnail, «Scegli» and «Rimuovi». */
 export function ImageField( {
 	label,
